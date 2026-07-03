@@ -1,0 +1,35 @@
+set machineType = `uname -a | awk '{print $1,$12}'`
+
+#if ( "$machineType" =~ Linux* ) then
+#  shift machineType
+#  if ($machineType == "ia64") then
+#    setenv SAGROOT '/nfs/site/proj/mpg/proc/cad/ia64_linux24/siclone/ItanOS_latest'
+#  else
+#    if ($machineType == "x86_64") then
+#      setenv SAGROOT '/nfs/site/proj/mpg/proc/cad/i386_linux22/siclone/Xeon_latest'
+#    else
+#      setenv SAGROOT '/nfs/site/proj/mpg/proc/cad/i386_linux22/siclone/LinuxOS_latest'
+#    endif
+#  endif
+#else
+#  if ( "$machineType" =~ SunOS* ) then
+#    setenv SAGROOT '/nfs/site/proj/mpg/proc/cad/sunos/siclone/sts754patch5b-64.SunOS5.8'
+#  else
+#    if ( "$machineType" =~ HP-UX* ) then
+#      setenv SAGROOT '/nfs/site/proj/mpg/proc/cad/hp700_ux110/siclone/HpOS_latest'
+#    endif
+#  endif
+#endif
+
+#set path = (${SAGROOT}/bin ${path})
+
+#setenv SAGANLMD_LICENSE_FILE /nfs/site/gen/adm/licenses/conf/iag/sagantec/mpg.sagantec_lic
+
+env | grep LM_LICENSE_FILE
+if !($status) then
+#  setenv LM_LICENSE_FILE "${SAGANLMD_LICENSE_FILE}:${LM_LICENSE_FILE}"
+  setenv LM_LICENSE_FILE "1704@ilics04.iil.intel.com:1704@ilics05.iil.intel.com:1704@ilics06.iil.intel.com:1700@ilics04.iil.intel.com:1700@ilics05.iil.intel.com:1700@ilics06.iil.intel.com:$LM_LICENSE_FILE"
+else
+#  setenv LM_LICENSE_FILE "${SAGANLMD_LICENSE_FILE}"
+  setenv LM_LICENSE_FILE "1704@ilics04.iil.intel.com:1704@ilics05.iil.intel.com:1704@ilics06.iil.intel.com:1700@ilics04.iil.intel.com:1700@ilics05.iil.intel.com:1700@ilics06.iil.intel.com"
+endif

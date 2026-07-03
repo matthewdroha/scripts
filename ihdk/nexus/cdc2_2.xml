@@ -1,0 +1,294 @@
+<AddHSD>	
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>jdchacon</owner>
+			<ip_module>ALP.DDR.VSSHI.ip10xddrvsshi_vsshitopana</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+    
+		
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>jenegret</owner>
+			<ip_module>ALP.DDR.DCD.ip10xddrdcc_dcdcompcoreana</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+    
+	
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>jenegret</owner>
+			<ip_module>ALP.DDR.DCD.ip10xddrdcc_dcdcoreana</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+    	   
+	
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>jenegret</owner>
+			<ip_module>ALP.DDR.RXSHIM.ip10xddrmisc_dqrxshim</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+    
+	
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>jenegret</owner>
+			<ip_module>ALP.DDR.TXSHIM.ip10xddrdllitc_dqtxshim</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+    
+		
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>jenegret</owner>
+			<ip_module>ALP.DDR.TXSHIM.ip10xddrmisc_shimpwrgdcke</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+    
+	
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>jenegret</owner>
+			<ip_module>ALP.DDR.TXSHIM.ip10xddrmisc_shimpwrgddq</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+    	   
+	
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>jenegret</owner>
+			<ip_module>ALP.DDR.TXSHIM.ip10xddrmisc_shimpwrgdtx</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+    
+	
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>jenegret</owner>
+			<ip_module>ALP.DDR.TXSHIM.ip10xddrmisc_shimpwrgdtxcke</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+    
+		
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>mariomon</owner>
+			<ip_module>ALP.DDR.COMP.ip10xddrcomp_pncvtcomp</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+    
+	
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>mariomon</owner>
+			<ip_module>ALP.DDR.COMP.ip10xddrcomp_scomp</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+    	   
+	
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>raguinal</owner>
+			<ip_module>ALP.DDR.COMP.ip10xddrcomp_rcompdqclk</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+    
+	
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>raguinal</owner>
+			<ip_module>ALP.DDR.TXCMD.ip10xddrtx_combocmdtx</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+    
+	
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>raguinal</owner>
+			<ip_module>ALP.DDR.TXDQ.ip10xddrtx_d4lpcombodqtx</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+    
+	
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>raguinal</owner>
+			<ip_module>ALP.DDR.TXDQS.ip10xddrtx_d4lpcombodqstx</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+    	   
+	
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>tmyoung1</owner>
+			<ip_module>ALP.DDR.ESDCLAMP.ip10xddrshr_esdclamphv</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+    
+	
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>tmyoung1</owner>
+			<ip_module>ALP.DDR.ESDCLAMP.ip10xddrshr_esdclampnom</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+    
+	
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>tmyoung1</owner>
+			<ip_module>ALP.DDR.ESDCLAMP.ip10xddrshr_esdclamptimerhv</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+    
+	
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>tmyoung1</owner>
+			<ip_module>ALP.DDR.ESDCLAMP.ip10xddrshr_esdd1d2d3d4</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+    	   
+	
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>tmyoung1</owner>
+			<ip_module>ALP.DDR.RXSDL.ip10xddrdllitc_mcsdl2pi</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+    
+	
+		<ticket>
+			<project>ALP</project> 
+			<project_stepping>A0</project_stepping>
+			<status>Open</status> 
+			<effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+			<title> CDC2 bundle clean up</title>
+			<owner>tmyoung1</owner>
+			<ip_module>ALP.DDR.TXDLL.ip10xddrdllitc_mcdll10pitop</ip_module>
+			<comments> Please complete the CDC2 clean up using the checklist</comments>
+			<circuit_tag>P_ihdk_CDC2_R0L0</circuit_tag>
+			<mail_list>;meperez1;gabustam;ggonen;pjbouche</mail_list>
+		</ticket>
+</AddHSD>

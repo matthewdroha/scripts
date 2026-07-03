@@ -1,0 +1,99 @@
+#!/usr/intel/pkgs/perl/5.12.2/bin/perl -w
+
+use strict;
+use warnings;
+use English;
+use Cwd;
+use IO::File;
+use IO::Pipe;
+
+
+my $pdlfile = '/usr/users/home2/mroha/pdl.names';
+
+
+# Extract information from the PDL names
+my @nameaddress_list;
+my %pdl;
+my $pdlfilehandle = new IO::File;
+$pdlfilehandle->open($pdlfile) or die "-E- Could not open $pdlfile for reading";
+while (<$pdlfilehandle>) {
+  @nameaddress_list = split(/\;/, $_);
+  foreach my $nameaddress (@nameaddress_list) {
+    if ($nameaddress =~ /\<(\S+)\>/) {
+      my $email = $1;
+      my $lastname = '';
+      if ($email =~ /\.\w\.(\w+)\@intel.com/) {
+	$lastname = $1;
+      } 
+      elsif ($email =~/(\w+)\.(\w+)\@intel.com/) {
+	$lastname = $1;
+      }
+      if ($lastname) {
+	my $employeedata = getemployeedata($lastname, $email);
+	if ($employeedata) {
+	  my @record = split (',', $employeedata);
+	  $pdl{$record[0]} = $employeedata;
+	}
+      }
+    }
+  }
+}
+
+my $input_name_count =  scalar @nameaddress_list;
+my $pdl_name_count = keys %pdl;
+print "Number of Outlook names provided as input: $input_name_count\n";
+print "Number of unique Outlook names: $pdl_name_count\n";
+
+
+# Extract information from orgtree .csv file 
+
+sub getemployeedata {
+  my $lastname = shift;
+  my $email = shift;
+  my $Emptype;
+  my $BookName;
+  my $DomainAddress;
+  my $MgrName;
+  my $WWID;
+  my $IDSID;
+
+  my $lastnamepipe = IO::Pipe->new;
+  $lastnamepipe->reader("/usr/intel/bin/cdislookup -l $lastname");
+  print "MAIL: $email\n";
+  while (<$lastnamepipe>) {
+    my @record = split;
+    my $wwid = pop @record;
+    my %info_hash = ();
+    if ($wwid =~ /^\d+$/) {
+      print "WWID: $wwid\n";
+      my $wwidpipe = IO::Pipe->new;
+      $wwidpipe->reader("/usr/intel/bin/cdislookup -w $wwid");
+      while (<$wwidpipe>) {
+	if (/^\s*(\S+)\s*\=\s*(.+)\s*$/) {
+	  $info_hash{$1} = $2;
+	}
+      }
+      $wwidpipe->close;
+      if ($info_hash{'DomainAddress'} eq $email) {
+	$Emptype = $info_hash{'Emptype'};
+	$BookName = $info_hash{'BookName'};
+	$DomainAddress = $info_hash{'DomainAddress'};
+	$MgrName = $info_hash{'MgrName'};
+	$WWID = $info_hash{'WWID'};
+	$IDSID = $info_hash{'IDSID'};
+	my $outrecord = join(',', $IDSID, $Emptype, $BookName, $DomainAddress, $MgrName, $WWID);
+	print "MATCH\n";
+	return $outrecord;
+      }
+    }
+  }  
+  return '';
+}
+
+
+sub trim {
+  my $string = shift;
+  $string =~ s/^\s+//;
+  $string =~ s/\s+$//;
+  return $string;
+}

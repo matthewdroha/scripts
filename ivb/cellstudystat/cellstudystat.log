@@ -1,0 +1,65 @@
+-I- cellstudystat.pl: Script command: cellstudystat.pl --verbose
+-I- cellstudystat.pl: Script start date: (Fri Dec 12 09:52:19 2008)
+-I- cellstudystat.pl: Machine Type: Linux fmci60262 2.6.5-7.287.3.PTF.363939.1-smp #1 SMP Tue Oct 2 07:31:36 UTC 2007 x86_64 x86_64 x86_64 GNU/Linux
+-I- cellstudystat.pl: ***** Stage 1: Read YG* List  *****
+-I- cellstudystat.pl: 8150 YG cells read from file: /usr/users/home2/mroha/cellstudystat/ctl/yg.csv
+-I- cellstudystat.pl: ***** Stage 2: Read SNB leaf usage file  *****
+-I- cellstudystat.pl: ***** Stage 3: Read YG->AI mapping file  *****
+-I- cellstudystat.pl: ***** Stage 4: Read cell assignment files  *****
+-I- cellstudystat.pl: ***** Stage 5: Search for LNFs in ivbstd libraries and run health checks *****
+-I- cellstudystat.pl: Querying Syncronicity information from cells in libary->(ai0cld)
+-I- cellstudystat.pl: Cells queried from ai0cld->(0)
+-I- cellstudystat.pl: Querying Syncronicity information from cells in libary->(ai0study)
+-E- cellstudystat.pl: Could not find cell in map file, skipping...  cell->(ai0sdl02jn0c0) lib->(ai0study)
+-E- cellstudystat.pl: Could not find cell in map file, skipping...  cell->(ai0gbf00ln0c0) lib->(ai0study)
+-E- cellstudystat.pl: Could not find cell in map file, skipping...  cell->(ai0sdl02jn0d0) lib->(ai0study)
+-E- cellstudystat.pl: Could not find cell in map file, skipping...  cell->(ai0fso05nn1c0) lib->(ai0study)
+-E- cellstudystat.pl: Could not find cell in map file, skipping...  cell->(ai0nan02nn0b5) lib->(ai0study)
+-E- cellstudystat.pl: Could not find cell in map file, skipping...  cell->(ai0fso02nn1b0) lib->(ai0study)
+-E- cellstudystat.pl: Could not find cell in map file, skipping...  cell->(ai0xon02nn1c7) lib->(ai0study)
+-E- cellstudystat.pl: Could not find cell in map file, skipping...  cell->(ai0fso01nn1b0) lib->(ai0study)
+-E- cellstudystat.pl: Could not find cell in map file, skipping...  cell->(ai0xon02nn1b7) lib->(ai0study)
+-E- cellstudystat.pl: Could not find cell in map file, skipping...  cell->(ai0xon02nn1a7) lib->(ai0study)
+-E- cellstudystat.pl: Could not find cell in map file, skipping...  cell->(ai0mxn03nnhh0_mod) lib->(ai0study)
+-E- cellstudystat.pl: Could not find cell in map file, skipping...  cell->(ai0gor05nn0c5) lib->(ai0study)
+-E- cellstudystat.pl: Could not find cell in map file, skipping...  cell->(ai5mpb10nn0f0) lib->(ai0study)
+-E- cellstudystat.pl: Could not find cell in map file, skipping...  cell->(ai0mxn03nnhf0_mod) lib->(ai0study)
+-E- cellstudystat.pl: Could not find cell in map file, skipping...  cell->(ai0mxn22nn1f0) lib->(ai0study)
+-E- cellstudystat.pl: Could not find cell in map file, skipping...  cell->(ai0bfn00nn0b7) lib->(ai0study)
+-I- cellstudystat.pl: Cells queried from ai0study->(665)
+-I- cellstudystat.pl: Extracting Genesys cell metrics for cells in library->(ai0study)
+-I- Tcsh: Starting foreground process: /bin/tcsh -fc '/p/mpg/proc/projects/da_projects/ivbstd/o50syn4.2/ivbstd.tool.modes.pl > /nfs/site/disks/fm_fdc_n25005/penryn_area/mroha/ivbstd/cellstudy_temp/cellstudystat.ai0study.pth.modes'
+-I- Tcsh: Starting foreground process: /bin/tcsh -fc '(dmsCompiler_new.pl -dbtypes lay sch flp dev sim net ctl -createDms2opus /nfs/site/disks/fm_fdc_n25005/penryn_area/mroha/ivbstd/cellstudy_temp/cellstudystat.ai0study.cds -outfile /nfs/site/disks/fm_fdc_n25005/penryn_area/mroha/ivbstd/cellstudy_temp/cellstudystat.ai0study.pth ) >& /dev/null'
+-I- cellstudystat.pl: Build netbatch feeder commands for PY shorts and Genesys interface check lib->(ai0study)
+-I- cellstudystat.pl: Starting netbatch feeder for health checking lib->(ai0study)
+-I- cellstudystat.pl: Opening pipe to process: '/usr/intel/pkgs/netbatch/7.3.2_0200_04/bin/nbfeeder start --task /nfs/site/disks/fm_fdc_n25005/penryn_area/mroha/ivbstd/cellstudy_temp/cellstudystat.ai0study.feed --terminate-on-finish --block --work-area /nfs/site/disks/fm_fdc_n25005/penryn_area/mroha/ivbstd/cellstudy_temp/persistency --task-refresh-interval 30'
+-I- cellstudystat.pl: Netbatch feeder run complete for lib->(ai0study)
+-I- cellstudystat.pl: Parse PY/Genesys output files from netbatch run
+-I- cellstudystat.pl: Querying Syncronicity information from cells in libary->(ai3study)
+-I- cellstudystat.pl: Cells queried from ai3study->(36)
+-I- cellstudystat.pl: Extracting Genesys cell metrics for cells in library->(ai3study)
+-I- Tcsh: Starting foreground process: /bin/tcsh -fc '/p/mpg/proc/projects/da_projects/ivbstd/o50syn4.2/ivbstd.tool.modes.pl > /nfs/site/disks/fm_fdc_n25005/penryn_area/mroha/ivbstd/cellstudy_temp/cellstudystat.ai3study.pth.modes'
+-I- Tcsh: Starting foreground process: /bin/tcsh -fc '(dmsCompiler_new.pl -dbtypes lay sch flp dev sim net ctl -createDms2opus /nfs/site/disks/fm_fdc_n25005/penryn_area/mroha/ivbstd/cellstudy_temp/cellstudystat.ai3study.cds -outfile /nfs/site/disks/fm_fdc_n25005/penryn_area/mroha/ivbstd/cellstudy_temp/cellstudystat.ai3study.pth ) >& /dev/null'
+-I- cellstudystat.pl: Build netbatch feeder commands for PY shorts and Genesys interface check lib->(ai3study)
+-I- cellstudystat.pl: Starting netbatch feeder for health checking lib->(ai3study)
+-I- cellstudystat.pl: Opening pipe to process: '/usr/intel/pkgs/netbatch/7.3.2_0200_04/bin/nbfeeder start --task /nfs/site/disks/fm_fdc_n25005/penryn_area/mroha/ivbstd/cellstudy_temp/cellstudystat.ai3study.feed --terminate-on-finish --block --work-area /nfs/site/disks/fm_fdc_n25005/penryn_area/mroha/ivbstd/cellstudy_temp/persistency --task-refresh-interval 30'
+-I- cellstudystat.pl: Netbatch feeder run complete for lib->(ai3study)
+-I- cellstudystat.pl: Parse PY/Genesys output files from netbatch run
+-I- cellstudystat.pl: Querying Syncronicity information from cells in libary->(ai7study)
+-E- cellstudystat.pl: Could not find cell in map file, skipping...  cell->(ai7rdg02kt1l1_vccmin_fix) lib->(ai7study)
+-I- cellstudystat.pl: Cells queried from ai7study->(135)
+-I- cellstudystat.pl: Extracting Genesys cell metrics for cells in library->(ai7study)
+-I- Tcsh: Starting foreground process: /bin/tcsh -fc '/p/mpg/proc/projects/da_projects/ivbstd/o50syn4.2/ivbstd.tool.modes.pl > /nfs/site/disks/fm_fdc_n25005/penryn_area/mroha/ivbstd/cellstudy_temp/cellstudystat.ai7study.pth.modes'
+-I- Tcsh: Starting foreground process: /bin/tcsh -fc '(dmsCompiler_new.pl -dbtypes lay sch flp dev sim net ctl -createDms2opus /nfs/site/disks/fm_fdc_n25005/penryn_area/mroha/ivbstd/cellstudy_temp/cellstudystat.ai7study.cds -outfile /nfs/site/disks/fm_fdc_n25005/penryn_area/mroha/ivbstd/cellstudy_temp/cellstudystat.ai7study.pth ) >& /dev/null'
+-I- cellstudystat.pl: Build netbatch feeder commands for PY shorts and Genesys interface check lib->(ai7study)
+-I- cellstudystat.pl: Starting netbatch feeder for health checking lib->(ai7study)
+-I- cellstudystat.pl: Opening pipe to process: '/usr/intel/pkgs/netbatch/7.3.2_0200_04/bin/nbfeeder start --task /nfs/site/disks/fm_fdc_n25005/penryn_area/mroha/ivbstd/cellstudy_temp/cellstudystat.ai7study.feed --terminate-on-finish --block --work-area /nfs/site/disks/fm_fdc_n25005/penryn_area/mroha/ivbstd/cellstudy_temp/persistency --task-refresh-interval 30'
+-I- cellstudystat.pl: Netbatch feeder run complete for lib->(ai7study)
+-I- cellstudystat.pl: Parse PY/Genesys output files from netbatch run
+-I- cellstudystat.pl: ***** Stage 6: Fetch cell study comment files *****
+-W- cellstudystat.pl: Cell->(ai0sdl02jn0d0) did not match existing yg*/ai* name
+-I- cellstudystat.pl: CSV report generated: cellstudystat.studylibs.csv
+-I- cellstudystat.pl: CSV report generated: cellstudystat.sourcecompare.csv
+
+-I- cellstudystat.pl: Script completion date: (Fri Dec 12 11:36:44 2008)
+-I- cellstudystat.pl: cellstudystat.pl run complete

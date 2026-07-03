@@ -1,0 +1,969 @@
+Flow,Error Code,lor1,Comment,Description
+DVE,AN_01,enable,,AN_01: all diffcons in A-320nm region must be on same grid as D 160nm region
+DVE,AN_02,enable,,AN_02: only poly pitch = AN_02
+DVE,AN_03/AN_04/AN_05,enable,,AN_03/AN_04/AN_05: only poly width = AN_03 or AN_04 or AN_05
+DVE,AN_06,enable,,AN_06: poly gate centerline space to TCN side = AN_06
+DVE,AN_07,enable,,AN_07: Total number of poly side-side spacing in analog must be an odd number
+DVE,AN_08,enable,,AN_08: min poly length = AN_08
+DVE,AN_09,enable,,AN_09: poly end-to-end < AN_09
+DVE,AN_10,enable,,AN_10: poly end-to-end > AN_10
+DVE,AN_11,enable,,AN_11: min poly endcap = AN_11
+DVE,AN_21,enable,,AN_21: min overlap adj SR gate dir = AN_21
+DVE,AN_22,enable,,AN_22: min separation between any non-adj. SR = AN_22
+DVE,AN_32,enable,,AN_32: only non-stacked-gate S/D diff enc of TCN side = AN_32
+DVE,AN_33,enable,,AN_33: only tap diff enc of TCN side = AN_33
+DVE,AN_34,enable,,"AN_34: only non-stacked gate S/D extent (N,P) = AN_34"
+DVE,AN_35,enable,,AN_35: min tap to transistor space (same well) = AN_35
+DVE,AN_41,enable,,AN_41: min polycon_A side enclosure by poly end = AN_41
+DVE,AN_42,enable,,AN_42: min polycon side space to poly line-end = AN_42
+DVE,AN_43,enable,,AN_43: min polycon end space to poly side = AN_43
+DVE,AN_44,enable,,AN_44: min poly side enclosure by polycon_A end = AN_44
+DVE,AN_90,enable,,AN_90: leftmost and rightmost poly in analog region must be 80nm
+DVE,AN_93,enable,,AN_93: polytd encl of non-coincident nwell = AN_93
+DVE,AN_93,enable,,AN_93: polytd space to non-coincident nwell edge = AN_93
+DVE,AN_94,enable,,AN_94: polytd spacing to non-coincident nwell = AN_94
+DVE,AN_95,enable,,AN_95: min required length of coincident nwell and polytd edges = AN_95
+DVE,BC_00,enable,,BC_00: All bitcells must be within the 180pitchID layer
+DVE,BC_01,enable,,"BC_01: min NWL space to N+ active diff, gate-dir = BC_01"
+DVE,BC_02,enable,,"BC_02: min NWL enclosure of P+ active diff, gate-dir = BC_02"
+DVE,BC_03,enable,,"BC_03: min NWL width, gate-dir = BC_03"
+DVE,BC_11,enable,,"BC_11: min transistor diff width (N,P) = BC_11"
+DVE,BC_12,enable,,BC_12: min device width = BC_12 and device length = PL_01
+DVE,BC_13,enable,,"BC_13: min transistor diff facing-edge space, gate-dir (P) = BC_13"
+DVE,BC_14,enable,,BC_14: min width of single_sided jogged S/D diff (N) = BC_14
+DVE,BC_21,enable,,BC_21: min poly endcap = BC_21
+DVE,BC_23,enable,,BC_23: SRAM poly space to n-transistor diffusion < BC_23
+DVE,BC_31,enable,,BC_31: min diffcon end-to-end space = BC_31
+DVE,BC_32,enable,,BC_32: min diffcon end extent beyond diff = BC_32
+DVE,BC_33,enable,,BC_33: All gate-SD edges require adjacent diffcon along at least 70nm of gate-SD edge
+DVE,BC_41,enable,,BC_41: min polycon side enclosure by poly end = BC_41
+DVE,BC_42,enable,,BC_42: min polycon_bc end extent beyond poly_bc side = BC_42
+DVE,BC_43,enable,,BC_43: min polycon side space to gated diffusion edge = BC_43
+DVE,BC_44,enable,,BC_44: min polycon side space to diffcon end = BC_44
+DVE,BC_51,enable,,BC_51: min svia1_bc corner-to-corner space to rvia0_bc = BC_51
+DVE,BC_52/V1_11,enable,,BC_52/V1_11: min svia1_bc enclosure by metal1_bc = BC_52 orthogonal V1_11
+DVE,BC_61,enable,,BC_61: min metal1_bc internal corner-to-corner spacing = BC_61
+DVE,BC_71,enable,,BC_71: nactive space to mnsd < BC_71
+DVE,BC_74,enable,,BC_74: mnsd enclosure of pactive < BC_74
+DVE,BC_77,enable,,BC_77: n-tip block space to active ndiff edge < BC_77
+DVE,BC_78,enable,,BC_78: p-tip block space to active pdiff edge < BC_78
+DVE,BC_79,enable,,BC_79: n-tip block enclosure of active pdiff edge < BC_79
+DVE,BC_80,enable,,BC_80: p-tip block enclosure of active ndiff edge < BC_80
+DVE,BC_81,enable,,BC_81: min mpsd concave corner space to active p+ diff corner = BC_81
+DVE,BC_81,enable,,BC_81: mnsd width < BC_81
+DVE,BC_84,enable,,BC_84: mnsd space < BC_84
+DVE,BC_85,enable,,BC_85: mnsd space < BC_85
+DVE,BC_90,enable,,BC_90: n-tip block space to ntap < BC_90
+DVE,BC_93,enable,,BC_93: min mnsd convex corner encl of active p+ diff corner = BC_93
+DVE,BC_94,enable,,BC_94: min mnsd convex corner encl of active p+ diff corner = BC_94
+DVE,BC_95,enable,,BC_95: min mpsd concave corner space to active p+ diff corner = BC_95
+DVE,BU_01/BU_01,enable,,BU_01/BU_01: only bump size = BU_01 x BU_01
+DVE,BU_02,enable,,BU_02: bump to bump center-to-center separation
+DVE,BU_03,enable,,BU_03: Each bump must have a via9
+DVE,CD_21,disable,Min density rule,CD_21: concentrated local metal1 density < CD_21
+DVE,CD_22,enable,,CD_22: concentrated local metal1 density > CD_22
+DVE,CD_23,disable,Min density rule,CD_23: concentrated local metal2 density < CD_23
+DVE,CD_24,enable,,CD_24: concentrated local metal2 density > CD_24
+DVE,CD_25,disable,Min density rule,CD_25: concentrated local metal3 density < CD_25
+DVE,CD_26,enable,,CD_26: concentrated local metal3 density > CD_26
+DVE,CD_27,enable,,CD_27: concentrated local metal4 density > CD_27
+DVE,CD_28,enable,,CD_28: concentrated local metal5 density > CD_28
+DVE,CD_29,enable,,CD_29: concentrated local metal6 density > CD_29
+DVE,CD_30,enable,,CD_30: concentrated local metal7 density > CD_30
+DVE,CM_41,enable,,"CM_41: cumulative floating metal4,3,2,1 area with or without facing edge not connected to  diff or gate > CM_41"
+DVE,CM_51,enable,,"CM_51: cumulative floating metal5,4,3,2,1 area with or without facing edge not connected to  diff or gate > CM_51"
+DVE,CM_61,enable,,"CM_61: cumulative floating metal6,5,4,3,2,1 area with or without facing edge not connected to  diff or gate > CM_61"
+DVE,CM_71,enable,,"CM_71: cumulative floating metal7,6,5,4,3,2,1 area with or without facing edge not connected to  diff or gate > CM_71"
+DVE,CM_81,enable,,"CM_81: cumulative floating metal8,7,6,5,4,3,2,1 area with or without facing edge not connected to  diff or gate > CM_81"
+DVE,DA_01,enable,,"DA_01: no Diff, TCN or GCN allowed in Transition Ring"
+DVE,DA_02,enable,,"DA_02: poly only width = PL_01, AN_03, AN_04, AN_05"
+DVE,DA_03,enable,,DA_03: poly not on template (off-pitch or incorrect length)
+DVE,DA_11,enable,,DA_11: only rectangular polytd allowed
+DVE,DA_12,enable,,DA_12: min polytd space in non_gate_dir = DA_12
+DVE,DA_13,enable,,DA_13: min polytd space in gate_dir = DA_13
+DVE,DA_14,enable,,DA_14: min polytd corner to corner space = DA_14
+DVE,DC_00,enable,,DC_00: only rectangular diffcon shapes are allowed
+DVE,DC_01,enable,,DC_01: only diffcon width = DC_01
+DVE,DC_02,enable,,DC_02: min diffcon length = DC_02
+DVE,DC_03,enable,,DC_03: min diffcon end-to-end space = DC_03
+DVE,DC_04/gt,enable,,DC_04/gt: diffcon side space to poly > DC_04
+DVE,DC_04/lt,enable,,DC_04/lt: diffcon side space to poly < DC_04
+DVE,DC_05,disable,TCN density,"DC_05: max spacing between any diffcon or polycon edges, in the smaller dir = DC_05"
+DVE,DC_11,enable,,DC_11: min diffcon end extent beyond diff = DC_11
+DVE,DC_12,enable,,DC_12: All gate-SD edges require adjacent diffcon along the entire gate-SD edge
+DVE,DC_13,enable,,DC_13: All diff section must have at least 1 diffcon
+DVE,DC_21,enable,,"DC_21: Diffcon pitch, only allowed value = DC_21"
+DVE,DF_01,enable,,"DF_01: min transistor diff width (N,P) = DF_01"
+DVE,DF_02,enable,,DF_02: min device width = DF_02 and device length = PL_01
+DVE,DF_03,enable,,DF_03: max device width = DF_03
+DVE,DF_04,enable,,"DF_04: min transistor diff facing-edge space, gate-dir (N,P) = DF_04"
+DVE,DF_05,enable,,"DF_05: min transistor diff facing-edge space, non-gate-dir (N,P) = DF_05"
+DVE,DF_06,enable,,"DF_06: min transistor diff corner-to-corner space (N,P) = DF_06"
+DVE,DF_07,enable,,DF_07: diff hole are not allowed
+DVE,DF_08,disable,Diffusion density,"DF_08: max spacing between any diff edges, in the smaller dir = DF_08"
+DVE,DF_11,enable,,DF_11: min t_diff_D_nbc length = DF_11
+DVE,DF_12,enable,,"DF_12: only non-stacked gate S/D extent (N,P) = DF_12"
+DVE,DF_13,enable,,"DF_13: max transistor diff dim, in smaller dir (N,P)= DF_13"
+DVE,DF_14,enable,,"DF_14: transistor diff width, with 1 concave diff corner (single jog) = DF_14"
+DVE,DF_15,enable,,DF_15: min width of two-sided jogged S/D diff = DF_15
+DVE,DF_16,enable,,DF_16: min transistor diff internal corner-to-corner width = DF_16
+DVE,DF_17,enable,,"DF_17: min transistor diff notch width, gate_dir = DF_17"
+DVE,DF_18,enable,,DF_18: min t_diff seg. len. when adj at corner = DF_18
+DVE,DF_20,enable,,DF_20: only rectangular tap shapes are allowed
+DVE,DF_21,enable,,"DF_21: only tap diffusion width (N,P) = DF_21"
+DVE,DF_22,enable,,"DF_22: min tap diffusion length (N,P) = DF_22"
+DVE,DF_23/DF_24,enable,,DF_23/DF_24: min tap spacing comp. overlap = DF_23 or not comp. overlap = DF_24
+DVE,DF_25/DF_26,enable,,DF_25/DF_26: min tap to transistor (same well) = DF_25
+DVE,DF_27,enable,,DF_27: min tap corner to transistor concave corner (jog segment > 0.10) space (same well) = DF_27
+DVE,DF_30,enable,,DF_30: no diode diff shape are allowed in the logic area
+DVE,DF_41,enable,,DF_41: min tdiff width w/ 2 concave on same gate/diff = DF_41
+DVE,DF_42,enable,,DF_42: min tdiff width w/ 2 concave on opp. gate/diff and on opp. gate/SD = DF_42 
+DVE,DF_43,enable,,DF_43: min tdiff width w/ 2 concave on opp. gate/diff and on same gate/SD = DF_43 
+DVE,DF_44,enable,,DF_44: diffusion w/ 3 concave corners not allowed
+DVE,DF_45,enable,,DF_45: diffusion w/ 4 concave corners not allowed
+DVE,DIC_DC,enable,,DIC_DC: No diffcon on top of DIC
+DVE,DIC_DF,enable,,DIC_DF: No diff on top of DIC
+DVE,DIC_M1,enable,,DIC_M1: No metal1 on top of DIC
+DVE,DIC_M2,enable,,DIC_M2: No metal2 on top of DIC
+DVE,DIC_M3,enable,,DIC_M3: No metal3 on top of DIC
+DVE,DIC_NW,enable,,DIC_NW: No nwell on top of DIC
+DVE,DIC_PC,enable,,DIC_PC: No polycon on top of DIC
+DVE,DIC_PL,enable,,DIC_PL: No poly on top of DIC
+DVE,DIC_V0,enable,,DIC_V0: No via0 on top of DIC
+DVE,DIC_V1,enable,,DIC_V1: No via1 on top of DIC
+DVE,DIC_V2,enable,,DIC_V2: No via2 on top of DIC
+DVE,DIC_V3,enable,,DIC_V3: No via3 on top of DIC
+DVE,diffcondnp,enable,,diffcondnp: layer diffcondnp not allowed in design data
+DVE,diffconframe,enable,,diffconframe: layer diffconframe not allowed in design data
+DVE,diffframe,enable,,diffframe: layer diffframe not allowed in design data
+DVE,diode,enable,,diode: integrated diode not tied to vss*
+DVE,DS_01,enable,,DS_01: no Diff or TCN allowed in Transition Ring
+DVE,DS_02,enable,,DS_02: poly only width = PL_01 or SM_01
+DVE,DS_03,enable,,DS_03: poly not on template (off-pitch or incorrect length)
+DVE,DS_13,enable,,DS_13: min polyod space in gate_dir = DS_13
+DVE,DS_21,enable,,"DS_21: In transition ring, polycon cannot touch or overlap poly"
+DVE,DS_22,enable,,"DS_22: In transition ring, polycon side space to poly line-end = DS_22"
+DVE,DS_23,enable,,"DS_23: In transition ring, polycon end space to poly side = DS_23"
+DVE,DV_00,enable,,DV_00: all gate inside altvtid must have AN_05 poly CD
+DVE,DV_01,enable,,DV_01: min altvtid width = DV_01
+DVE,DV_03,enable,,DV_03: min altvtid space = DV_03
+DVE,DV_05,enable,,DV_05: min altvtid area [sq um] = DV_05
+DVE,DV_06,enable,,DV_06: min altvtid hole area [sq um] = DV_06
+DVE,DV_07,enable,,DV_07: min altvtid seg. len. when adj at corner = DV_07
+DVE,DV_11,enable,,"DV_11: altvtid encl of tdiff, in gate dir = DV_11"
+DVE,DV_12,enable,,"DV_12: altvtid encl of tdiff, orthog gate dir = DV_12"
+DVE,DV_13,enable,,"DV_13: altvtid space to tdiff, in gate dir = DV_13"
+DVE,DV_14,enable,,"DV_14: altvtid space to tdiff, orthog gate dir = DV_14"
+DVE,DV_21,enable,,DV_21: nwell enc of non-coincident altvtid = DV_21
+DVE,DV_22,enable,,DV_22: nwell space to non-coincident altvtid edge = DV_22
+DVE,DV_23,enable,,DV_23: min required length of coincident altvtid and nwell edges = DV_23
+DVE,DV_91,enable,,DV_91: altvtid layer not allowed outside polytd regions
+DVE,DV_92,enable,,DV_92: polytd enc of non-coincident altvtid < DV_92
+DVE,dvnframe,enable,,dvnframe: layer dvnframe not allowed in design data
+DVE,dvpframe,enable,,dvpframe: layer dvpframe not allowed in design data
+DVE,EA_01/EA_02,enable,,EA_01/EA_02: EOA PGD length != n x EA_01 or OGD length != m x EA_02
+DVE,EA_11/gt,enable,,EA_11/gt: EOA OGD edge spacing to poly line-end > EA_11
+DVE,EA_11/lt,enable,,EA_11/lt: EOA OGD edge spacing to poly line-end < EA_11
+DVE,EA_12/gt,enable,,EA_12/gt: EOA PGD edge spacing to poly side > EA_12
+DVE,EA_12/lt,enable,,EA_12/lt: EOA PGD edge spacing to poly side < EA_12
+DVE,EA_21/EA_22,enable,,EA_21/EA_22: EOA space to metal9 < EA_21 or > EA_22
+DVE,ER_01,enable,,ER_01: esd nwell resistor width < ER_01
+DVE,ER_03,enable,,"ER_03: esd nwell resistor space, to self or to any other well < ER_03"
+DVE,ER_04,enable,,ER_04: esd nwell enclosure of N+ diffusion inside < ER_04
+DVE,ER_05,enable,,ER_05: esd nwell resistor space to N+ diffusion outside < ER_05
+DVE,ER_06,enable,,ER_06: esd nwell resistor space to P+ diffusion outside < ER_06
+DVE,ER_07,enable,,ER_07: esd nwell resistor space to N+ diffusion outside < ER_07
+DVE,ER_08,enable,,ER_08: esd nwell resistor space to floating (no via0 connected) diffusion outside < ER_08
+DVE,ER_09,enable,,"ER_09: Poly-blocked ESD resistor length, only allowed value = ER_09"
+DVE,ER_12,enable,,ER_12: min blocked poly resistor width = ER_12
+DVE,err0,enable,,err0: err0 - gate within esddiodewell
+DVE,fbiasedcheck,enable,,fbiasedcheck: forward - biased diode shorting vcc and vss
+DVE,FM_11,enable,,FM_11: max area of floating metal1 with or without a facing edge not connected to diff or gate > FM_11
+DVE,FM_12,enable,,FM_12: floating metal1 not connected to diff or gate with facing edge > FM_12
+DVE,FM_13,enable,,FM_13: area of floating metal1 not connected to diff or gate > FM_13 with facing edge > 0
+DVE,FM_21,enable,,FM_21: floating metal2 area with or without a facing edge not connected to diff or gate > FM_21
+DVE,FM_22,enable,,FM_22: floating metal2 not connected to diff or gate with facing edge > FM_22
+DVE,FM_23,enable,,FM_23: area of floating metal2 not connected to diff or gate > FM_23 with facing edge > 0
+DVE,FM_31,enable,,FM_31: floating metal3 area with or without facing edge not connected to  diff or gate > FM_31
+DVE,FM_32,enable,,FM_32: floating metal3 not connected to diff or gate with facing edge > FM_32
+DVE,FM_33,enable,,FM_33: area of floating metal3 not connected to diff or gate > FM_33 with facing edge > 0
+DVE,FM_41,enable,,FM_41: floating metal4 area with or without facing edge not connected to  diff or gate > FM_41
+DVE,FM_42,enable,,FM_42: floating metal4 not connected to diff or gate with facing edge > FM_42
+DVE,FM_43,enable,,FM_43: area of floating metal4 not connected to diff or gate > FM_43 with facing edge > 0
+DVE,FM_51,enable,,FM_51: floating metal5 area with or without facing edge not connected to  diff or gate > FM_51
+DVE,FM_52,enable,,FM_52: floating metal5 not connected to diff or gate with facing edge > FM_52
+DVE,FM_53,enable,,FM_53: area of floating metal5 not connected to diff or gate > FM_53 with facing edge > 0
+DVE,FM_61,enable,,FM_61: floating metal6 area with or without facing edge not connected to  diff or gate > FM_61
+DVE,FM_62,enable,,FM_62: floating metal6 not connected to diff or gate with facing edge > FM_62
+DVE,FM_63,enable,,FM_63: area of floating metal6 not connected to diff or gate > FM_63 with facing edge > 0
+DVE,FM_71,enable,,FM_71: floating metal7 area with or without facing edge not connected to  diff or gate > FM_71
+DVE,FM_72,enable,,FM_72: floating metal7 not connected to diff or gate with facing edge > FM_72
+DVE,FM_73,enable,,FM_73: area of floating metal7 not connected to diff or gate > FM_73 with facing edge > 0
+DVE,FM_81,enable,,FM_81: floating metal8 area with or without facing edge not connected to  diff or gate > FM_81
+DVE,FM_82,enable,,FM_82: floating metal8 not connected to diff or gate with facing edge > FM_82
+DVE,FM_83,enable,,FM_83: area of floating metal8 not connected to diff or gate > FM_83 with facing edge > 0
+DVE,fntap,enable,,fntap: fntap - floating N pickup in nwell
+DVE,GD_01,disable,Global density,GD_01: global pdiff density < GD_01
+DVE,GD_02/pdiff_not_gate,disable,Global density,GD_02/pdiff_not_gate: global pdiff density > GD_02
+DVE,GD_03,disable,Global density,GD_03: global ndiff density < GD_03
+DVE,GD_04/ndiff_not_gate,disable,Global density,GD_04/ndiff_not_gate: global ndiff density > GD_04
+DVE,GD_21,disable,Global density,GD_21: global metal1 density < GD_21
+DVE,GD_22,disable,Global density,GD_22: global metal2 density < GD_22
+DVE,GD_23,disable,Global density,GD_23: global metal3 density < GD_23
+DVE,GD_24,disable,Global density,GD_24: global metal4 density < GD_24
+DVE,GD_25,disable,Global density,GD_25: global metal5 density < GD_25
+DVE,GD_26,disable,Global density,GD_26: global metal6 density < GD_26
+DVE,GD_27,disable,Global density,GD_27: global metal7 density < GD_27
+DVE,GD_28,disable,Global density,GD_28: global metal8 density < GD_28
+DVE,GD_29,disable,Global density,GD_29: global metal9 density < GD_29
+DVE,GD_31/metal1,disable,Global density,GD_31/metal1: global metal1 density > GD_31
+DVE,GD_31/metal2,disable,Global density,GD_31/metal2: global metal2 density > GD_31
+DVE,GD_31/metal3,disable,Global density,GD_31/metal3: global metal3 density > GD_31
+DVE,GD_31/metal4,disable,Global density,GD_31/metal4: global metal4 density > GD_31
+DVE,GD_31/metal5,disable,Global density,GD_31/metal5: global metal5 density > GD_31
+DVE,GD_31/metal6,disable,Global density,GD_31/metal6: global metal6 density > GD_31
+DVE,GD_31/metal7,disable,Global density,GD_31/metal7: global metal7 density > GD_31
+DVE,GD_31/metal8,disable,Global density,GD_31/metal8: global metal8 density > GD_31
+DVE,GD_32/metal9,disable,Global density,GD_32/metal9: global metal9 density > GD_32
+DVE,gnacerr,enable,,gnacerr: pgated nacid layer overlaps the pgate area
+DVE,gnacerr,enable,,gnacerr: nngate area not completely enclosed by gated nacid layer
+DVE,illdev,enable,,illdev: illdev - illegal device formation - ngate in well
+DVE,illdev,enable,,illdev: illdev - illegal device formation - pgate not well
+DVE,illdev,enable,,illdev: illdev - illegal device formation - nwell and wellres_id
+DVE,illdev,enable,,illdev: illdev - illegal device formation - gate and wellres_id
+DVE,illdev,enable,,illdev: illdev - illegal device formation - gate and pres_id
+DVE,illdev,enable,,illdev: illdev - illegal device formation - polycon and pres_id
+DVE,illdev,enable,,illdev: illdev - illegal device formation - diff_w_id not poly
+DVE,illdev,enable,,illdev: illdev - illegal device formation - via0 and met1resid
+DVE,illdev,enable,,illdev: illdev - illegal device formation - via1 and met1resid
+DVE,illdev,enable,,illdev: illdev - illegal device formation - via1 and met2resid
+DVE,illdev,enable,,illdev: illdev - illegal device formation - via2 and met2resid
+DVE,illdev,enable,,illdev: illdev - illegal device formation - via2 and met3resid
+DVE,illdev,enable,,illdev: illdev - illegal device formation - via3 and met3resid
+DVE,illdev,enable,,illdev: illdev - illegal device formation - via3 and met4resid
+DVE,illdev,enable,,illdev: illdev - illegal device formation - via4 and met4resid
+DVE,illdev,enable,,illdev: illdev - illegal device formation - via4 and met5resid
+DVE,illdev,enable,,illdev: illdev - illegal device formation - via5 and met5resid
+DVE,illdev,enable,,illdev: illdev - illegal device formation - via5 and met6resid
+DVE,illdev,enable,,illdev: illdev - illegal device formation - via6 and met6resid
+DVE,illdev,enable,,illdev: illdev - illegal device formation - via6 and met7resid
+DVE,illdev,enable,,illdev: illdev - illegal device formation - via7 and met7resid
+DVE,illdev,enable,,illdev: illdev - illegal device formation - via7 and met8resid
+DVE,illdev,enable,,illdev: illdev - illegal device formation - via8 and met8resid
+DVE,illdev,enable,,illdev: illdev - illegal device formation - via8 and met9resid
+DVE,illdev,enable,,illdev: illdev - illegal device formation - via9 and met9resid
+DVE,illdev,enable,,illdev: illdev - illegal device formation - vdgate and polycon
+DVE,IP_00,enable,,IP_00: max ratio of gcn+tcn area to ngate+pgate not connected to a discharge device > IP_00
+DVE,IP_01,enable,,IP_01: max ratio of field_poly to gate area > IP_01
+DVE,IP_02,enable,,IP_02: max ratio of polycon to ngate area > IP_02
+DVE,IP_04,enable,,IP_04: max ratio of polycon to pgate area > IP_04
+DVE,IP_06,enable,,IP_06: max ratio of metal1 area to ngate+pgate not connected to a discharge device > IP_06
+DVE,IP_07,enable,,IP_07: max ratio of metal2 area to ngate+pgate not connected to a discharge device > IP_07
+DVE,IP_08,enable,,IP_08: max ratio of metal3 area to ngate+pgate not connected to a discharge device > IP_08
+DVE,IP_09,enable,,IP_09: max ratio of metal4 area to ngate+pgate not connected to a discharge device > IP_09
+DVE,IP_10,enable,,IP_10: max ratio of metal5 area to ngate+pgate not connected to a discharge device > IP_10
+DVE,IP_100,enable,,IP_100: max ratio of gcn+tcn area to only ngate not connected to a discharge device > IP_100
+DVE,IP_101,enable,,IP_101: max ratio of metal1 area to only ngate not connected to a discharge device > IP_101
+DVE,IP_102,enable,,IP_102: max ratio of metal2 area to only ngate not connected to a discharge device > IP_102
+DVE,IP_103,enable,,IP_103: max ratio of metal3 area to only ngate not connected to a discharge device > IP_103
+DVE,IP_104,enable,,IP_104: max ratio of metal4 area to only ngate not connected to a discharge device > IP_104
+DVE,IP_105,enable,,IP_105: max ratio of metal5 area to only ngate not connected to a discharge device > IP_105
+DVE,IP_106,enable,,IP_106: max ratio of metal6 area to only ngate not connected to a discharge device > IP_106
+DVE,IP_107,enable,,IP_107: max ratio of metal7 area to only ngate not connected to a discharge device > IP_107
+DVE,IP_108,enable,,IP_108: max ratio of metal8 area to only ngate not connected to a discharge device > IP_108
+DVE,IP_109,enable,,IP_109: max ratio of metal9 area to only ngate not connected to a discharge device > IP_109
+DVE,IP_11,enable,,IP_11: max ratio of metal1 area to ngate connected to only drain > IP_11
+DVE,IP_12,enable,,IP_12: max ratio of metal2 area to ngate connected to only drain > IP_12
+DVE,IP_13,enable,,IP_13: max ratio of metal3 area to ngate connected to only drain > IP_13
+DVE,IP_14,enable,,IP_14: max ratio of metal4 area to ngate connected to only drain > IP_14
+DVE,IP_15,enable,,IP_15: max ratio of metal5 area to ngate connected to only drain > IP_15
+DVE,IP_16,enable,,IP_16: max ratio of metal6 area to ngate connected to only drain > IP_16
+DVE,IP_17,enable,,IP_17: max ratio of metal7 area to ngate connected to only drain > IP_17
+DVE,IP_18,enable,,IP_18: max ratio of metal8 area to ngate connected to only drain > IP_18
+DVE,IP_19,enable,,IP_19: max ratio of metal9 area to ngate connected to only drain > IP_19
+DVE,IP_20,enable,,IP_20: max ratio of gcn+tcn area to only pgate not connected to a discharge device > IP_20
+DVE,IP_21,enable,,IP_21: max ratio of metal1 area to only pgate not connected to a discharge device > IP_21
+DVE,IP_22,enable,,IP_22: max ratio of metal2 area to only pgate not connected to a discharge device > IP_22
+DVE,IP_23,enable,,IP_23: max ratio of metal3 area to only pgate not connected to a discharge device > IP_23
+DVE,IP_24,enable,,IP_24: max ratio of metal4 area to only pgate not connected to a discharge device > IP_24
+DVE,IP_25,enable,,IP_25: max ratio of metal5 area to only pgate not connected to a discharge device > IP_25
+DVE,IP_26,enable,,IP_26: max ratio of metal6 area to only pgate not connected to a discharge device > IP_26
+DVE,IP_27,enable,,IP_27: max ratio of metal7 area to only pgate not connected to a discharge device > IP_27
+DVE,IP_28,enable,,IP_28: max ratio of metal8 area to only pgate not connected to a discharge device > IP_28
+DVE,IP_29,enable,,IP_29: max ratio of metal9 area to only pgate not connected to a discharge device > IP_29
+DVE,IP_31,enable,,IP_31: max ratio of metal1 area to pgate connected to only drain > IP_31
+DVE,IP_32,enable,,IP_32: max ratio of metal2 area to pgate connected to only drain > IP_32
+DVE,IP_33,enable,,IP_33: max ratio of metal3 area to pgate connected to only drain > IP_33
+DVE,IP_34,enable,,IP_34: max ratio of metal4 area to pgate connected to only drain > IP_34
+DVE,IP_35,enable,,IP_35: max ratio of metal5 area to pgate connected to only drain > IP_35
+DVE,IP_36,enable,,IP_36: max ratio of metal6 area to pgate connected to only drain > IP_36
+DVE,IP_37,enable,,IP_37: max ratio of metal7 area to pgate connected to only drain > IP_37
+DVE,IP_38,enable,,IP_38: max ratio of metal8 area to pgate connected to only drain > IP_38
+DVE,IP_39,enable,,IP_39: max ratio of metal9 area to pgate connected to only drain > IP_39
+DVE,IP_40,enable,,IP_40: max ratio of via0 area to ngate not connected to a discharge device > IP_40
+DVE,IP_41,enable,,IP_41: max ratio of via1 area to ngate not connected to a discharge device > IP_41
+DVE,IP_42,enable,,IP_42: max ratio of via2 area to ngate not connected to a discharge device > IP_42
+DVE,IP_43,enable,,IP_43: max ratio of via3 area to ngate not connected to a discharge device > IP_43
+DVE,IP_44,enable,,IP_44: max ratio of via4 area to ngate not connected to a discharge device > IP_44
+DVE,IP_45,enable,,IP_45: max ratio of via5 area to ngate not connected to a discharge device > IP_45
+DVE,IP_46,enable,,IP_46: max ratio of via6 area to ngate not connected to a discharge device > IP_46
+DVE,IP_47,enable,,IP_47: max ratio of via7 area to ngate not connected to a discharge device > IP_47
+DVE,IP_48,enable,,IP_48: max ratio of via8 area to ngate not connected to a discharge device > IP_48
+DVE,IP_49,enable,,IP_49: max ratio of metal6 area to ngate+pgate not connected to a discharge device > IP_49
+DVE,IP_50,enable,,IP_50: max ratio of via0 area to ngate connected to a discharge device > IP_50
+DVE,IP_51,enable,,IP_51: max ratio of via1 area to ngate connected to a discharge device > IP_51
+DVE,IP_52,enable,,IP_52: max ratio of via2 area to ngate connected to a discharge device > IP_52
+DVE,IP_53,enable,,IP_53: max ratio of via3 area to ngate connected to a discharge device > IP_53
+DVE,IP_54,enable,,IP_54: max ratio of via4 area to ngate connected to a discharge device on a non vcc*/vss* node > IP_54
+DVE,IP_55,enable,,IP_55: max ratio of via5 area to ngate connected to a discharge device on a non vcc*/vss* node > IP_55
+DVE,IP_56,enable,,IP_56: max ratio of via6 area to ngate connected to a discharge device on a non vcc*/vss* node > IP_56
+DVE,IP_57,enable,,IP_57: max ratio of via7 area to ngate connected to a discharge device on a non vcc*/vss* node > IP_57
+DVE,IP_58,enable,,IP_58: max ratio of via8 area to ngate connected to a discharge device on a non vcc*/vss* node > IP_58
+DVE,IP_59,enable,,IP_59: max ratio of metal7 area to ngate+pgate not connected to a discharge device > IP_59
+DVE,IP_60,enable,,IP_60: max ratio of via0 area to pgate not connected to a discharge device > IP_60
+DVE,IP_61,enable,,IP_61: max ratio of via1 area to pgate not connected to a discharge device > IP_61
+DVE,IP_62,enable,,IP_62: max ratio of via2 area to pgate not connected to a discharge device > IP_62
+DVE,IP_63,enable,,IP_63: max ratio of via3 area to pgate not connected to a discharge device > IP_63
+DVE,IP_64,enable,,IP_64: max ratio of via4 area to pgate not connected to a discharge device > IP_64
+DVE,IP_65,enable,,IP_65: max ratio of via5 area to pgate not connected to a discharge device > IP_65
+DVE,IP_66,enable,,IP_66: max ratio of via6 area to pgate not connected to a discharge device > IP_66
+DVE,IP_67,enable,,IP_67: max ratio of via7 area to pgate not connected to a discharge device > IP_67
+DVE,IP_68,enable,,IP_68: max ratio of via8 area to pgate not connected to a discharge device > IP_68
+DVE,IP_69,enable,,IP_69: max ratio of metal8 area to ngate+pgate not connected to a discharge device > IP_69
+DVE,IP_70,enable,,IP_70: max ratio of via0 area to pgate connected to a discharge device > IP_70
+DVE,IP_71,enable,,IP_71: max ratio of via1 area to pgate connected to a discharge device > IP_71
+DVE,IP_72,enable,,IP_72: max ratio of via2 area to pgate connected to a discharge device > IP_72
+DVE,IP_73,enable,,IP_73: max ratio of via3 area to pgate connected to a discharge device > IP_73
+DVE,IP_74,enable,,IP_74: max ratio of via4 area to pgate connected to a discharge device on a non vcc*/vss* node > IP_74
+DVE,IP_74,enable,,IP_74: max ratio of via4 area to pgate connected to a discharge device on a non vcc*/vss* node > IP_74
+DVE,IP_75,enable,,IP_75: max ratio of via5 area to pgate connected to a discharge device on a non vcc*/vss* node > IP_75
+DVE,IP_75,enable,,IP_75: max ratio of via5 area to pgate connected to a discharge device on a non vcc*/vss* node > IP_75
+DVE,IP_76,enable,,IP_76: max ratio of via6 area to pgate connected to a discharge device on a non vcc*/vss* node > IP_76
+DVE,IP_76,enable,,IP_76: max ratio of via6 area to pgate connected to a discharge device on a non vcc*/vss* node > IP_76
+DVE,IP_77,enable,,IP_77: max ratio of via7 area to pgate connected to a discharge device on a non vcc*/vss* node > IP_77
+DVE,IP_77,enable,,IP_77: max ratio of via7 area to pgate connected to a discharge device on a non vcc*/vss* node > IP_77
+DVE,IP_78,enable,,IP_78: max ratio of via8 area to pgate connected to a discharge device on a non vcc*/vss* node > IP_78
+DVE,IP_78,enable,,IP_78: max ratio of via8 area to pgate connected to a discharge device on a non vcc*/vss* node > IP_78
+DVE,IP_79,enable,,IP_79: max ratio of metal9 area to ngate+pgate not connected to a discharge device > IP_79
+DVE,IP_81,enable,,IP_81: max ratio of via4 area to ngate connected to a discharge device on a vcc*/vss* node > IP_81
+DVE,IP_82,enable,,IP_82: max ratio of via5 area to ngate connected to a discharge device on a vcc*/vss* node > IP_82
+DVE,IP_83,enable,,IP_83: max ratio of via6 area to ngate connected to a discharge device on a vcc*/vss* node > IP_83
+DVE,IP_84,enable,,IP_84: max ratio of via7 area to ngate connected to a discharge device on a vcc*/vss* node > IP_84
+DVE,IP_85,enable,,IP_85: max ratio of via8 area to ngate connected to a discharge device on a vcc*/vss* node > IP_85
+DVE,IP_86,enable,,IP_86: max ratio of via4 area to pgate connected to a discharge device on a vcc*/vss* node > IP_86
+DVE,IP_86,enable,,IP_86: max ratio of via4 area to pgate connected to a discharge device on a vcc*/vss* node > IP_86
+DVE,IP_87,enable,,IP_87: max ratio of via5 area to pgate connected to a discharge device on a vcc*/vss* node > IP_87
+DVE,IP_87,enable,,IP_87: max ratio of via5 area to pgate connected to a discharge device on a vcc*/vss* node > IP_87
+DVE,IP_88,enable,,IP_88: max ratio of via6 area to pgate connected to a discharge device on a vcc*/vss* node > IP_88
+DVE,IP_88,enable,,IP_88: max ratio of via6 area to pgate connected to a discharge device on a vcc*/vss* node > IP_88
+DVE,IP_89,enable,,IP_89: max ratio of via7 area to pgate connected to a discharge device on a vcc*/vss* node > IP_89
+DVE,IP_89,enable,,IP_89: max ratio of via7 area to pgate connected to a discharge device on a vcc*/vss* node > IP_89
+DVE,IP_90,enable,,IP_90: max ratio of via8 area to pgate connected to a discharge device on a vcc*/vss* node > IP_90
+DVE,IP_90,enable,,IP_90: max ratio of via8 area to pgate connected to a discharge device on a vcc*/vss* node > IP_90
+DVE,IP_91,enable,,IP_91: limit ratio of (metal1 area)/ze > IP_91 on non-grounded source drain
+DVE,IP_91,enable,,IP_91: limit ratio of (metal2 area)/ze > IP_91 on non-grounded source drain
+DVE,IP_91,enable,,IP_91: limit ratio of (metal3 area)/ze > IP_91 on non-grounded source drain
+DVE,IP_91,enable,,IP_91: limit ratio of (metal4 area)/ze > IP_91 on non-grounded source drain
+DVE,IP_91,enable,,IP_91: limit ratio of (metal5 area)/ze > IP_91 on non-grounded source drain
+DVE,IP_91,enable,,IP_91: limit ratio of (metal6 area)/ze > IP_91 on non-grounded source drain
+DVE,IP_91,enable,,IP_91: limit ratio of (metal7 area)/ze > IP_91 on non-grounded source drain
+DVE,IP_91,enable,,IP_91: limit ratio of (metal8 area)/ze > IP_91 on non-grounded source drain
+DVE,IP_91,enable,,IP_91: limit ratio of (metal9 area)/ze > IP_91 on non-grounded source drain
+DVE,IP_91,enable,,IP_91: limit ratio of (tcn+gcn area)/ze > IP_91 on non-grounded source drain
+DVE,IP_95,enable,,IP_95: limit ratio of (metal1 area)/ze > IP_95 with metal1 to ngate area > IP_11/IP_31 on grounded source drain
+DVE,IP_95,enable,,IP_95: limit ratio of (metal2 area)/ze > IP_95 with metal2 to ngate area > IP_12/IP_32 on grounded source drain
+DVE,IP_95,enable,,IP_95: limit ratio of (metal3 area)/ze > IP_95 with metal3 to ngate area > IP_13/IP_33 on grounded source drain
+DVE,IP_95,enable,,IP_95: limit ratio of (metal4 area)/ze > IP_95 with metal4 to ngate area > IP_14/IP_34 on grounded source drain
+DVE,IP_95,enable,,IP_95: limit ratio of (metal5 area)/ze > IP_95 with metal5 to ngate area > IP_15/IP_35 on grounded source drain
+DVE,IP_95,enable,,IP_95: limit ratio of (metal6 area)/ze > IP_95 with metal6 to ngate area > IP_16/IP_36 on grounded source drain
+DVE,IP_95,enable,,IP_95: limit ratio of (metal7 area)/ze > IP_95 with metal7 to ngate area > IP_17/IP_37 on grounded source drain
+DVE,IP_95,enable,,IP_95: limit ratio of (metal8 area)/ze > IP_95 with metal8 to ngate area > IP_18/IP_38 on grounded source drain
+DVE,IP_95,enable,,IP_95: limit ratio of (metal9 area)/ze > IP_95 with metal9 to ngate area > IP_19/IP_39 on grounded source drain
+DVE,IP_95,enable,,IP_95: limit ratio of (tcn+gcn area)/ze > IP_95 with tcn+gcn to ngate area > IP_80/IP_30 on grounded source drain
+DVE,J_01,enable,,J_01: mnsd width < J_01
+DVE,J_02,enable,,J_02: mnsd space < J_02
+DVE,J_03,enable,,J_03: nactive space to mnsd < J_03
+DVE,J_04,enable,,J_04: n-tip block space to ntap < J_04
+DVE,J_05,enable,,J_05: mnsd enclosure of pactive < J_05
+DVE,J_06,enable,,J_06: mnsd enclosure of ptap < J_06
+DVE,J_08,enable,,J_08: mnsd area < J_08
+DVE,J_09,enable,,J_09: min allowed drawn mnsd hole area < J_09
+DVE,J_10,enable,,J_10: nwell encl n-tip block < J_10
+DVE,J_11,enable,,J_11: n-tip block space to active ndiff edge < J_11
+DVE,J_12,enable,,J_12: n-tip block enclosure of active pdiff edge < J_12
+DVE,J_13,enable,,J_13: min mnsd seg. len. when adj at corner = J_13
+DVE,J_14,enable,,J_14: min mnsd convex corner encl of active p+ diff corner = J_14
+DVE,J_15,enable,,J_15: min mnsd concave corner space to active n+ diff corner = J_15
+DVE,K_10,enable,,K_10: nwell space p-tip block < K_10
+DVE,K_11,enable,,K_11: p-tip block space to active pdiff edge < K_11
+DVE,K_12,enable,,K_12: p-tip block enclosure of active ndiff edge < K_12
+DVE,K_13,enable,,K_13: min mpsd seg. len. when adj at corner = K_13
+DVE,K_14,enable,,K_14: min mpsd convex corner encl of active n+ diff corner = K_14
+DVE,K_15,enable,,K_15: min mpsd concave corner space to active p+ diff corner = K_15
+DVE,LD_01,disable,Min density rule,LD_01: local pdiff density < LD_01
+DVE,LD_02,enable,,LD_02: local pdiff density > LD_02
+DVE,LD_03,disable,Min density rule,LD_03: local diff density < LD_03
+DVE,LD_04,enable,,LD_04: local diff density > LD_04
+DVE,LD_05,disable,Min density rule,LD_05: local poly density < LD_05
+DVE,LD_05_L,disable,Min density rule,LD_05_L: local poly density < LD_05_L
+DVE,LD_05_S,disable,Min density rule,LD_05_S: local poly density < LD_05_S
+DVE,LD_06,enable,,LD_06: local poly density > LD_06
+DVE,LD_06_L,enable,,LD_06_L: local poly density > LD_06_L
+DVE,LD_06_S,enable,,LD_06_S: local poly density > LD_06_S
+DVE,LD_07,disable,Min density rule,LD_07: local TCN+GCN density < LD_07
+DVE,LD_08,enable,,LD_08: local TCN+GCN density > LD_08
+DVE,LD_11,disable,Min density rule,LD_11: local ndiff density < LD_11
+DVE,LD_12,enable,,LD_12: local ndiff density > LD_12
+DVE,LD_21,disable,Min density rule,LD_21: local metal1 density < LD_21
+DVE,LD_22,enable,,LD_22: local metal1 density > LD_22
+DVE,LD_23,disable,Min density rule,LD_23: local metal2 density < LD_23
+DVE,LD_24,enable,,LD_24: local metal2 density > LD_24
+DVE,LD_25,disable,Min density rule,LD_25: local metal3 density < LD_25
+DVE,LD_26,enable,,LD_26: local metal3 density > LD_26
+DVE,LD_27,disable,Min density rule,LD_27: local metal4 density < LD_27
+DVE,LD_28,enable,,LD_28: local metal4 density > LD_28
+DVE,LD_29,disable,Min density rule,LD_29: local metal5 density < LD_29
+DVE,LD_30,enable,,LD_30: local metal5 density > LD_30
+DVE,LD_31,disable,Min density rule,LD_31: local metal6 density < LD_31
+DVE,LD_32,enable,,LD_32: local metal6 density > LD_32
+DVE,LD_33,disable,Min density rule,LD_33: local metal7 density < LD_33
+DVE,LD_34,enable,,LD_34: local metal7 density > LD_34
+DVE,LD_35,disable,Min density rule,LD_35: local metal8 density < LD_35
+DVE,LD_36,enable,,LD_36: local metal8 density > LD_36
+DVE,LD_37,disable,Min density rule,LD_37: local metal9 density < LD_37
+DVE,LD_38,enable,,LD_38: local metal9 density > LD_38
+DVE,LD_51,disable,Min density rule,LD_51: local via0 density < LD_51
+DVE,LD_52,disable,Min density rule,LD_52: local via1 density < LD_52
+DVE,LD_53,disable,Min density rule,LD_53: local via2 density < LD_53
+DVE,LD_54,disable,Min density rule,LD_54: local via3 density < LD_54
+DVE,LD_55,disable,Min density rule,LD_55: local via4 density < LD_55
+DVE,LD_56,disable,Min density rule,LD_56: local via5 density < LD_56
+DVE,LD_57,disable,Min density rule,LD_57: local via6 density < LD_57
+DVE,LD_58,disable,Min density rule,LD_58: local via7 density < LD_58
+DVE,LD_59,disable,Min density rule,LD_59: local via8 density < LD_59
+DVE,M1_01,enable,,M1_01: width metal line running PGD < M1_01
+DVE,M1_03/M1_05,enable,,M1_03/M1_05: Metal width running PGD > M1_03 or running OGD > M1_05
+DVE,M1_04,enable,,M1_04: width metal line running OGD < M1_04
+DVE,M1_06/M1_02,enable,,M1_06/M1_02: width metal line running PGD > M1_06 or < M1_02
+DVE,M1_11/gt,disable,Fill related error; focus should be on fillable,M1_11/gt: space bet. metal edges aligned OGD w/ at least 1 lt max width > M1_11
+DVE,M1_11/lt,enable,,M1_11/lt: space bet. metal edges aligned OGD w/ at least 1 lt max width < M1_11
+DVE,M1_12/gt,disable,Fill related error; focus should be on fillable,M1_12/gt: space bet. metal edges aligned PGD w/ at least 1 narrow width > M1_12
+DVE,M1_12/lt,enable,,M1_12/lt: space bet. metal edges aligned PGD w/ at least 1 narrow width < M1_12
+DVE,M1_14,enable,,M1_14: space bet. wide metal edges aligned PGD < M1_14
+DVE,M1_15,disable,Fill related error; focus should be on fillable,M1_15: space bet. wide metal edges aligned PGD > M1_15
+DVE,M1_16,enable,,M1_16: space bet. max width metal edges aligned OGD < M1_16
+DVE,M1_17,disable,Fill related error; focus should be on fillable,M1_17: space bet. max width metal edges aligned OGD > M1_17
+DVE,M1_18,disable,Fill related error; focus should be on fillable,M1_18: length of unfaced metal edge aligned PGD > M1_18
+DVE,M1_21,enable,,M1_21: min length of rect-only narrow metal lines running PGD = M1_21
+DVE,M1_22/M1_23,enable,,M1_22/M1_23: min lvl_other_metal1 length/extent = M1_22 OGD or M1_23 PGD
+DVE,M1_24,enable,,M1_24: min length of rect. only metal hole running PGD bounded by 1 narrow line = M1_24
+DVE,M1_25,enable,,M1_25: min length of rect. only metal hole running OGD = M1_25
+DVE,M1_26,enable,,M1_26: min length of other metal hole = M1_26
+DVE,M1_31,enable,,M1_31: min metal1 required jog segment length = M1_31
+DVE,M1_32,enable,,M1_32: min metal1 segm len when both adj at a corner containing via = M1_32
+DVE,M1_33,enable,,M1_33: min spacing between metal1 non-overlapping convex corners = M1_33
+DVE,M1_34,enable,,M1_34: min metal1_nbc internal corner-to-corner spacing = M1_34
+DVE,M1_35,enable,,M1_35: min metal1_nbc width bet. f. cc corner ext. (40nm) of opp. dir. = M1_35
+DVE,M1_35,enable,,M1_35: min metal1_bc width bet. f. cc corner ext. (40nm) of opp. dir. = M1_35
+DVE,M1_36,enable,,M1_36: min required width of notched metal1 line section = M1_36
+DVE,M1_42/M1_41,enable,,M1_42/M1_41: min svia0 enclosure by metal1 = M1_42 orthogonal M1_41
+DVE,M1_44/M1_44,enable,,M1_44/M1_44: min rvia0 enclosure by metal1 = M1_44 orthogonal M1_44
+DVE,M2_01,enable,,M2_01: width metal line running OGD < M2_01
+DVE,M2_03/M2_05,enable,,M2_03/M2_05: Metal width running OGD > M2_03 or running PGD > M2_05
+DVE,M2_04,enable,,M2_04: width metal line running PGD < M2_04
+DVE,M2_06/M2_02,enable,,M2_06/M2_02: width metal line running OGD > M2_06 or < M2_02
+DVE,M2_11/gt,disable,Fill related error; focus should be on fillable,M2_11/gt: space bet. metal edges aligned PGD w/ at least 1 lt max width > M2_11
+DVE,M2_11/lt,enable,,M2_11/lt: space bet. metal edges aligned PGD w/ at least 1 lt max width < M2_11
+DVE,M2_12/gt,disable,Fill related error; focus should be on fillable,M2_12/gt: space bet. metal edges aligned PGD w/ at least 1 narrow width > M2_12
+DVE,M2_12/lt,enable,,M2_12/lt: space bet. metal edges aligned OGD w/ at least 1 narrow width < M2_12
+DVE,M2_14,enable,,M2_14: space bet. wide metal edges aligned OGD < M2_14
+DVE,M2_15,disable,Fill related error; focus should be on fillable,M2_15: space bet. wide metal edges aligned OGD > M2_15
+DVE,M2_16,enable,,M2_16: space bet. max width metal edges aligned PGD < M2_16
+DVE,M2_17,disable,Fill related error; focus should be on fillable,M2_17: space bet. max width metal edges aligned PGD > M2_17
+DVE,M2_18,disable,Fill related error; focus should be on fillable,M2_18: length of unfaced metal edge aligned OGD > M2_18
+DVE,M2_21,enable,,M2_21: min length of rect-only narrow metal lines running OGD = M2_21
+DVE,M2_23/M2_22,enable,,M2_23/M2_22: min lvl_other_metal2 length/extent = M2_23 OGD or M2_22 PGD
+DVE,M2_24,enable,,M2_24: min length of rect. only metal hole running OGD bounded by 1 narrow line = M2_24
+DVE,M2_25,enable,,M2_25: min length of rect. only metal hole running PGD = M2_25
+DVE,M2_26,enable,,M2_26: min length of other metal hole = M2_26
+DVE,M2_31,enable,,M2_31: min metal2 required jog segment length = M2_31
+DVE,M2_32,enable,,M2_32: min metal2 segm len when both adj at a corner containing via = M2_32
+DVE,M2_33,enable,,M2_33: min spacing between metal2 non-overlapping convex corners = M2_33
+DVE,M2_34,enable,,M2_34: min metal2 internal corner-to-corner spacing = M2_34
+DVE,M2_35,enable,,M2_35: min metal2 width bet. f. cc corner ext. (40nm) of opp. dir. = M2_35
+DVE,M2_36,enable,,M2_36: min required width of notched metal2 line section = M2_36
+DVE,M2_42/M2_41,enable,,M2_42/M2_41: min svia1 enclosure by metal2 = M2_42 orthogonal M2_41
+DVE,M2_44/M2_44,enable,,M2_44/M2_44: min rvia1 enclosure by metal2 = M2_44 orthogonal M2_44
+DVE,M3_01,enable,,M3_01: width metal line running PGD < M3_01
+DVE,M3_03/M3_05,enable,,M3_03/M3_05: Metal width running PGD > M3_03 or running OGD > M3_05
+DVE,M3_04,enable,,M3_04: width metal line running OGD < M3_04
+DVE,M3_06/M3_02,enable,,M3_06/M3_02: width metal line running PGD > M3_06 or < M3_02
+DVE,M3_11/gt,disable,Fill related error; focus should be on fillable,M3_11/gt: space bet. metal edges aligned OGD w/ at least 1 lt max width > M3_11
+DVE,M3_11/lt,enable,,M3_11/lt: space bet. metal edges aligned OGD w/ at least 1 lt max width < M3_11
+DVE,M3_12/gt,disable,Fill related error; focus should be on fillable,M3_12/gt: space bet. metal edges aligned PGD w/ at least 1 narrow width > M3_12
+DVE,M3_12/lt,enable,,M3_12/lt: space bet. metal edges aligned PGD w/ at least 1 narrow width < M3_12
+DVE,M3_14,enable,,M3_14: space bet. wide metal edges aligned PGD < M3_14
+DVE,M3_15,disable,Fill related error; focus should be on fillable,M3_15: space bet. wide metal edges aligned PGD > M3_15
+DVE,M3_16,enable,,M3_16: space bet. max width metal edges aligned OGD < M3_16
+DVE,M3_17,disable,Fill related error; focus should be on fillable,M3_17: space bet. max width metal edges aligned OGD > M3_17
+DVE,M3_18,disable,Fill related error; focus should be on fillable,M3_18: length of unfaced metal edge aligned PGD > M3_18
+DVE,M3_21,enable,,M3_21: min length of rect-only narrow metal lines running PGD = M3_21
+DVE,M3_22/M3_23,enable,,M3_22/M3_23: min lvl_other_metal3 length/extent = M3_22 OGD or M3_23 PGD
+DVE,M3_24,enable,,M3_24: min length of rect. only metal hole running PGD bounded by 1 narrow line = M3_24
+DVE,M3_25,enable,,M3_25: min length of rect. only metal hole running OGD = M3_25
+DVE,M3_26,enable,,M3_26: min length of other metal hole = M3_26
+DVE,M3_31,enable,,M3_31: min metal3 required jog segment length = M3_31
+DVE,M3_32,enable,,M3_32: min metal3 segm len when both adj at a corner containing via = M3_32
+DVE,M3_33,enable,,M3_33: min spacing between metal3 non-overlapping convex corners = M3_33
+DVE,M3_34,enable,,M3_34: min metal3 internal corner-to-corner spacing = M3_34
+DVE,M3_35,enable,,M3_35: min metal3 width bet. f. cc corner ext. (40nm) of opp. dir. = M3_35
+DVE,M3_36,enable,,M3_36: min required width of notched metal3 line section = M3_36
+DVE,M3_42/M3_41,enable,,M3_42/M3_41: min svia2 enclosure by metal3 = M3_42 orthogonal M3_41
+DVE,M3_44/M3_44,enable,,M3_44/M3_44: min rvia2 enclosure by metal3 = M3_44 orthogonal M3_44
+DVE,M4_01,enable,,M4_01: min metal4 width = M4_01
+DVE,M4_02,enable,,M4_02: min metal4 space = M4_02
+DVE,M4_21,enable,,M4_21: max metal4 width = M4_21
+DVE,M4_22,enable,,M4_22: min metal4 hole area [sq um] = M4_22
+DVE,M4_23,enable,,M4_23: min metal4 seg. len. when adj at corner = M4_23
+DVE,M4_24,enable,,M4_24: min lvl_metal4 length/extent = M4_24
+DVE,M4_41/M4_43,enable,,M4_41/M4_43: min svia3 enclosure by metal4 = M4_41 orthogonal M4_43
+DVE,M4_51/M4_52,enable,,M4_51/M4_52: min rvia3 enclosure by metal4 = M4_51 orthogonal M4_52
+DVE,M4_61,enable,,M4_61: min metal4 eol width at the eon segm when facing 0.125 = M4_61
+DVE,M5_01,enable,,M5_01: min metal5 width = M5_01
+DVE,M5_02,enable,,M5_02: min metal5 space = M5_02
+DVE,M5_21,enable,,M5_21: max metal5 width = M5_21
+DVE,M5_22,enable,,M5_22: min metal5 hole area [sq um] = M5_22
+DVE,M5_23,enable,,M5_23: min metal5 seg. len. when adj at corner = M5_23
+DVE,M5_24,enable,,M5_24: min lvl_metal5 length/extent = M5_24
+DVE,M5_41/M5_43,enable,,M5_41/M5_43: min svia4 enclosure by metal5 = M5_41 orthogonal M5_43
+DVE,M5_51/M5_52,enable,,M5_51/M5_52: min rvia4 enclosure by metal5 = M5_51 orthogonal M5_52
+DVE,M5_61,enable,,M5_61: min metal5 eol width at the eon segm when facing 0.150 = M5_61
+DVE,M6_01,enable,,M6_01: min metal6 width = M6_01
+DVE,M6_02,enable,,M6_02: min metal6 space = M6_02
+DVE,M6_21,enable,,M6_21: max metal6 width = M6_21
+DVE,M6_22,enable,,M6_22: min metal6 hole area [sq um] = M6_22
+DVE,M6_23,enable,,M6_23: min metal6 seg. len. when adj at corner = M6_23
+DVE,M6_24,enable,,M6_24: min lvl_metal6 length/extent = M6_24
+DVE,M6_41/M6_43,enable,,M6_41/M6_43: min svia5 enclosure by metal6 = M6_41 orthogonal M6_43
+DVE,M6_51/M6_52,enable,,M6_51/M6_52: min rvia5 enclosure by metal6 = M6_51 orthogonal M6_52
+DVE,M7_01,enable,,M7_01: min metal7 width = M7_01
+DVE,M7_02,enable,,M7_02: min metal7 space = M7_02
+DVE,M7_21,enable,,M7_21: max metal7 width = M7_21
+DVE,M7_22,enable,,M7_22: min metal7 hole area [sq um] = M7_22
+DVE,M7_23,enable,,M7_23: min metal7 seg. len. when adj at corner = M7_23
+DVE,M7_24,enable,,M7_24: min lvl_metal7 length/extent = M7_24
+DVE,M7_41/M7_43,enable,,M7_41/M7_43: min svia6 enclosure by metal7 = M7_41 orthogonal M7_43
+DVE,M7_51/M7_52,enable,,M7_51/M7_52: min rvia6 enclosure by metal7 = M7_51 orthogonal M7_52
+DVE,M8_01,enable,,M8_01: min metal8 width = M8_01
+DVE,M8_02,enable,,M8_02: min metal8 space = M8_02
+DVE,M8_21,enable,,M8_21: max metal8 width = M8_21
+DVE,M8_22,enable,,M8_22: min metal8 hole area [sq um] = M8_22
+DVE,M8_23,enable,,M8_23: min metal8 seg. len. when adj at corner = M8_23
+DVE,M8_24,enable,,M8_24: min lvl_metal8 length/extent = M8_24
+DVE,M8_41/M8_43,enable,,M8_41/M8_43: min svia7 enclosure by metal8 = M8_41 orthogonal M8_43
+DVE,M8_51/M8_52,enable,,M8_51/M8_52: min rvia7 enclosure by metal8 = M8_51 orthogonal M8_52
+DVE,M9_01,enable,,M9_01: min reg_metal9 width = M9_01
+DVE,M9_02,enable,,M9_02: min metal9 space = M9_02
+DVE,M9_03,enable,,M9_03: max metal9 space = M9_03
+DVE,M9_12/M9_13/M9_14,enable,,M9_12/M9_13/M9_14: Hien says this is a very bad via9
+DVE,M9_21,enable,,M9_21: max metal9 width = M9_21
+DVE,M9_22,enable,,M9_22: min metal9 hole area [sq um] = M9_22
+DVE,M9_23,enable,,M9_23: min metal9 seg. len. when adj at corner = M9_23
+DVE,M9_25,enable,,M9_25: min metal9 area [sq um] = M9_25
+DVE,M9_51/M9_52,enable,,M9_51/M9_52: min rvia8 enclosure by metal9 = M9_51 orthogonal M9_52
+DVE,met1frame,enable,,met1frame: layer met1frame not allowed in design data
+DVE,met2frame,enable,,met2frame: layer met2frame not allowed in design data
+DVE,met3frame,enable,,met3frame: layer met3frame not allowed in design data
+DVE,met4frame,enable,,met4frame: layer met4frame not allowed in design data
+DVE,met5frame,enable,,met5frame: layer met5frame not allowed in design data
+DVE,met6frame,enable,,met6frame: layer met6frame not allowed in design data
+DVE,met7frame,enable,,met7frame: layer met7frame not allowed in design data
+DVE,met8frame,enable,,met8frame: layer met8frame not allowed in design data
+DVE,met9frame,enable,,met9frame: layer met9frame not allowed in design data
+DVE,metal1dnp,enable,,metal1dnp: layer metal1dnp not allowed in design data
+DVE,metal2dnp,enable,,metal2dnp: layer metal2dnp not allowed in design data
+DVE,metal3dnp,enable,,metal3dnp: layer metal3dnp not allowed in design data
+DVE,metal4dnp,enable,,metal4dnp: layer metal4dnp not allowed in design data
+DVE,metal5dnp,enable,,metal5dnp: layer metal5dnp not allowed in design data
+DVE,metal6dnp,enable,,metal6dnp: layer metal6dnp not allowed in design data
+DVE,metal7dnp,enable,,metal7dnp: layer metal7dnp not allowed in design data
+DVE,metal8dnp,enable,,metal8dnp: layer metal8dnp not allowed in design data
+DVE,metal9dnp,enable,,metal9dnp: layer metal9dnp not allowed in design data
+DVE,nblockframe,enable,,nblockframe: layer nblockframe not allowed in design data
+DVE,ndiffdnp,enable,,ndiffdnp: layer ndiffdnp not allowed in design data
+DVE,noprot,enable,,noprot: layer noprot not allowed in design data
+DVE,NW_01,enable,,"NW_01: min NWL space to N+ active diff, gate-dir = NW_01"
+DVE,NW_02,enable,,"NW_02: min NWL space to N+ active diff, non-gate-dir = NW_02"
+DVE,NW_03,enable,,"NW_03: min NWL enclosure of P+ active diff, gate-dir = NW_03"
+DVE,NW_04,enable,,"NW_04: min NWL enclosure of P+ active diff, non-gate-dir = NW_04"
+DVE,NW_05,enable,,"NW_05: min NWL enclosure of Ntap diff (well tap), gate-dir = NW_05"
+DVE,NW_06,enable,,"NW_06: min NWL enclosure of Ntap diff (well tap), non-gate-dir = NW_06"
+DVE,NW_07,enable,,"NW_07: min NWL space to Ptap diff (sub tap), gate-dir = NW_07"
+DVE,NW_08,enable,,"NW_08: min NWL space to Ptap diff (sub tap), non-gate-dir = NW_08"
+DVE,NW_11,enable,,"NW_11: min NWL width, gate-dir = NW_11"
+DVE,NW_12,enable,,"NW_12: min NWL width, non-gate-dir = NW_12"
+DVE,NW_13,enable,,"NW_13: min NWL space (isolated or to self), gate-dir = NW_13"
+DVE,NW_14,enable,,"NW_14: min NWL space (isolated or to self), non-gate-dir = NW_14"
+DVE,NW_15,enable,,NW_15: min NWL corner-to-corner width = NW_15
+DVE,NW_16,enable,,NW_16: min NWL corner-to-corner space (isolated or to self) = NW_16
+DVE,NW_17,enable,,NW_17: min required NWL area (sq um) = NW_17
+DVE,NW_18,enable,,NW_18: min required NWL hole area (sq um) = NW_18
+DVE,NW_21,enable,,NW_21: min NWL space to N+ active diff in I/Os = NW_21
+DVE,NW_22,enable,,NW_22: min NWL enclosure of P+ active diff in I/Os = NW_22
+DVE,NW_23,enable,,NW_23: min NWL convex corner enclosure of P+ diff corner = NW_23
+DVE,NW_24,enable,,NW_24: min NWL concave corner space to N+ diff corner = NW_24
+DVE,NW_25/NW_26,enable,,NW_25/NW_26: min NWL x- or y-dir enc/spc to n+/p+ taps near short NWL jog <= 0.23 = NW_25 / NW_26
+DVE,NW_27,enable,,NW_27: min tap dist. to NWL edge when facing opp-type spaced at < 0.38um from NWL edge = NW_27
+DVE,NW_28,enable,,NW_28: max dist from P+ active w/ gate in well to a well tap = NW_28
+DVE,NW_29,enable,,NW_29: max dist from N+ active w/ gate to sub tap = NW_29
+DVE,NW_31,enable,,NW_31: min NWL seg. len. when both adj. at corner = NW_31
+DVE,NW_32,enable,,NW_32: max allowed open/unfilled NWL area of >= 7um width (sq um) = NW_32
+DVE,nwelldnp,enable,,nwelldnp: layer nwelldnp not allowed in design data
+DVE,nwellesddnp,enable,,nwellesddnp: layer nwellesddnp not allowed in design data
+DVE,nwellframe,enable,,nwellframe: layer nwellframe not allowed in design data
+DVE,padframe,enable,,padframe: layer padframe not allowed in design data
+DVE,PC_00,enable,,PC_00: only rectangular polycon shapes are allowed
+DVE,PC_01,enable,,PC_01: only polycon width = PC_01
+DVE,PC_02,enable,,PC_02: min polycon length = PC_02
+DVE,PC_03,enable,,PC_03: min polycon side-to-side space = PC_03
+DVE,PC_04,enable,,PC_04: min polycon end-to-end space = PC_04
+DVE,PC_05,enable,,PC_05: min polycon corner-to-corner space = PC_05
+DVE,PC_11,enable,,PC_11: min polycon_D_nbc side enclosure by poly_nbc end = PC_11
+DVE,PC_12,enable,,PC_12: min polycon side space to poly end = PC_12
+DVE,PC_13,enable,,PC_13: min polycon_D_nbc end extent beyond poly_nbc side = PC_13
+DVE,PC_14,enable,,PC_14: min polycon end space to poly side = PC_14
+DVE,PC_15,enable,,PC_15: min polycon side space to gated diffusion edge = PC_15
+DVE,PC_16,enable,,PC_16: min polycon end space to diffusion = PC_16
+DVE,PC_21,enable,,PC_21: min polycon side space to diffcon end = PC_21
+DVE,PC_22,enable,,"PC_22: min polycon overlap of diffcon, gate-direction = PC_22"
+DVE,PC_23,enable,,"PC_23: min polycon overlap of diffcon, non-gate-direction = PC_23"
+DVE,pdiffdnp,enable,,pdiffdnp: layer pdiffdnp not allowed in design data
+DVE,pinch,enable,,pinch: pinched nwell resistor has no model in process file
+DVE,PL_00,enable,,PL_00: only rectangular poly shapes are allowed
+DVE,PL_01,enable,,PL_01: only poly width = PL_01
+DVE,PL_02,enable,,PL_02: only poly pitch = PL_02
+DVE,PL_03,enable,,PL_03: min poly length = PL_03
+DVE,PL_04,enable,,PL_04: poly end-to-end < PL_04
+DVE,PL_04/PL_05,disable,Fill related error; focus should be on fillable,PL_04/PL_05: poly end-to end > PL_04 and < PL_05
+DVE,PL_06,disable,Fill related error; focus should be on fillable,PL_06: poly end-to-end > PL_06
+DVE,PL_11,enable,,PL_11: min poly endcap = PL_11
+DVE,PL_12/AN_12,enable,,PL_12/AN_12: All gate areas + endcaps require full poly shielding
+DVE,PL_12/BC_22,enable,,PL_12/BC_22: All gate areas + endcaps require full poly shielding
+DVE,PL_12/PL_13,disable,Fill related error; focus should be on fillable,PL_12/PL_13: All gate areas + endcaps require full poly shielding
+DVE,PL_14/AN_13,enable,,PL_14/AN_13: All tap + AN_13 extension require full poly shielding
+DVE,PL_14/BC_26,enable,,PL_14/BC_26: All tap require full poly shielding
+DVE,PL_14/PL_15,enable,,PL_14/PL_15: All tap require full poly shielding
+DVE,PL_16,disable,Fill related error; focus should be on fillable,PL_16: min required offset bet adj non-aligned poly eol having same eol dir = PL_16
+DVE,PL_21/gt,enable,,PL_21/gt: poly space to transistor diffusion > PL_21
+DVE,PL_21/lt,enable,,PL_21/lt: poly space to transistor diffusion < PL_21
+DVE,PL_22/gt,enable,,PL_22/gt: dummy poly space to tap diffusion > PL_22
+DVE,PL_22/lt,enable,,PL_22/lt: dummy poly space to tap diffusion < PL_22
+DVE,PL_23,enable,,PL_23: tap cannot be adjacent to interconnect poly
+DVE,PL_24,enable,,PL_24: min poly side space to NWL edge = PL_24
+DVE,PL_27,enable,,PL_27: dummy poly cannot be adjacent to both types of tap diff simultaneously
+DVE,PL_31,enable,,PL_31: min n+ poly gate/sd edge to parallel NWL = PL_31
+DVE,PL_32,enable,,PL_32: min p+ poly gate/sd edge to parallel NWL = PL_32
+DVE,PL_61,disable,Fill related error; focus should be on fillable,PL_61: min overlap adj SR gate dir = PL_61
+DVE,PL_62,disable,Fill related error; focus should be on fillable,PL_62: any short SR adj to long SR must be adj to another SR
+DVE,PL_63,disable,Fill related error; focus should be on fillable,PL_63: min separation between any non-adj. SR = PL_63
+DVE,PL_92,enable,,PL_92: Gate must be horizontal at full chip DRC
+DVE,PL_99,enable,,PL_99: min required altleidll layer enclosure of active gate = PL_99
+DVE,PL_float_altleidll,enable,,PL_float_altleidll: floating altleidll
+DVE,plp0ph,enable,,plp0ph: layer plp0ph not allowed in design data
+DVE,plp180ph,enable,,plp180ph: layer plp180ph not allowed in design data
+DVE,pltafterprot,enable,,pltafterprot: layer pltafterprot not allowed in design data
+DVE,poly1frame,enable,,poly1frame: layer poly1frame not allowed in design data
+DVE,polycondnp,enable,,polycondnp: layer polycondnp not allowed in design data
+DVE,polyconframe,enable,,polyconframe: layer polyconframe not allowed in design data
+DVE,polydnp,enable,,polydnp: layer polydnp not allowed in design data
+DVE,ptd1reservedframe,enable,,ptd1reservedframe: layer ptd1reservedframe not allowed in design data
+DVE,scratch,enable,,scratch: layer scratch not allowed in design data
+DVE,SM_00,enable,,SM_00: No layouts are allowed within the poly_180pitchID layer except bit-cells and template-cells
+DVE,SM_01,enable,,SM_01: only poly width = SM_01
+DVE,SM_02,enable,,SM_02: only poly pitch = SM_02
+DVE,sram_id,enable,,sram_id: layer sram_id not allowed in design data
+DVE,UL_01,enable,,UL_01: min tgoxid width = UL_01
+DVE,UL_03,enable,,UL_03: min tgoxid space = UL_03
+DVE,UL_05,enable,,UL_05: min tgoxid area [sq um] = UL_05
+DVE,UL_06,enable,,UL_06: min tgoxid hole area [sq um] = UL_06
+DVE,UL_07,enable,,UL_07: min tgoxid seg. len. when adj at corner = UL_07
+DVE,UL_11,enable,,"UL_11: tgoxid encl of tdiff, in gate dir = UL_11"
+DVE,UL_12,enable,,"UL_12: tgoxid encl of tdiff, orthog gate dir = UL_12"
+DVE,UL_13,enable,,"UL_13: tgoxid space to tdiff, in gate dir = UL_13"
+DVE,UL_14,enable,,"UL_14: tgoxid space to tdiff, orthog gate dir = UL_14"
+DVE,UL_21,enable,,UL_21: min offset between non-coincident nwell and tgoxid = UL_21
+DVE,V0_01/V0_31/V0_32,enable,,V0_01/V0_31/V0_32: only via0 size = V0_01 x V0_01 or V0_31 x V0_32
+DVE,V0_03,enable,,V0_03: svia0 to svia0 center-to-center separation
+DVE,V0_11,enable,,V0_11: min via0 enclosure by diffcon end = V0_11
+DVE,V0_11/V0_13,enable,,V0_11/V0_13: via0 must be enclose by diffcon or polycon
+DVE,V0_12,enable,,V0_12: only via0 extent beyond diffcon side = V0_12
+DVE,V0_13,enable,,V0_13: only via0 enclosure by polycon side = V0_13
+DVE,V0_14,enable,,V0_14: max via0 extent beyond polycon end = V0_14
+DVE,V0_15,enable,,V0_15: min V0 space to polycon end = V0_15
+DVE,V0_33,enable,,V0_33: min rvia0 long edge facing space to via0 = V0_33
+DVE,V0_34,enable,,V0_34: min rvia0 short edge facing space to svia0 = V0_34
+DVE,V0_35,enable,,V0_35: min rvia0 short edge facing space to rvia0 short edge = V0_35
+DVE,V0_39,enable,,V0_39: min rvia0 corner-to-corner space to via0 = V0_39
+DVE,V1_01/V1_31/V1_32,enable,,V1_01/V1_31/V1_32: only via1 size = V1_01 x V1_01 or V1_31 x V1_32
+DVE,V1_03,enable,,V1_03: svia1 to svia1 center-to-center separation
+DVE,V1_12/V1_11,enable,,V1_12/V1_11: min svia1_nbc enclosure by metal1 = V1_12 orthogonal V1_11
+DVE,V1_21,enable,,V1_21: svia1 to svia0 center-to-center separation
+DVE,V1_22,enable,,V1_22: min svia1 facing edge space to rvia0 = V1_22
+DVE,V1_23,enable,,V1_23: min svia1_nbc corner-to-corner space to rvia0_nbc = V1_23
+DVE,V1_33,enable,,V1_33: min rvia1 long edge facing space to via1 = V1_33
+DVE,V1_34,enable,,V1_34: min rvia1 short edge facing space to svia1 = V1_34
+DVE,V1_35,enable,,V1_35: min rvia1 short edge facing space to rvia1 short edge = V1_35
+DVE,V1_39,enable,,V1_39: min rvia1 corner-to-corner space to via1 = V1_39
+DVE,V1_41,enable,,V1_41: min rvia1 facing edge space to via0 = V1_41
+DVE,V1_43,enable,,V1_43: min rvia1 corner-to-corner space to via0 = V1_43
+DVE,V1_52/V1_51,enable,,V1_52/V1_51: min rvia1 enclosure by metal1 = V1_52 orthogonal V1_51
+DVE,V2_01/V2_31/V2_32,enable,,V2_01/V2_31/V2_32: only via2 size = V2_01 x V2_01 or V2_31 x V2_32
+DVE,V2_03,enable,,V2_03: svia2 to svia2 center-to-center separation
+DVE,V2_11/V2_12,enable,,V2_11/V2_12: min svia2 enclosure by metal2 = V2_11 orthogonal V2_12
+DVE,V2_21,enable,,V2_21: svia2 to svia1 center-to-center separation
+DVE,V2_22,enable,,V2_22: min svia2 facing edge space to rvia1 = V2_22
+DVE,V2_23,enable,,V2_23: min svia2 corner-to-corner space to rvia1 = V2_23
+DVE,V2_33,enable,,V2_33: min rvia2 long edge facing space to via2 = V2_33
+DVE,V2_34,enable,,V2_34: min rvia2 short edge facing space to svia2 = V2_34
+DVE,V2_35,enable,,V2_35: min rvia2 short edge facing space to rvia2 short edge = V2_35
+DVE,V2_39,enable,,V2_39: min rvia2 corner-to-corner space to via2 = V2_39
+DVE,V2_41,enable,,V2_41: min rvia2 facing edge space to via1 = V2_41
+DVE,V2_43,enable,,V2_43: min rvia2 corner-to-corner space to via1 = V2_43
+DVE,V2_51/V2_52,enable,,V2_51/V2_52: min rvia2 enclosure by metal2 = V2_51 orthogonal V2_52
+DVE,V3_01/V3_31/V3_32,enable,,V3_01/V3_31/V3_32: only via3 size = V3_01 x V3_01 or V3_31 x V3_32
+DVE,V3_02,enable,,V3_02: svia3 to svia3 center-to-center separation
+DVE,V3_12/V3_11,enable,,V3_12/V3_11: min svia3 enclosure by metal3 = V3_12 orthogonal V3_11
+DVE,V3_21,enable,,V3_21: svia3 to svia2 center-to-center separation
+DVE,V3_22,enable,,V3_22: min svia3 facing edge space to rvia2 = V3_22
+DVE,V3_23,enable,,V3_23: min svia3 corner-to-corner space to rvia2 = V3_23
+DVE,V3_33,enable,,V3_33: min rvia3 long edge facing space to svia3 = V3_33
+DVE,V3_34,enable,,V3_34: min rvia3 short edge facing space to svia3 = V3_34
+DVE,V3_35,enable,,V3_35: min rvia3 corner-to-corner space to svia3 = V3_35
+DVE,V3_36,enable,,V3_36: min rvia3 long edge facing space to rvia3 long edge = V3_36
+DVE,V3_36/only,enable,,V3_36/only: min rvia3 long edge facing space to rvia3 long edge = V3_36
+DVE,V3_37,enable,,V3_37: min rvia3 short edge facing space to rvia3 = V3_37
+DVE,V3_38,enable,,V3_38: min rvia3 corner-to-corner space = V3_38
+DVE,V3_39,enable,,V3_39: min red. rvia3 long edge facing space to rvia3 long edge = V3_39
+DVE,V3_39/only,enable,,V3_39/only: min red. rvia3 long edge facing space to rvia3 long edge = V3_39
+DVE,V3_39/triplet,enable,,V3_39/triplet: redundant vias are allowed in pair only
+DVE,V3_42,enable,,V3_42: min rvia3 facing edge space to via2 = V3_42
+DVE,V3_43,enable,,V3_43: min rvia3 corner-to-corner space to via2 = V3_43
+DVE,V3_52/V3_51,enable,,V3_52/V3_51: min rvia3 enclosure by metal3 = V3_52 orthogonal V3_51
+DVE,V4_01/V4_31/V4_32,enable,,V4_01/V4_31/V4_32: only via4 size = V4_01 x V4_01 or V4_31 x V4_32
+DVE,V4_02,enable,,V4_02: svia4 to svia4 center-to-center separation
+DVE,V4_12/V4_11,enable,,V4_12/V4_11: min svia4 enclosure by metal4 = V4_12 orthogonal V4_11
+DVE,V4_21,enable,,V4_21: svia4 to svia3 center-to-center separation
+DVE,V4_22,enable,,V4_22: min svia4 facing edge space to rvia3 = V4_22
+DVE,V4_23,enable,,V4_23: min svia4 corner-to-corner space to rvia3 = V4_23
+DVE,V4_33,enable,,V4_33: min rvia4 long edge facing space to svia4 = V4_33
+DVE,V4_34,enable,,V4_34: min rvia4 short edge facing space to svia4 = V4_34
+DVE,V4_35,enable,,V4_35: min rvia4 corner-to-corner space to svia4 = V4_35
+DVE,V4_36,enable,,V4_36: min rvia4 long edge facing space to rvia4 long edge = V4_36
+DVE,V4_36/only,enable,,V4_36/only: min rvia4 long edge facing space to rvia4 long edge = V4_36
+DVE,V4_37,enable,,V4_37: min rvia4 short edge facing space to rvia4 = V4_37
+DVE,V4_38,enable,,V4_38: min rvia4 corner-to-corner space = V4_38
+DVE,V4_39,enable,,V4_39: min red. rvia4 long edge facing space to rvia4 long edge = V4_39
+DVE,V4_39/only,enable,,V4_39/only: min red. rvia4 long edge facing space to rvia4 long edge = V4_39
+DVE,V4_39/triplet,enable,,V4_39/triplet: redundant vias are allowed in pair only
+DVE,V4_42,enable,,V4_42: min rvia4 facing edge space to via3 = V4_42
+DVE,V4_43,enable,,V4_43: min rvia4 corner-to-corner space to via3 = V4_43
+DVE,V4_52/V4_51,enable,,V4_52/V4_51: min rvia4 enclosure by metal4 = V4_52 orthogonal V4_51
+DVE,V5_01/V5_31/V5_32,enable,,V5_01/V5_31/V5_32: only via5 size = V5_01 x V5_01 or V5_31 x V5_32
+DVE,V5_02,enable,,V5_02: svia5 to svia5 center-to-center separation
+DVE,V5_12/V5_11,enable,,V5_12/V5_11: min svia5 enclosure by metal5 = V5_12 orthogonal V5_11
+DVE,V5_21,enable,,V5_21: svia5 to svia4 center-to-center separation
+DVE,V5_22,enable,,V5_22: min svia5 facing edge space to rvia4 = V5_22
+DVE,V5_23,enable,,V5_23: min svia5 corner-to-corner space to rvia4 = V5_23
+DVE,V5_33,enable,,V5_33: min rvia5 long edge facing space to svia5 = V5_33
+DVE,V5_34,enable,,V5_34: min rvia5 short edge facing space to svia5 = V5_34
+DVE,V5_35,enable,,V5_35: min rvia5 corner-to-corner space to svia5 = V5_35
+DVE,V5_36,enable,,V5_36: min rvia5 long edge facing space to rvia5 long edge = V5_36
+DVE,V5_36/only,enable,,V5_36/only: min rvia5 long edge facing space to rvia5 long edge = V5_36
+DVE,V5_37,enable,,V5_37: min rvia5 short edge facing space to rvia5 = V5_37
+DVE,V5_38,enable,,V5_38: min rvia5 corner-to-corner space = V5_38
+DVE,V5_39,enable,,V5_39: min red. rvia5 long edge facing space to rvia5 long edge = V5_39
+DVE,V5_39/only,enable,,V5_39/only: min red. rvia5 long edge facing space to rvia5 long edge = V5_39
+DVE,V5_39/triplet,enable,,V5_39/triplet: redundant vias are allowed in pair only
+DVE,V5_42,enable,,V5_42: min rvia5 facing edge space to via4 = V5_42
+DVE,V5_43,enable,,V5_43: min rvia5 corner-to-corner space to via4 = V5_43
+DVE,V5_52/V5_51,enable,,V5_52/V5_51: min rvia5 enclosure by metal5 = V5_52 orthogonal V5_51
+DVE,V6_01/V6_31/V6_32,enable,,V6_01/V6_31/V6_32: only via6 size = V6_01 x V6_01 or V6_31 x V6_32
+DVE,V6_02,enable,,V6_02: svia6 to svia6 center-to-center separation
+DVE,V6_12/V6_11,enable,,V6_12/V6_11: min svia6 enclosure by metal6 = V6_12 orthogonal V6_11
+DVE,V6_21,enable,,V6_21: svia6 to svia5 center-to-center separation
+DVE,V6_22,enable,,V6_22: min svia6 facing edge space to rvia5 = V6_22
+DVE,V6_23,enable,,V6_23: min svia6 corner-to-corner space to rvia5 = V6_23
+DVE,V6_33,enable,,V6_33: min rvia6 long edge facing space to svia6 = V6_33
+DVE,V6_34,enable,,V6_34: min rvia6 short edge facing space to svia6 = V6_34
+DVE,V6_35,enable,,V6_35: min rvia6 corner-to-corner space to svia6 = V6_35
+DVE,V6_36,enable,,V6_36: min rvia6 long edge facing space to rvia6 long edge = V6_36
+DVE,V6_36/only,enable,,V6_36/only: min rvia6 long edge facing space to rvia6 long edge = V6_36
+DVE,V6_37,enable,,V6_37: min rvia6 short edge facing space to rvia6 = V6_37
+DVE,V6_38,enable,,V6_38: min rvia6 corner-to-corner space = V6_38
+DVE,V6_39,enable,,V6_39: min red. rvia6 long edge facing space to rvia6 long edge = V6_39
+DVE,V6_39/only,enable,,V6_39/only: min red. rvia6 long edge facing space to rvia6 long edge = V6_39
+DVE,V6_39/triplet,enable,,V6_39/triplet: redundant vias are allowed in pair only
+DVE,V6_42,enable,,V6_42: min rvia6 facing edge space to via5 = V6_42
+DVE,V6_43,enable,,V6_43: min rvia6 corner-to-corner space to via5 = V6_43
+DVE,V6_52/V6_51,enable,,V6_52/V6_51: min rvia6 enclosure by metal6 = V6_52 orthogonal V6_51
+DVE,V7_01/V7_31/V7_32,enable,,V7_01/V7_31/V7_32: only via7 size = V7_01 x V7_01 or V7_31 x V7_32
+DVE,V7_02,enable,,V7_02: svia7 to svia7 center-to-center separation
+DVE,V7_12/V7_11,enable,,V7_12/V7_11: min svia7 enclosure by metal7 = V7_12 orthogonal V7_11
+DVE,V7_21,enable,,V7_21: svia7 to svia6 center-to-center separation
+DVE,V7_22,enable,,V7_22: min svia7 facing edge space to rvia6 = V7_22
+DVE,V7_23,enable,,V7_23: min svia7 corner-to-corner space to rvia6 = V7_23
+DVE,V7_30,enable,,V7_30: min red. rvia7 short edge facing space to rvia7 short edge = V7_30
+DVE,V7_33,enable,,V7_33: min rvia7 long edge facing space to svia7 = V7_33
+DVE,V7_34,enable,,V7_34: min rvia7 short edge facing space to svia7 = V7_34
+DVE,V7_35,enable,,V7_35: min rvia7 corner-to-corner space to svia7 = V7_35
+DVE,V7_36,enable,,V7_36: min rvia7 long edge facing space to rvia7 long edge = V7_36
+DVE,V7_36/only,enable,,V7_36/only: min rvia7 long edge facing space to rvia7 long edge = V7_36
+DVE,V7_37,enable,,V7_37: min rvia7 short edge facing space to rvia7 short edge = V7_37
+DVE,V7_37,enable,,V7_37: min rvia7 short edge facing space to rvia7 long edge = V7_37
+DVE,V7_38,enable,,V7_38: min rvia7 corner-to-corner space = V7_38
+DVE,V7_39,enable,,V7_39: min red. rvia7 long edge facing space to rvia7 long edge = V7_39
+DVE,V7_39/only,enable,,V7_39/only: min red. rvia7 long edge facing space to rvia7 long edge = V7_39
+DVE,V7_39/triplet,enable,,V7_39/triplet: redundant vias are allowed in pair only
+DVE,V7_42,enable,,V7_42: min rvia7 facing edge space to via6 = V7_42
+DVE,V7_43,enable,,V7_43: min rvia7 corner-to-corner space to via6 = V7_43
+DVE,V7_52/V7_51,enable,,V7_52/V7_51: min rvia7 enclosure by metal7 = V7_52 orthogonal V7_51
+DVE,V8_31/V8_32,enable,,V8_31/V8_32: only via8 size = V8_31 x V8_32
+DVE,V8_36,enable,,V8_36: min rvia8 space = V8_36
+DVE,V8_42,enable,,V8_42: min rvia8 facing edge space to via7 = V8_42
+DVE,V8_43,enable,,V8_43: min rvia8 corner-to-corner space to via7 = V8_43
+DVE,V8_52/V8_51,enable,,V8_52/V8_51: min rvia8 enclosure by metal8 = V8_52 orthogonal V8_51
+DVE,V9_31/V9_32,enable,,V9_31/V9_32: only via9 size = V9_31 x V9_32
+DVE,V9_33,enable,,V9_33: min rvia9 space = V9_33
+DVE,V9_52/V9_51,enable,,V9_52/V9_51: min rvia9 enclosure by metal9 = V9_52 orthogonal V9_51
+DVE,V9_61,enable,,"V9_61: only 1 via9 allowed per bump, and each via9 must be covered by a bump"
+DVE,V9_62,enable,,V9_62: Only distance from center of via9 to center of bump = V9_62
+DVE,VD_21,enable,,VD_21: area of via0 array clusters > VD_21
+DVE,VD_22,enable,,VD_22: area of via1 array clusters > VD_22
+DVE,VD_23,enable,,VD_23: area of via2 array clusters > VD_23
+DVE,VD_24,enable,,VD_24: area of via3 array clusters > VD_24
+DVE,VD_25,enable,,VD_25: area of via4 array clusters > VD_25
+DVE,VD_26,enable,,VD_26: area of via5 array clusters > VD_26
+DVE,VD_27,enable,,VD_27: area of via6 array clusters > VD_27
+DVE,VD_28,enable,,VD_28: area of via7 array clusters > VD_28
+DVE,VD_29,enable,,VD_29: area of via8 array clusters > VD_29
+DVE,VD_51,enable,,VD_51: merged med density via0 area > VD_51
+DVE,VD_52,enable,,VD_52: merged med density via1 area > VD_52
+DVE,VD_53,enable,,VD_53: merged med density via2 area > VD_53
+DVE,VD_54,enable,,VD_54: merged med density via3 area > VD_54
+DVE,VD_55,enable,,VD_55: merged med density via4 area > VD_55
+DVE,VD_56,enable,,VD_56: merged med density via5 area > VD_56
+DVE,VD_57,enable,,VD_57: merged med density via6 area > VD_57
+DVE,VD_58,enable,,VD_58: merged med density via7 area > VD_58
+DVE,VD_59,enable,,VD_59: merged med density via8 area > VD_59
+DVE,via0dnp,enable,,via0dnp: layer via0dnp not allowed in design data
+DVE,via0frame,enable,,via0frame: layer via0frame not allowed in design data
+DVE,via1dnp,enable,,via1dnp: layer via1dnp not allowed in design data
+DVE,via1frame,enable,,via1frame: layer via1frame not allowed in design data
+DVE,via2dnp,enable,,via2dnp: layer via2dnp not allowed in design data
+DVE,via2frame,enable,,via2frame: layer via2frame not allowed in design data
+DVE,via3dnp,enable,,via3dnp: layer via3dnp not allowed in design data
+DVE,via3frame,enable,,via3frame: layer via3frame not allowed in design data
+DVE,via4dnp,enable,,via4dnp: layer via4dnp not allowed in design data
+DVE,via4frame,enable,,via4frame: layer via4frame not allowed in design data
+DVE,via5dnp,enable,,via5dnp: layer via5dnp not allowed in design data
+DVE,via5frame,enable,,via5frame: layer via5frame not allowed in design data
+DVE,via6dnp,enable,,via6dnp: layer via6dnp not allowed in design data
+DVE,via6frame,enable,,via6frame: layer via6frame not allowed in design data
+DVE,via7dnp,enable,,via7dnp: layer via7dnp not allowed in design data
+DVE,via7frame,enable,,via7frame: layer via7frame not allowed in design data
+DVE,via8dnp,enable,,via8dnp: layer via8dnp not allowed in design data
+DVE,via8frame,enable,,via8frame: layer via8frame not allowed in design data
+METALFILLABLE,M1_BG_NR_0,enable,,"NRD Metal1 - [0.120-0.175,0.120-0.180] Space - [0.125-0.355]"
+METALFILLABLE,M1_BG_NR_1,enable,,"NRD Metal1 - [0.120-0.175,0.120-0.180] Space - [0.425-0.595]"
+METALFILLABLE,M1_BG_NR_2,enable,,"NRD Metal1 - [0.180-0.180,0.180-0.180] Space - [0.265-0.355]"
+METALFILLABLE,M1_BG_PR_0,enable,,"PRD Metal1 - [0.080-0.090,0.080-0.090] Space - [0.085-0.235]"
+METALFILLABLE,M1_BG_PR_1,enable,,"PRD Metal1 - [0.080-0.090,0.080-0.090] Space - [0.255-0.275]"
+METALFILLABLE,M1_BG_PR_2,enable,,"PRD Metal1 - [0.080-0.090,0.080-0.090] Space - [0.325-0.395]"
+METALFILLABLE,M1_BG_PR_3,enable,,"PRD Metal1 - [0.080-0.090,0.080-0.090] Space - [0.425-0.435]"
+METALFILLABLE,M1_BG_PR_4,enable,,"PRD Metal1 - [0.080-0.090,0.120-0.160] Space - [0.085-0.235]"
+METALFILLABLE,M1_BG_PR_5,enable,,"PRD Metal1 - [0.080-0.090,0.120-0.160] Space - [0.255-0.275]"
+METALFILLABLE,M1_BG_PR_6,enable,,"PRD Metal1 - [0.120-0.160,0.120-0.160] Space - [0.255-0.275]"
+METALFILLABLE,M1_CONT_PR,enable,,PRD M1 is not a continuous 1/2 DR from boundary.
+METALFILLABLE,M1_EE_NR_0,enable,,"NRD Metal1 - [0.120-0.180,0.120-0.180] Space - [0.240-0.360]"
+METALFILLABLE,M1_EE_PR_0,enable,,"PRD Metal1 - [0.080-0.090,0.080-0.090] Space - [0.120-0.440]"
+METALFILLABLE,M1_EE_PR_1,enable,,"PRD Metal1 - [0.080-0.090,0.120-0.160] Space - [0.120-0.540]"
+METALFILLABLE,M1_EE_PR_2,enable,,"PRD Metal1 - [0.120-0.160,0.120-0.160] Space - [0.120-0.540]"
+METALFILLABLE,M1_EOL_AON_PR,enable,,PRD M1 end of line violates all-or-nothing region.
+METALFILLABLE,M1_EOL_HALF_PR,enable,,PRD M1 end of line violates 1/2 DR region.
+METALFILLABLE,M1_EOL_NR,enable,,NRD M1 end of line is not half min-DR from boundary.
+METALFILLABLE,M1_HDR_NR,enable,,NRD M1 is not half min-DR from boundary.
+METALFILLABLE,M1_HDR_PR,enable,,PRD M1 is not half min-DR from boundary.
+METALFILLABLE,M1_ogd,enable,Dummy code; no error reported,M1 OGD routing
+METALFILLABLE,M1_pgd,enable,Dummy code; no error reported,M1 PGD routing
+METALFILLABLE,M1_testing,enable,Dummy code; no error reported,M1 testing
+METALFILLABLE,M1_wide_ogd,enable,Dummy code; no error reported,M1 Wide OGD routing
+METALFILLABLE,M1_wide_pgd,enable,Dummy code; no error reported,M1 Wide PGD routing
+METALFILLABLE,M2_BG_NR_0,enable,,"NRD Metal2 - [0.120-0.175,0.120-0.180] Space - [0.125-0.355]"
+METALFILLABLE,M2_BG_NR_1,enable,,"NRD Metal2 - [0.120-0.175,0.120-0.180] Space - [0.425-0.595]"
+METALFILLABLE,M2_BG_NR_2,enable,,"NRD Metal2 - [0.180-0.180,0.180-0.180] Space - [0.265-0.355]"
+METALFILLABLE,M2_BG_PR_0,enable,,"PRD Metal2 - [0.080-0.090,0.080-0.090] Space - [0.085-0.235]"
+METALFILLABLE,M2_BG_PR_1,enable,,"PRD Metal2 - [0.080-0.090,0.080-0.090] Space - [0.255-0.275]"
+METALFILLABLE,M2_BG_PR_2,enable,,"PRD Metal2 - [0.080-0.090,0.080-0.090] Space - [0.325-0.395]"
+METALFILLABLE,M2_BG_PR_3,enable,,"PRD Metal2 - [0.080-0.090,0.080-0.090] Space - [0.425-0.435]"
+METALFILLABLE,M2_BG_PR_4,enable,,"PRD Metal2 - [0.080-0.090,0.120-0.160] Space - [0.085-0.235]"
+METALFILLABLE,M2_BG_PR_5,enable,,"PRD Metal2 - [0.080-0.090,0.120-0.160] Space - [0.255-0.275]"
+METALFILLABLE,M2_BG_PR_6,enable,,"PRD Metal2 - [0.120-0.160,0.120-0.160] Space - [0.255-0.275]"
+METALFILLABLE,M2_CONT_PR,enable,,PRD M2 is not a continuous 1/2 DR from boundary.
+METALFILLABLE,M2_EE_NR_0,enable,,"NRD Metal2 - [0.120-0.180,0.120-0.180] Space - [0.240-0.360]"
+METALFILLABLE,M2_EE_PR_0,enable,,"PRD Metal2 - [0.080-0.090,0.080-0.090] Space - [0.120-0.440]"
+METALFILLABLE,M2_EE_PR_1,enable,,"PRD Metal2 - [0.080-0.090,0.120-0.160] Space - [0.120-0.540]"
+METALFILLABLE,M2_EE_PR_2,enable,,"PRD Metal2 - [0.120-0.160,0.120-0.160] Space - [0.120-0.540]"
+METALFILLABLE,M2_EOL_AON_PR,enable,,PRD M2 end of line violates all-or-nothing region.
+METALFILLABLE,M2_EOL_HALF_PR,enable,,PRD M2 end of line violates 1/2 DR region.
+METALFILLABLE,M2_EOL_NR,enable,,NRD M2 end of line is not half min-DR from boundary.
+METALFILLABLE,M2_HDR_NR,enable,,NRD M2 is not half min-DR from boundary.
+METALFILLABLE,M2_HDR_PR,enable,,PRD M2 is not half min-DR from boundary.
+METALFILLABLE,M2_ogd,enable,Dummy code; no error reported,M2 OGD routing
+METALFILLABLE,M2_pgd,enable,Dummy code; no error reported,M2 PGD routing
+METALFILLABLE,M2_testing,enable,Dummy code; no error reported,M2 testing
+METALFILLABLE,M2_wide_ogd,enable,Dummy code; no error reported,M2 Wide OGD routing
+METALFILLABLE,M2_wide_pgd,enable,Dummy code; no error reported,M2 Wide PGD routing
+METALFILLABLE,M3_BG_NR_0,enable,,"NRD Metal3 - [0.120-0.175,0.120-0.180] Space - [0.125-0.355]"
+METALFILLABLE,M3_BG_NR_1,enable,,"NRD Metal3 - [0.120-0.175,0.120-0.180] Space - [0.425-0.595]"
+METALFILLABLE,M3_BG_NR_2,enable,,"NRD Metal3 - [0.180-0.180,0.180-0.180] Space - [0.265-0.355]"
+METALFILLABLE,M3_BG_PR_0,enable,,"PRD Metal3 - [0.080-0.090,0.080-0.090] Space - [0.085-0.235]"
+METALFILLABLE,M3_BG_PR_1,enable,,"PRD Metal3 - [0.080-0.090,0.080-0.090] Space - [0.255-0.275]"
+METALFILLABLE,M3_BG_PR_2,enable,,"PRD Metal3 - [0.080-0.090,0.080-0.090] Space - [0.325-0.395]"
+METALFILLABLE,M3_BG_PR_3,enable,,"PRD Metal3 - [0.080-0.090,0.080-0.090] Space - [0.425-0.435]"
+METALFILLABLE,M3_BG_PR_4,enable,,"PRD Metal3 - [0.080-0.090,0.120-0.160] Space - [0.085-0.235]"
+METALFILLABLE,M3_BG_PR_5,enable,,"PRD Metal3 - [0.080-0.090,0.120-0.160] Space - [0.255-0.275]"
+METALFILLABLE,M3_BG_PR_6,enable,,"PRD Metal3 - [0.120-0.160,0.120-0.160] Space - [0.255-0.275]"
+METALFILLABLE,M3_CONT_PR,enable,,PRD M3 is not a continuous 1/2 DR from boundary.
+METALFILLABLE,M3_EE_NR_0,enable,,"NRD Metal3 - [0.120-0.180,0.120-0.180] Space - [0.240-0.360]"
+METALFILLABLE,M3_EE_PR_0,enable,,"PRD Metal3 - [0.080-0.090,0.080-0.090] Space - [0.120-0.440]"
+METALFILLABLE,M3_EE_PR_1,enable,,"PRD Metal3 - [0.080-0.090,0.120-0.160] Space - [0.120-0.540]"
+METALFILLABLE,M3_EE_PR_2,enable,,"PRD Metal3 - [0.120-0.160,0.120-0.160] Space - [0.120-0.540]"
+METALFILLABLE,M3_EOL_AON_PR,enable,,PRD M3 end of line violates all-or-nothing region.
+METALFILLABLE,M3_EOL_HALF_PR,enable,,PRD M3 end of line violates 1/2 DR region.
+METALFILLABLE,M3_EOL_NR,enable,,NRD M3 end of line is not half min-DR from boundary.
+METALFILLABLE,M3_HDR_NR,enable,,NRD M3 is not half min-DR from boundary.
+METALFILLABLE,M3_HDR_PR,enable,,PRD M3 is not half min-DR from boundary.
+METALFILLABLE,M3_ogd,enable,Dummy code; no error reported,M3 OGD routing
+METALFILLABLE,M3_pgd,enable,Dummy code; no error reported,M3 PGD routing
+METALFILLABLE,M3_testing,enable,Dummy code; no error reported,M3 testing
+METALFILLABLE,M3_wide_ogd,enable,Dummy code; no error reported,M3 Wide OGD routing
+METALFILLABLE,M3_wide_pgd,enable,Dummy code; no error reported,M3 Wide PGD routing
+METALFILLABLE,X_Off-grid,enable,,Max X boundary not aligned with 480nm pitch.
+METALFILLABLE,X-Y_Off_Axis,enable,,"Cell boundary not centered at 0,0"
+METALFILLABLE,Y_Off-grid,enable,,Max Y boundary not aligned with 480nm pitch.
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,

@@ -1,0 +1,8 @@
+-I- cellstudystat.pl: Script command: cellstudystat.pl 
+-I- cellstudystat.pl: Script start date: (Fri Jan 30 15:13:27 2009)
+-I- cellstudystat.pl: Machine Type: Linux fmci60339 2.6.5-7.287.3.PTF.363939.1-smp #1 SMP Tue Oct 2 07:31:36 UTC 2007 x86_64 x86_64 x86_64 GNU/Linux
+-I- cellstudystat.pl: ***** Stage 1: Read YG* List  *****
+-I- cellstudystat.pl: 8150 YG cells read from file: /usr/users/home2/mroha/cellstudystat/ctl/yg.csv
+-I- cellstudystat.pl: ***** Stage 2: Read SNB leaf usage file  *****
+-I- cellstudystat.pl: ***** Stage 3: Read YG->AI mapping file  *****
+-F- cellstudystat.pl: Could not open file for reading: /usr/users/home2/mroha/cellstudystat/ctl/ivb_yg_ai.map

@@ -1,0 +1,7 @@
+-I- mkfeed.pl: Script command: mkfeed.pl --queue Express_MPG_IALcs -class SUSE_64_32G -qslot 66 --task 2009_09_09_ivb_custom_cells --maxwait 10 --maxjobs 20 --work /nfs/site/disks/fm_fdc_n25005/penryn_area/mroha/ivbsa/2009_09_09_ivb_custom_cells --cmd /nfs/site/proj/mpg/proc/cad/em64t_linux26/uesetup/uesetup -d -pr 1270 -m lay_model -ov /nfs/site/disks/fm_fdc_n25005/penryn_area/mroha/ivbsa -ot LOR2 -n 2009_09_09_ivb_custom_cells -b {3} -p {0} -hp {0} -t parade -cmd "$HOME/ivb/genesys/rungenesys.pl --cell {3} --command ::fmrMig::getLeafCellMetricsFromHier"
+-I- mkfeed.pl: Script start date: (Thu Sep 10 12:56:50 2009)
+-I- mkfeed.pl: Machine Type: Linux fmci60339 2.6.5-7.287.3.PTF.363939.1-smp #1 SMP Tue Oct 2 07:31:36 UTC 2007 x86_64 x86_64 x86_64 GNU/Linux
+-I- mkfeed.pl: To launch feeder job: nbfeeder start --task 2009_09_09_ivb_custom_cells.taskfile --terminate-on-finish --block --work-area /nfs/site/disks/fm_fdc_n25005/penryn_area/mroha/ivbsa/2009_09_09_ivb_custom_cells
+
+-I- mkfeed.pl: Script completion date: (Thu Sep 10 12:56:51 2009)
+-I- mkfeed.pl: mkfeed.pl run complete

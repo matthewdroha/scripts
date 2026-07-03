@@ -1,0 +1,146 @@
+
+===================
+= RDT Status:  syn
+===================
+
+----------------------------------------  ------------  ------------  ------------
+Stage                                       Status         Memory        Run Time
+----------------------------------------  ------------  ------------  ------------
+import_design                              DONE            768KB         00:02:04
+   rdt_start                                 DONE          0KB           00:00:01
+   start_svf_vsdc                            DONE          0KB           00:00:00
+   syn_import_design                         DONE          64KB          00:00:01
+   syn_import_pla_cod                        DONE          0KB           00:00:00
+   syn_import_gate_verilog                   DONE          0KB           00:00:00
+   syn_import_mapped_ddc                     DONE          0KB           00:00:00
+   syn_elab_and_link                         DONE          704KB         00:00:51
+   syn_fdr_rtl_params_to_attributes          DONE          0KB           00:00:00
+   syn_fdr_read_spy_files                    DONE          0KB           00:00:00
+   syn_load_pushdown_connectivity            DONE          0KB           00:00:00
+   syn_enable_register_merging               DONE          0KB           00:00:00
+   extract_rtl_timing_override               DONE          0KB           00:00:00
+   stop_svf_vsdc                             DONE          0KB           00:00:00
+   rdt_create_scenarios                      DONE          0KB           00:00:00
+   rdt_run_checks                            DONE          0KB           00:00:00
+   syn_outputs                               DONE          0KB           00:00:25
+   rdt_done                                  DONE          0KB           00:00:46
+upf                                        DONE            0KB           00:00:04
+   rdt_start                                 DONE          0KB           00:00:01
+   start_svf_vsdc                            DONE          0KB           00:00:00
+   syn_operating_conditions                  DONE          0KB           00:00:00
+   syn_upf                                   DONE          0KB           00:00:03
+   syn_multidie_virtual_units_upf_handling   DONE          0KB           00:00:00
+   stop_svf_vsdc                             DONE          0KB           00:00:00
+   rdt_run_checks                            DONE          0KB           00:00:00
+   syn_outputs                               DONE          0KB           00:00:00
+   rdt_done                                  DONE          0KB           00:00:00
+saif                                       SKIPPED         0KB           00:00:00
+   rdt_start                                 SKIPPED       SKIPPED       SKIPPED
+   start_svf_vsdc                            SKIPPED       SKIPPED       SKIPPED
+   syn_saif                                  SKIPPED       SKIPPED       SKIPPED
+   syn_write_dc_saif                         SKIPPED       SKIPPED       SKIPPED
+   stop_svf_vsdc                             SKIPPED       SKIPPED       SKIPPED
+   rdt_run_checks                            SKIPPED       SKIPPED       SKIPPED
+   syn_outputs                               SKIPPED       SKIPPED       SKIPPED
+   rdt_done                                  SKIPPED       SKIPPED       SKIPPED
+ungroup                                    DONE            0KB           00:00:02
+   rdt_start                                 DONE          0KB           00:00:00
+   start_svf_vsdc                            DONE          0KB           00:00:00
+   syn_ungroup                               DONE          0KB           00:00:01
+   stop_svf_vsdc                             DONE          0KB           00:00:00
+   rdt_run_checks                            DONE          0KB           00:00:00
+   syn_outputs                               DONE          0KB           00:00:00
+   rdt_done                                  DONE          0KB           00:00:01
+floorplan                                  DONE            0KB           00:00:02
+   rdt_start                                 DONE          0KB           00:00:00
+   start_svf_vsdc                            DONE          0KB           00:00:00
+   rdt_change_names                          DONE          0KB           00:00:01
+   syn_floorplan                             DONE          0KB           00:00:00
+   syn_voltage_areas                         DONE          0KB           00:00:01
+   syn_pushdown_cells                        DONE          0KB           00:00:00
+   stop_svf_vsdc                             DONE          0KB           00:00:00
+   rdt_run_checks                            DONE          0KB           00:00:00
+   syn_outputs                               DONE          0KB           00:00:00
+   rdt_done                                  DONE          0KB           00:00:00
+constraints                                DONE            0KB           00:00:44
+   rdt_start                                 DONE          0KB           00:00:00
+   start_svf_vsdc                            DONE          0KB           00:00:00
+   rdt_change_names                          DONE          0KB           00:00:01
+   rdt_timing_constraints                    DONE          0KB           00:00:00
+   rdt_mbist_constraints                     DONE          0KB           00:00:00
+   rdt_lbist_constraints                     DONE          0KB           00:00:00
+   syn_fdr_constraints                       DONE          0KB           00:00:00
+   syn_constraints                           DONE          0KB           00:00:35
+   syn_healer                                DONE          0KB           00:00:00
+   rdt_constrain_visa_logic                  DONE          0KB           00:00:01
+   syn_area_constraints                      DONE          0KB           00:00:00
+   syn_operating_conditions                  DONE          0KB           00:00:00
+   syn_power_constraints                     SKIPPED       SKIPPED       SKIPPED
+   syn_saif_map                              DONE          0KB           00:00:00
+   stop_svf_vsdc                             DONE          0KB           00:00:00
+   rdt_run_checks                            DONE          0KB           00:00:00
+   syn_outputs                               DONE          0KB           00:00:07
+   rdt_done                                  DONE          0KB           00:00:00
+compile                                    DONE            128.003MB     00:17:28
+   rdt_start                                 DONE          0KB           00:00:00
+   sd_set_multi_vt_libs                      DONE          0KB           00:00:01
+   start_svf_vsdc                            DONE          0KB           00:00:00
+   rdt_dont_use                              DONE          0KB           00:00:04
+   syn_subset_library                        DONE          0KB           00:00:01
+   syn_power_constraints                     SKIPPED       SKIPPED       SKIPPED
+   syn_clock_gating                          DONE          0KB           00:00:05
+   syn_ungroup                               DONE          0KB           00:00:00
+   syn_fdr_remove_spy_instances              DONE          0KB           00:00:00
+   syn_compile                               DONE          128.003MB     00:17:05
+   syn_vector_swap                           DONE          0KB           00:00:00
+   syn_check_unmapped_logic                  DONE          0KB           00:00:00
+   rdt_change_names                          DONE          0KB           00:00:04
+   stop_svf_vsdc                             DONE          0KB           00:00:00
+   rdt_run_checks                            DONE          0KB           00:00:00
+   syn_outputs                               DONE          0KB           00:00:08
+   rdt_done                                  DONE          0KB           00:00:00
+insert_dft                                 DONE            0KB           00:03:03
+   rdt_start                                 DONE          0KB           00:00:00
+   sd_set_multi_vt_libs                      DONE          0KB           00:00:00
+   start_svf_vsdc                            DONE          0KB           00:00:00
+   rdt_dont_use                              DONE          0KB           00:00:04
+   syn_dft_pre_setup                         DONE          0KB           00:00:03
+   syn_dft_config_generation                 DONE          0KB           00:00:01
+   syn_insert_dft                            DONE          0KB           00:01:33
+   syn_dft_fix_iso                           DONE          0KB           00:00:22
+   rdt_change_names                          DONE          0KB           00:00:02
+   stop_svf_vsdc                             DONE          0KB           00:00:00
+   rdt_run_checks                            DONE          0KB           00:00:01
+   syn_outputs                               DONE          0KB           00:00:11
+   rdt_done                                  DONE          0KB           00:00:46
+compile_incr                               DONE            0KB           00:15:13
+   rdt_start                                 DONE          0KB           00:00:00
+   sd_set_multi_vt_libs                      DONE          0KB           00:00:00
+   start_svf_vsdc                            DONE          0KB           00:00:00
+   rdt_dont_use                              DONE          0KB           00:00:04
+   syn_subset_library                        DONE          0KB           00:00:02
+   syn_power_constraints                     DONE          0KB           00:00:00
+   syn_pre_place_iso_cells                   DONE          0KB           00:00:05
+   syn_clock_split                           DONE          0KB           00:00:00
+   syn_compile_incr                          DONE          0KB           00:08:52
+   syn_optimize_area                         DONE          0KB           00:05:15
+   rdt_change_names                          DONE          0KB           00:00:03
+   stop_svf_vsdc                             DONE          0KB           00:00:00
+   rdt_run_checks                            DONE          0KB           00:00:00
+   syn_outputs                               DONE          0KB           00:00:08
+   rdt_done                                  DONE          0KB           00:00:44
+syn_final                                    DONE          -64KB         00:01:40
+   rdt_start                                 DONE          0KB           00:00:00
+   start_svf_vsdc                            DONE          0KB           00:00:00
+   syn_power_constraints                     SKIPPED       SKIPPED       SKIPPED
+   syn_syn_final                             DONE          0KB           00:00:05
+   rdt_change_names                          DONE          0KB           00:00:04
+   print_clk_bu                              DONE          0KB           00:00:00
+   stop_svf_vsdc                             DONE          -128KB        00:00:13
+   rdt_run_checks                            DONE          0KB           00:00:00
+   syn_outputs                               DONE          64KB          00:01:18
+   syn_restore_mim                           DONE          0KB           00:00:00
+   rdt_done                                  DONE          0KB           00:00:00
+----------------------------------------  ------------  ------------  ------------
+                                                                         00:40:20
+

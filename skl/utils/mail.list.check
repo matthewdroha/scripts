@@ -1,0 +1,364 @@
+START: Tue Jul 17 18:03:20 PDT 2012
+
+Target Mail->(manuel.a.aguilar.arreola@intel.com)             *** MATCH ***
+Target Mail->(melvin.alvarado@intel.com)                      *** MATCH ***
+Target Mail->(pablo.arias.camano@intel.com)                   *** MATCH ***
+Target Mail->(kasturi.bidarkar@intel.com)                     *** MATCH ***
+Target Mail->(james.p.cavanaugh@intel.com)                    *** MATCH ***
+Target Mail->(aarti.chandrashekhar@intel.com)                 *** MATCH ***
+Target Mail->(john.depew@intel.com)                           *** MATCH ***
+Target Mail->(sameer.desai@intel.com)                         *** MATCH ***
+Target Mail->(alan.b.dlima@intel.com)                         *** MATCH ***
+Target Mail->(mohammad.ferouz@intel.com)                      *** MATCH ***
+Target Mail->(chris.gaines@intel.com)                         *** MATCH ***
+Target Mail->(gibin.george@intel.com)                         *** MATCH ***
+Target Mail->(jose.j.hernandez@intel.com)                     *** MATCH ***
+Target Mail->(ivan.herrera.mejia@intel.com)                   *** MATCH ***
+Target Mail->(meer.t.husain@intel.com)                        *** MATCH ***
+Target Mail->(andrew.d.luciere@intel.com)                     *** MATCH ***
+Target Mail->(avinash.maddy@intel.com)                        *** MATCH ***
+Target Mail->(margareth.e.marrugo@intel.com)                  *** MATCH ***
+Target Mail->(edwin.f.mendez.valverde@intel.com)              *** MATCH ***
+Target Mail->(michael.n.michael@intel.com)                    *** MATCH ***
+Target Mail->(yosia.dalay@intel.com)                          *** MATCH ***
+Target Mail->(vikranth.r.gaddam@intel.com)                    *** MATCH ***
+Target Mail->(bao.h.ha@intel.com)                             *** MATCH ***
+Target Mail->(prabahar.krishna.gounder@intel.com)             *** MATCH ***
+Target Mail->(gregory.s.norton@intel.com)                     *** MATCH ***
+Target Mail->(miraben.j.patel@intel.com)                      *** MATCH ***
+Target Mail->(pratik.r.shah@intel.com)                        *** MATCH ***
+Target Mail->(long.q.tran@intel.com)                          *** MATCH ***
+Target Mail->(eric.msechu@intel.com)                          *** MATCH ***
+Target Mail->(gayathri.natarajan@intel.com)                   *** MATCH ***
+Target Mail->(carlos.nava@intel.com)                          *** MATCH ***
+Target Mail->(tuan.a.nguyen@intel.com)                        *** MATCH ***
+Target Mail->(srikanth.palawancha@intel.com)                  *** MATCH ***
+Target Mail->(nishad.h.pancholi@intel.com)                    *** MATCH ***
+Target Mail->(nitin.paradkar@intel.com)                       *** MATCH ***
+Target Mail->(jorge.e.parra@intel.com)                        *** MATCH ***
+Target Mail->(reena.v.patel@intel.com)                        *** MATCH ***
+Target Mail->(dileep.s.patli@intel.com)                       *** MATCH ***
+Target Mail->(israel.paz@intel.com)                           *** MATCH ***
+Target Mail->(bharat.s.pillilli@intel.com)                    *** MATCH ***
+Target Mail->(gayatri.s.sagi@intel.com)                       *** MATCH ***
+Target Mail->(amadou.sallah@intel.com)                        *** MATCH ***
+Target Mail->(snehal.sanghavi@intel.com)                      *** MATCH ***
+Target Mail->(jagat.g.shah@intel.com)                         *** MATCH ***
+Target Mail->(atul.z.sharma@intel.com)                        *** MATCH ***
+Target Mail->(mike.shenoy@intel.com)                          *** MATCH ***
+Target Mail->(john.a.sicilia@intel.com)                       *** MATCH ***
+Target Mail->(sandeep.sirsi@intel.com)                        *** MATCH ***
+Target Mail->(santosh.b.talli@intel.com)                      *** MATCH ***
+Target Mail->(ritesh.k.thakkar@intel.com)                     *** MATCH ***
+Target Mail->(george.l.tipple@intel.com)                      *** MATCH ***
+Target Mail->(vinay.vaddepalli@intel.com)                     *** MATCH ***
+Target Mail->(john.vinyard@intel.com)                         *** MATCH ***
+Target Mail->(venkata.yelampalli@intel.com)                   *** MATCH ***
+Target Mail->(vijay.yelemanchili@intel.com)                   *** MATCH ***
+Target Mail->(ying.yi@intel.com)                              *** MATCH ***
+Target Mail->(lin.zhu@intel.com)                              *** MATCH ***
+Target Mail->(barak.druyan@intel.com)                         *** MATCH ***
+Target Mail->(claudia.p.barrera@intel.com)                    *** MATCH ***
+Target Mail->(miguel.corvacho@intel.com)                      *** MATCH ***
+Target Mail->(vijayshree.gupta@intel.com)                     *** MATCH ***
+Target Mail->(tanveer.r.khondker@intel.com)                   *** MATCH ***
+Target Mail->(ramkumar.krithivasan@intel.com)                 *** MATCH ***
+Target Mail->(kedar.mangrulkar@intel.com)                     *** MATCH ***
+Target Mail->(amreesh.rao@intel.com)                          *** MATCH ***
+Target Mail->(ying.cole@intel.com)                            *** MATCH ***
+Target Mail->(fei.deng@intel.com)                             *** MATCH ***
+Target Mail->(mike.yun.he@intel.com)                          *** MATCH ***
+Target Mail->(mir.m.hossain@intel.com)                        *** MATCH ***
+Target Mail->(jean.jiang@intel.com)                           *** MATCH ***
+Target Mail->(amjad.khan@intel.com)                           *** MATCH ***
+Target Mail->(muthukumar.sadasivam@intel.com)                 *** MATCH ***
+Target Mail->(sanjib.sarkar@intel.com)                        *** MATCH ***
+Target Mail->(mohammad.s.sikder@intel.com)                    *** MATCH ***
+Target Mail->(sriram.venkatesan@intel.com)                    *** MATCH ***
+Target Mail->(vikas.manra@intel.com)                          *** MATCH ***
+Target Mail->(brannon.pierce@intel.com)                       *** MATCH ***
+Target Mail->(ak.r.ahmed@intel.com)                           *** MATCH ***
+Target Mail->(nikhil.baddam@intel.com)                        *** MATCH ***
+Target Mail->(akanksha.p.bhatt@intel.com)                     *** MATCH ***
+Target Mail->(dean.e.cabrey@intel.com)                        *** MATCH ***
+Target Mail->(rohan.s.deshpande@intel.com)                    *** MATCH ***
+Target Mail->(mohammed.j.hasan@intel.com)                     *** MATCH ***
+Target Mail->(michael.j.helquist@intel.com)                   *** MATCH ***
+Target Mail->(muhammad.omer.jamal@intel.com)                  *** MATCH ***
+Target Mail->(lari.a.jones@intel.com)                         *** MATCH ***
+Target Mail->(chenna.katagunta@intel.com)                     *** MATCH ***
+Target Mail->(sanjay.krishnan@intel.com)                      *** MATCH ***
+Target Mail->(vanitha.kumar@intel.com)                        *** MATCH ***
+Target Mail->(hui.lai@intel.com)                              *** MATCH ***
+Target Mail->(jayesh.lanjewar@intel.com)                      *** MATCH ***
+Target Mail->(steven.r.co.larson@intel.com)                   *** MATCH ***
+Target Mail->(john.a.laryea@intel.com)                        *** MATCH ***
+Target Mail->(hon.s.lau@intel.com)                            *** MATCH ***
+Target Mail->(pradeep.majumder@intel.com)                     *** MATCH ***
+Target Mail->(mihir.mapara@intel.com)                         *** MATCH ***
+Target Mail->(sunil.nekkanti@intel.com)                       *** MATCH ***
+Target Mail->(aditi.nigam@intel.com)                          *** MATCH ***
+Target Mail->(brian.t.ormson@intel.com)                       *** MATCH ***
+Target Mail->(andrei.ossman@intel.com)                        *** MATCH ***
+Target Mail->(amayika.panda@intel.com)                        *** MATCH ***
+Target Mail->(mithun.a.patel@intel.com)                       *** MATCH ***
+Target Mail->(evgeny.petlakh@intel.com)                       *** MATCH ***
+Target Mail->(michael.prasad@intel.com)                       *** MATCH ***
+Target Mail->(ahmad.m.rahman@intel.com)                       *** MATCH ***
+Target Mail->(rafi.saied@intel.com)                           *** MATCH ***
+Target Mail->(krishna.santhanam@intel.com)                    *** MATCH ***
+Target Mail->(ramgopal.satyamurti@intel.com)                  *** MATCH ***
+Target Mail->(gayatri.v.shirodkar@intel.com)                  *** MATCH ***
+Target Mail->(wayne.h.szeto@intel.com)                        *** MATCH ***
+Target Mail->(ka-po.tsoi@intel.com)                           *** MATCH ***
+Target Mail->(mai.z.vang@intel.com)                           *** MATCH ***
+Target Mail->(meyya.venkat@intel.com)                         *** MATCH ***
+Target Mail->(thao.vien@intel.com)                            *** MATCH ***
+Target Mail->(yi-chin.yan@intel.com)                          *** MATCH ***
+Target Mail->(noam.yosef@intel.com)                           *** MATCH ***
+Target Mail->(nirmala.balasingam@intel.com)                   *** MATCH ***
+Target Mail->(justin.m.barber@intel.com)                      *** MATCH ***
+Target Mail->(jae-yong.chung@intel.com)                       *** MATCH ***
+Target Mail->(hoang.dang@intel.com)                           *** MATCH ***
+Target Mail->(randy.l.helms@intel.com)                        *** MATCH ***
+Target Mail->(jonathan.lopez-morell@intel.com)                *** MATCH ***
+Target Mail->(michael.mccoy@intel.com)                        *** MATCH ***
+Target Mail->(shaileshkumar.m.patel@intel.com)                *** MATCH ***
+Target Mail->(prasanna.ramanand@intel.com)                    *** MATCH ***
+Target Mail->(yawar.shah@intel.com)                           *** MATCH ***
+Target Mail->(vignesh.vivekraja@intel.com)                    *** MATCH ***
+Target Mail->(harikrishna.baliga@intel.com)                   *** MATCH ***
+Target Mail->(sunny.c.huang@intel.com)                        *** MATCH ***
+Target Mail->(minnie.lui@intel.com)                           *** MATCH ***
+Target Mail->(ofer.sierra@intel.com)                          *** MATCH ***
+Target Mail->(john.a.starbuck@intel.com)                      *** MATCH ***
+Target Mail->(jared.w.stark@intel.com)                        *** MATCH ***
+Target Mail->(arun.subbiah@intel.com)                         *** MATCH ***
+Target Mail->(mahesh.subramanian@intel.com)                   *** MATCH ***
+Target Mail->(talin.kevorkian@intel.com)                      *** MATCH ***
+Target Mail->(jihong.zhang@intel.com)                         *** MATCH ***
+Target Mail->(mohammad.nasar.ahmed@intel.com)                 *** MATCH ***
+Target Mail->(jihoon.j.kim@intel.com)                         *** MATCH ***
+Target Mail->(justin.niel@intel.com)                          *** MATCH ***
+Target Mail->(denny.stemen@intel.com)                         *** MATCH ***
+Target Mail->(kinchit.desai@intel.com)                        *** MATCH ***
+Target Mail->(nitin.t.jain@intel.com)                         *** MATCH ***
+Target Mail->(franz.j.lutz@intel.com)                         *** MATCH ***
+Target Mail->(bhavna.murali.mohan@intel.com)                  *** MATCH ***
+Target Mail->(aishwariya.pattabiraman@intel.com)              *** MATCH ***
+Target Mail->(santosh.kumar.thouta@intel.com)                 *** MATCH ***
+Target Mail->(tal.gubezskis@intel.com)                        *** MATCH ***
+Target Mail->(victoria.s.kolesov@intel.com)                   *** MATCH ***
+Target Mail->(chaitanya.v.mantena@intel.com)                  *** MATCH ***
+Target Mail->(jen-yi.wuu@intel.com)                           *** MATCH ***
+Target Mail->(harshdeep.s.jawandha@intel.com)                 *** MATCH ***
+Target Mail->(atul.s.walimbe@intel.com)                       *** MATCH ***
+Target Mail->(truyen.trinh@intel.com)                         *** MATCH ***
+Target Mail->(galaly.i.ahmad@intel.com)                       *** MATCH ***
+Target Mail->(bhanu.dharmaiahgari@intel.com)                  *** MATCH ***
+Target Mail->(jean-pierre.diei@intel.com)                     *** MATCH ***
+Target Mail->(justin.m.elkow@intel.com)                       *** MATCH ***
+Target Mail->(sana.d.habib@intel.com)                         *** MATCH ***
+Target Mail->(ramakrishna.kanthaswamy@intel.com)              *** MATCH ***
+Target Mail->(hon.ming.li@intel.com)                          *** MATCH ***
+Target Mail->(james.t.ngo@intel.com)                          *** MATCH ***
+Target Mail->(lakshminarayana.pappu@intel.com)                *** MATCH ***
+Target Mail->(baruch.schnarch@intel.com)                      *** MATCH ***
+Target Mail->(dan.to@intel.com)                               *** MATCH ***
+Target Mail->(ben.q.dang@intel.com)                           *** MATCH ***
+Target Mail->(fatima.fahimi@intel.com)                        *** MATCH ***
+Target Mail->(tapan.a.ganpule@intel.com)                      *** MATCH ***
+Target Mail->(chad.a.gibbs@intel.com)                         *** MATCH ***
+Target Mail->(raza.mawjee@intel.com)                          *** MATCH ***
+Target Mail->(riaz.ahmad@intel.com)                           *** MATCH ***
+Target Mail->(mostafa.s.akhavi@intel.com)                     *** MATCH ***
+Target Mail->(thanh.thuy.t.behmen@intel.com)                  *** MATCH ***
+Target Mail->(daniel.r.bennett@intel.com)                     *** MATCH ***
+Target Mail->(pranav.k.bhatt@intel.com)                       *** MATCH ***
+Target Mail->(michelle.k.bui@intel.com)                       *** MATCH ***
+Target Mail->(wen-chih.chang@intel.com)                       *** MATCH ***
+Target Mail->(kyle.clarkson@intel.com)                        *** MATCH ***
+Target Mail->(kevin.q.duong@intel.com)                        *** MATCH ***
+Target Mail->(saima.haq@intel.com)                            *** MATCH ***
+Target Mail->(david.h.hough@intel.com)                        *** MATCH ***
+Target Mail->(shelvy.m.huffman@intel.com)                     *** MATCH ***
+Target Mail->(kenny.k.li@intel.com)                           *** MATCH ***
+Target Mail->(michelle.h.li@intel.com)                        *** MATCH ***
+Target Mail->(paul.matos@intel.com)                           *** MATCH ***
+Target Mail->(jesamine.y.maxino@intel.com)                    *** MATCH ***
+Target Mail->(jayashree.mohapatra@intel.com)                  *** MATCH ***
+Target Mail->(smitha.ranganathan@intel.com)                   *** MATCH ***
+Target Mail->(nicholas.r.sam@intel.com)                       *** MATCH ***
+Target Mail->(harsh.n.shah@intel.com)                         *** MATCH ***
+Target Mail->(sangeivi.sivagnanasundaram@intel.com)           *** MATCH ***
+Target Mail->(michele.a.smothers@intel.com)                   *** MATCH ***
+Target Mail->(shyamala.subramanian@intel.com)                 *** MATCH ***
+Target Mail->(lien.k.tran@intel.com)                          *** MATCH ***
+Target Mail->(suchitra.a.kulkarni@intel.com)                  *** MATCH ***
+Target Mail->(narender.nagulapally@intel.com)                 *** MATCH ***
+Target Mail->(parth.h.shah@intel.com)                         *** MATCH ***
+Target Mail->(pranali.n.shah@intel.com)                       *** MATCH ***
+Target Mail->(ravi.shekhar@intel.com)                         *** MATCH ***
+Target Mail->(vijay.k.vuppaladadium@intel.com)                *** MATCH ***
+Target Mail->(keith.jenkins@intel.com)                        *** MATCH ***
+Target Mail->(chen.koren@intel.com)                           *** MATCH ***
+Target Mail->(ai-hsin.liu@intel.com)                          *** PROBLEM ***
+Target Mail->(swati.nadkarni@intel.com)                       *** MATCH ***
+Target Mail->(michael.j.norris@intel.com)                     *** MATCH ***
+Target Mail->(priyaa.ramanathan@intel.com)                    *** MATCH ***
+Target Mail->(michael.s.yu@intel.com)                         *** MATCH ***
+Target Mail->(siva.makineni@intel.com)                        *** MATCH ***
+Target Mail->(lutricia.l.dean@intel.com)                      *** MATCH ***
+Target Mail->(varghese.george@intel.com)                      *** MATCH ***
+Target Mail->(meredith.l.leitch@intel.com)                    *** MATCH ***
+Target Mail->(ryan.a.lyles@intel.com)                         *** MATCH ***
+Target Mail->(omar.malik@intel.com)                           *** MATCH ***
+Target Mail->(madhusudan.s.ponnada@intel.com)                 *** MATCH ***
+Target Mail->(can.d.tran@intel.com)                           *** MATCH ***
+Target Mail->(shannon.trickett@intel.com)                     *** MATCH ***
+Target Mail->(elizabeth.butler@intel.com)                     *** MATCH ***
+Target Mail->(james.s.coke@intel.com)                         *** MATCH ***
+Target Mail->(stephen.a.fischer@intel.com)                    *** MATCH ***
+Target Mail->(mohammad.h.foroozannejad@intel.com)             *** MATCH ***
+Target Mail->(daniel.gerzhoy@intel.com)                       *** MATCH ***
+Target Mail->(nishank.n.chandawala@intel.com)                 *** MATCH ***
+Target Mail->(niranjan.l.cooray@intel.com)                    *** MATCH ***
+Target Mail->(dannie.g.feekes@intel.com)                      *** MATCH ***
+Target Mail->(shareef.hakim@intel.com)                        *** MATCH ***
+Target Mail->(theresa.holliday@intel.com)                     *** MATCH ***
+Target Mail->(sanjeev.jahagirdar@intel.com)                   *** MATCH ***
+Target Mail->(prashanth.kalluraya@intel.com)                  *** MATCH ***
+Target Mail->(michael.t.klinglesmith@intel.com)               *** MATCH ***
+Target Mail->(katherine.kong@intel.com)                       *** MATCH ***
+Target Mail->(ingrid.f.liu@intel.com)                         *** MATCH ***
+Target Mail->(avi.medlinsky@intel.com)                        *** MATCH ***
+Target Mail->(rob.milstrey@intel.com)                         *** MATCH ***
+Target Mail->(douglas.r.moran@intel.com)                      *** MATCH ***
+Target Mail->(asim.nisar@intel.com)                           *** MATCH ***
+Target Mail->(joydeep.ray@intel.com)                          *** MATCH ***
+Target Mail->(vishram.sarurkar@intel.com)                     *** MATCH ***
+Target Mail->(inder.sodhi@intel.com)                          *** MATCH ***
+Target Mail->(marc.torrant@intel.com)                         *** MATCH ***
+Target Mail->(john.trelford@intel.com)                        *** MATCH ***
+Target Mail->(ryan.wells@intel.com)                           *** MATCH ***
+Target Mail->(ki.w.yoon@intel.com)                            *** MATCH ***
+Target Mail->(rika.nakahara@intel.com)                        *** MATCH ***
+Target Mail->(ninar.nuemah@intel.com)                         *** MATCH ***
+Target Mail->(peter.j.smith@intel.com)                        *** MATCH ***
+Target Mail->(daniel.m.camacho.montejo@intel.com)             *** MATCH ***
+Target Mail->(yun-han.chen@intel.com)                         *** MATCH ***
+Target Mail->(mythreyi.nethi@intel.com)                       *** MATCH ***
+Target Mail->(kyan.pedrami@intel.com)                         *** MATCH ***
+Target Mail->(ahsanur.rahman@intel.com)                       *** MATCH ***
+Target Mail->(kenneth.a.brand@intel.com)                      *** MATCH ***
+Target Mail->(grant.d.miller@intel.com)                       *** MATCH ***
+Target Mail->(scott.e.siers@intel.com)                        *** MATCH ***
+Target Mail->(srinivas.thota@intel.com)                       *** MATCH ***
+Target Mail->(satish.damaraju@intel.com)                      *** MATCH ***
+Target Mail->(iqbal.rajwani@intel.com)                        *** MATCH ***
+Target Mail->(aarti.ramesh@intel.com)                         *** MATCH ***
+Target Mail->(sundar.balasubramaniam@intel.com)               *** MATCH ***
+Target Mail->(hoang-frank.doan@intel.com)                     *** MATCH ***
+Target Mail->(shou-wen.fu@intel.com)                          *** MATCH ***
+Target Mail->(eshwar.gollapudi@intel.com)                     *** MATCH ***
+Target Mail->(jay.a.ingalls@intel.com)                        *** MATCH ***
+Target Mail->(venkat.jeyaraman@intel.com)                     *** MATCH ***
+Target Mail->(nilesh.s.karnik@intel.com)                      *** MATCH ***
+Target Mail->(jaya.mishra@intel.com)                          *** MATCH ***
+Target Mail->(patrick.t.nguyen@intel.com)                     *** MATCH ***
+Target Mail->(matthew.d.nichelson@intel.com)                  *** MATCH ***
+Target Mail->(towhid.rahman@intel.com)                        *** MATCH ***
+Target Mail->(vikash.singhal@intel.com)                       *** MATCH ***
+Target Mail->(phu.v.tang@intel.com)                           *** MATCH ***
+Target Mail->(locg.thai@intel.com)                            *** MATCH ***
+Target Mail->(chung-kuan.tsai@intel.com)                      *** MATCH ***
+Target Mail->(zsu-yao.steven.yang@intel.com)                  *** MATCH ***
+Target Mail->(chinnakrishnan.s.ballapuram@intel.com)          *** MATCH ***
+Target Mail->(brent.bero@intel.com)                           *** MATCH ***
+Target Mail->(hem.doshi@intel.com)                            *** MATCH ***
+Target Mail->(arturo.espinosa.soley@intel.com)                *** MATCH ***
+Target Mail->(malvika.d.kancherla@intel.com)                  *** MATCH ***
+Target Mail->(roi.leibowitch@intel.com)                       *** MATCH ***
+Target Mail->(ruchira.k.liyanage@intel.com)                   *** MATCH ***
+Target Mail->(yoav.lossin@intel.com)                          *** MATCH ***
+Target Mail->(rekha.b.manjunath@intel.com)                    *** MATCH ***
+Target Mail->(zeev.offen@intel.com)                           *** MATCH ***
+Target Mail->(raghuram.parvataneni@intel.com)                 *** MATCH ***
+Target Mail->(kaushal.patel@intel.com)                        *** MATCH ***
+Target Mail->(steven.d.pudar@intel.com)                       *** MATCH ***
+Target Mail->(Anuradha.Raghunathan@intel.com)                 *** PROBLEM ***
+Target Mail->(anand.raju@intel.com)                           *** MATCH ***
+Target Mail->(ashwin.k.ramnath@intel.com)                     *** MATCH ***
+Target Mail->(maitreyee.saikia@intel.com)                     *** MATCH ***
+Target Mail->(surendran.subramanian@intel.com)                *** MATCH ***
+Target Mail->(haran.thanigasalam@intel.com)                   *** MATCH ***
+Target Mail->(guna.thuraisingham@intel.com)                   *** MATCH ***
+Target Mail->(shrinivas.venkatraman@intel.com)                *** MATCH ***
+Target Mail->(tsung-han.yang@intel.com)                       *** MATCH ***
+Number of Outlook names provided as input: 295
+Number of unique Outlook names: 293
+Number of unique Orgtree names: 264
+
+*** Checking for names that are in orgtree but not in the pdl list ***
+Missing in PDL->("KONDURU, PRITHVI","VENKATACHALAM, MEYYAPPAN",11450182,pkonduru,Student Hire Employee,H)
+Missing in PDL->("KORATALA, AJITHA","WALIMBE, ATUL S",11089969,akoratax,Outsourced Worker,A)
+Missing in PDL->("RAGHUNATHAN, ANURADHA","THURAISINGHAM, GUNENDRAN",10699633,araghun1,Regular Intel Employee,A)
+Missing in PDL->("GAO, JHIH-RONG","WALIMBE, ATUL S",11410513,jhihrong,Student Hire Employee,A)
+Missing in PDL->("GARBE, JOHN R","MISHRA, JAYA",10074396,jgarbe,Regular Intel Employee,A)
+Missing in PDL->("TUMMALA, KALYAN C","KHONDKER, TANVEER R",11267899,kctummal,Regular Intel Employee,A)
+Missing in PDL->("RAMIREZ RIANO, MARIO A","KHONDKER, TANVEER R",11448650,marioara,Student Hire Employee,A)
+Missing in PDL->("ROHA, MATTHEW D","MAKINENI, SIVAKUMAR",10539046,mroha,Regular Intel Employee,A)
+Missing in PDL->("HUYNH, PHONG A","WALIMBE, ATUL S",11089290,pahuynhx,Outsourced Worker,A)
+Missing in PDL->("PONG, SEA","D'LIMA, ALAN B",11450670,spong,Student Hire Employee,H)
+Missing in PDL->("SOMAN, SHAL K","THURAISINGHAM, GUNENDRAN",10705373,sksoman,Regular Intel Employee,A)
+Missing in PDL->("SHARMA, SHALINI","THURAISINGHAM, GUNENDRAN",11299109,sshar14,Regular Intel Employee,A)
+Missing in PDL->("SIVALINGAM, VIJAYA KUMAR","WALIMBE, ATUL S",11103941,vsivalix,Outsourced Worker,A)
+
+
+*** Checking for names that are in the PDL but not in orgtree ***
+Missing in Orgtree->(aditi.nigam@intel.com,NIGAM, ADITI K,KUMAR,GANAPATHY S,10635299,aknigam,REG,A)
+Missing in Orgtree->(andrei.ossman@intel.com,OSSMAN, ANDREI,KUMAR,GANAPATHY S,10666855,aossman,REG,A)
+Missing in Orgtree->(asim.nisar@intel.com,NISAR, ASIM,RAY,JOYDEEP,10668410,anisar,REG,A)
+Missing in Orgtree->(avi.medlinsky@intel.com,MEDLINSKY, AVI,JAHAGIRDAR,SANJEEV S,10644143,amedlins,REG,A)
+Missing in Orgtree->(daniel.gerzhoy@intel.com,GERZHOY, DANIEL,JAHAGIRDAR,SANJEEV S,11409502,dgerzhoy,SH,A)
+Missing in Orgtree->(dannie.g.feekes@intel.com,FEEKES, DANNIE G,RAY,JOYDEEP,11269193,dgfeekes,REG,A)
+Missing in Orgtree->(douglas.r.moran@intel.com,MORAN, DOUGLAS R (DOUG),GEORGE,VARGHESE,10076147,dmoran,REG,A)
+Missing in Orgtree->(elizabeth.butler@intel.com,BUTLER, ELIZABETH,JAHAGIRDAR,SANJEEV S,11409555,butlerel,SH,A)
+Missing in Orgtree->(inder.sodhi@intel.com,SODHI, INDER M,JAHAGIRDAR,SANJEEV S,10500932,ISODHI,REG,A)
+Missing in Orgtree->(ingrid.f.liu@intel.com,LIU, INGRID F,JAHAGIRDAR,SANJEEV S,11269981,ifliu,REG,A)
+Missing in Orgtree->(james.s.coke@intel.com,COKE, JAMES S (JIM),FISCHER,STEPHEN A,10029130,coke,REG,A)
+Missing in Orgtree->(jared.w.stark@intel.com,STARK, JARED W,YOAZ,ADI,10637835,jwstark,REG,A)
+Missing in Orgtree->(john.a.starbuck@intel.com,STARBUCK, JOHN A,LUI,MINNIE,10637494,jastarbu,REG,A)
+Missing in Orgtree->(john.trelford@intel.com,TRELFORD, JOHN T,JAHAGIRDAR,SANJEEV S,10047606,JTRELFOR,REG,A)
+Missing in Orgtree->(joydeep.ray@intel.com,RAY, JOYDEEP,GEORGE,VARGHESE,11268974,jray,REG,A)
+Missing in Orgtree->(katherine.kong@intel.com,KONG, KATHERINE (KATHY),RAY,JOYDEEP,10069695,kkong,REG,A)
+Missing in Orgtree->(ki.w.yoon@intel.com,YOON, KI W,MILSTREY,ROBERT G,10160550,KWYOON,REG,A)
+Missing in Orgtree->(marc.torrant@intel.com,TORRANT, MARC,MILSTREY,ROBERT G,10533206,mtorrant,REG,A)
+Missing in Orgtree->(meredith.l.leitch@intel.com,LEITCH, MEREDITH L,JACOBS,JODI L,10676082,mlleitch,REG,A)
+Missing in Orgtree->(michael.t.klinglesmith@intel.com,KLINGLESMITH, MICHAEL T,LAKSHMANAMURTHY,SRIDHAR,10665630,mtklingl,REG,A)
+Missing in Orgtree->(minnie.lui@intel.com,LUI, MINNIE,NOBLEY,BRET L,10562682,MLUI,REG,A)
+Missing in Orgtree->(mohammad.h.foroozannejad@intel.com,FOROOZANNEJAD, MOHAMMAD H,JAHAGIRDAR,SANJEEV S,11448807,mhforooz,SH,A)
+Missing in Orgtree->(mohammed.j.hasan@intel.com,HASAN, MD J (HASAN),MODI,PUNIT,10650182,mjhasan,REG,A)
+Missing in Orgtree->(ninar.nuemah@intel.com,NUEMAH, NINAR,JAHAGIRDAR,SANJEEV S,11409492,nnuemah,SH,A)
+Missing in Orgtree->(niranjan.l.cooray@intel.com,COORAY, NIRANJAN L (NIRAN),MILSTREY,ROBERT G,10078790,ncooray,REG,A)
+Missing in Orgtree->(nishank.n.chandawala@intel.com,CHANDAWALA, NISHANK N,RAY,JOYDEEP,10717494,nnchanda,REG,A)
+Missing in Orgtree->(peter.j.smith@intel.com,SMITH, PETER J,YOAZ,ADI,10078955,PJSMITH,REG,A)
+Missing in Orgtree->(prashanth.kalluraya@intel.com,KALLURAYA, PRASHANTH,MILSTREY,ROBERT G,11341858,pkallura,REG,A)
+Missing in Orgtree->(rika.nakahara@intel.com,NAKAHARA, RIKA,JAHAGIRDAR,SANJEEV S,11304860,rnakahar,SH,A)
+Missing in Orgtree->(rob.milstrey@intel.com,MILSTREY, ROBERT G (ROB),GEORGE,VARGHESE,10061827,rmilstre,REG,A)
+Missing in Orgtree->(roi.leibowitch@intel.com,LEIBOWITCH, ROI,HEVRONY,AVIAD,11268475,rleibowi,REG,A)
+Missing in Orgtree->(ryan.a.lyles@intel.com,LYLES, RYAN A,RIOS,ALEJANDRO,11304230,ralyles,REG,A)
+Missing in Orgtree->(ryan.wells@intel.com,WELLS, RYAN D,JAHAGIRDAR,SANJEEV S,10683887,rdwells1,REG,A)
+Missing in Orgtree->(sanjeev.jahagirdar@intel.com,JAHAGIRDAR, SANJEEV S,GEORGE,VARGHESE,10503613,sjahagir,REG,A)
+Missing in Orgtree->(shannon.trickett@intel.com,TRICKETT, SHANNON M,THIGPEN,FELICIA M,10071621,SMTRICKE,REG,A)
+Missing in Orgtree->(shareef.hakim@intel.com,HAKIM, SHAREEF,MEDLINSKY,AVI,11343067,shakim1,REG,A)
+Missing in Orgtree->(stephen.a.fischer@intel.com,FISCHER, STEPHEN A,LEMPEL,ODED,10044092,sfischer,REG,A)
+Missing in Orgtree->(varghese.george@intel.com,GEORGE, VARGHESE,SCHENKLER,YOSSEF,10062337,vgeorge,REG,A)
+Missing in Orgtree->(vijay.yelemanchili@intel.com,YELEMANCHILI, VIJAY,ELSTER,ELAD,10679956,vyeleman,REG,A)
+Missing in Orgtree->(vishram.sarurkar@intel.com,SARURKAR, VISHRAM (VISHY),JAHAGIRDAR,SANJEEV S,10775891,vasarur,REG,A)
+Missing in Orgtree->(yawar.shah@intel.com,SHAH, SYED Y (YAWAR),STRATAKOS,CHARLES J,10650886,syshah,REG,A)
+Missing in Orgtree->(yoav.lossin@intel.com,LOSSIN, YOAV,POLLAK,BENNY,10672373,ylossin,REG,A)
+
+
+END: Tue Jul 17 18:38:46 PDT 2012
+

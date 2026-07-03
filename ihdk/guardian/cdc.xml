@@ -1,0 +1,27 @@
+<AddHSD>
+    <ticket>
+        <project>ASP</project>
+        <project_stepping>A0</project_stepping>
+        <status>Assigned</status>
+        <effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+        <title>Please complete CDC2 quality requirements for this CBB</title>
+        <ip_module>ASP.DDR.ESD.ip10xddrmisc_esdclamplvdvs </ip_module>
+        <comments>Please complete CDC2 quality requirements for this CBB</comments>
+        <circuit_tag>P_ihdk_Gen5p1_CDC2_R0L0</circuit_tag>
+<owner>abintimo</owner>
+<mail_list>meperez1;kaguilar;bspaynic;yccheng1</mail_list>
+    </ticket>
+    
+    <ticket>
+        <project>ASP</project>
+        <project_stepping>A0</project_stepping>
+        <status>Assigned</status>
+        <effort_category>CDC2.PD-Only (PD Use Only)</effort_category>
+        <title>Please complete CDC2 quality requirements for this CBB</title>
+        <ip_module>ASP.DDR.ESD.ip10xddrmisc_esdclampnom</ip_module>
+        <comments>Please complete CDC2 quality requirements for this CBB</comments>
+        <circuit_tag>P_ihdk_Gen5p1_CDC2_R0L0</circuit_tag>
+<owner>abintimo</owner>
+<mail_list>meperez1;kaguilar;bspaynic;yccheng1</mail_list>
+    </ticket>
+</AddHSD>

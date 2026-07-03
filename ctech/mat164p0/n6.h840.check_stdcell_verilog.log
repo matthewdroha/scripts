@@ -1,0 +1,20 @@
+-I- check_stdcell_verilog.pl: Command: check_stdcell_verilog.pl --verilog-file-list n6.h840.list --ctech-dir-list n6.ctech.h840.list --run-name n6.h840
+-I- check_stdcell_verilog.pl: Start date: (Tue Apr 14 15:26:18 2020)
+-I- check_stdcell_verilog.pl: Machine: fmci70428.fm.intel.com
+-I- main::read_file_to_list: 3 items read from file->(n6.h840.list)
+-I- main::quick_check_verilog_files: File->(tcbn06_bwpfb1h840l135p229pd_base_c191231.v) Definitions->(72) Fullpath->(/p/tech/n6/tech-prerelease/v1.0.0_pre.4/tcbn06_bwpfb1h840l135p229pd_base_c191231_lib/verilog/tcbn06_bwpfb1h840l135p229pd_base_c191231_050a/tcbn06_bwpfb1h840l135p229pd_base_c191231.v)
+-I- main::quick_check_verilog_files: File->(tcbn06_bwpfb1h840l135p229pd_lvl_c191231.v) Definitions->(2) Fullpath->(/p/tech/n6/tech-prerelease/v1.0.0_pre.4/tcbn06_bwpfb1h840l135p229pd_lvl_c191231_lib/verilog/tcbn06_bwpfb1h840l135p229pd_lvl_c191231_050b/tcbn06_bwpfb1h840l135p229pd_lvl_c191231.v)
+-I- main::quick_check_verilog_files: File->(tcbn06_bwpfb1h840l135p229pd_pm_c191231.v) Definitions->(4) Fullpath->(/p/tech/n6/tech-prerelease/v1.0.0_pre.4/tcbn06_bwpfb1h840l135p229pd_pm_c191231_lib/verilog/tcbn06_bwpfb1h840l135p229pd_pm_c191231_050a/tcbn06_bwpfb1h840l135p229pd_pm_c191231.v)
+-I- main::read_file_to_list: 2 items read from file->(n6.ctech.h840.list)
+-I- main::load_ctech_sv_files: Ctech modules found count->(19) dir->(1) dir->(/nfs/fm/disks/w.mroha.102/ctech/c4v19ww40d_hdk162_n6_v1.0.0_pre.4_mtls_sip_sbx/source/h840/io)
+-I- main::load_ctech_sv_files: Ctech modules found count->(3) dir->(2) dir->(/nfs/fm/disks/w.mroha.102/ctech/ctech_exp_c4v20ww12e_hdk161_mtls_sip_sbx/source/n6/h840/io)
+-I- main::test_for_module_redefinitions: Test results: test->(test_for_redefinitions) errors->(0)
+-I- main::test_for_unresolvable_stdcell_references: Test results: test->(test_for_unresolvable_stdcell_references) errors->(0)
+-I- main::test_for_unresolvable_ctech_references: Test results: test->(test_for_unresolvable_ctech_references) errors->(0)
+-I- main::write_xlsx: Excel workbook created: n6.h840.check_stdcell_verilog.xlsx
+-I- main::write_xlsx: Data written to xlsx: worksheet->(stdcells) rowcount->(78)
+-I- main::write_xlsx: Data written to xlsx: worksheet->(ctech) rowcount->(27)
+-I- main::write_xlsx: Data written to xlsx: worksheet->(error) rowcount->(1) errorcount->(0)
+-I- check_stdcell_verilog.pl: Finish date: (Tue Apr 14 15:26:18 2020)
+-I- check_stdcell_verilog.pl: Elapsed time:  0 days,  0 hours,  0 minutes,  0 seconds
+-I- check_stdcell_verilog.pl: check_stdcell_verilog.pl run complete

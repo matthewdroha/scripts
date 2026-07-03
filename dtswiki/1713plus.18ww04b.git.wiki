@@ -1,0 +1,22 @@
+{| class="wikitable"
+! Type
+! style="white-space: nowrap;" | Date
+! Summary
+|-
+| style="color:white; background:#3399ff;" | '''Improved'''
+| style="white-space: nowrap;" | 2018-01-22 16:01:37
+| Upgraded default TSA test_sbx ToolData.pm to activate 1713plus features. @vertical(tsa) @tsa(1713plus)
+|-
+| style="color:white; background:#3399ff;" | '''Improved'''
+| style="white-space: nowrap;" | 2018-01-22 14:30:11
+| Upgraded vc_static from L-2016.06-SP2-11 to N-2017.12 and vc_methodology_lp from 1.00.09.17ww50 to 1.01.00.18ww03 @tsa(1713plus) @fast(vclp)
+|-
+| style="color:white; background:#00b300;" | '''Fixed'''
+| style="white-space: nowrap;" | 2018-01-22 15:58:18
+| Changed default results area for vclp_build and vclp_test stages from results/vclp to results (vclp already has a directory structure to keep the results area clean) @fast(vclp) @tsa(1713plus)
+|-
+| style="color:white; background:#00b300;" | '''Fixed'''
+| style="white-space: nowrap;" | 2018-01-21 14:19:44
+| Disabled snapshot read of imports when snap checks are disabled. Exposes a bug when aceroot_dpath/tsa root is overriden in LocalToolData @vertical(tsa) @hsd(https://hsdes.intel.com/resource/1604641686)
+|-
+|}

@@ -1,0 +1,6 @@
+Type	Date	Summary
+Fixed	2018-01-05 13:23:25	Upgraded spyglass_lint version from 1.05.01.18ww01 to 1.05.02.18ww01 to address issue inside of central ace_static_check.cfg @tsa(1713plus) @fast(sglint)
+Improved	2018-01-04 21:42:45	Upgraded spyglass_lint to 1.05.01.18ww01 and dependent spyglass version to M2017.03-SP2-2 @tsa(1713plus) @fast(sglint)
+Improved	2017-12-20 22:21:51	Advanced ace version from 2.05.05 to 2.05.10 for 1713plus only to improve sglint integration. @fast(sglint) @tsa(1713plus)
+Improved	2017-12-20 22:20:41	Upgraded vcsmx version from L-2016.06-SP1-1 to L-2016.06-SP2-11 to address post-si bug. Critical fixes: xprop enablement, missed assertions, upf check. @fast(vcsmx) @hsd(https://hsdes.intel.com/resource/1406418729) @detail(https://dtspedia.intel.com/VCS/xprop/xindex)
+Improved	2017-12-20 22:20:40	Upgraded configulate version from 1.0.33.p9 to 1.0.33.p37 to enable -no_overwrite option for configulate xmls. @ddi(configulate) @hsd(https://hsdes.intel.com/resource/1406545588)

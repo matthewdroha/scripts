@@ -1,0 +1,121 @@
+#
+# This is purge-decap option file
+# This file is Perl file that requires by the purgedecap.pl script
+#
+# Note: All cell names, net and device type are case insensitive 
+#
+
+#----------------------------------------------------------#
+# PLEASE EDIT WITH CARE, BASE ON YOUR PROJECT DEFINITION!  #
+#----------------------------------------------------------#
+
+### Define cells to skip their device filtering
+%SKIP_CELL = (
+	#'template' => 'gnac decap dummy bjtdiode all'
+	#'example_cell1' => 'gnac dummy',
+	#'example_cell2' => 'all',
+);
+
+
+### Define cells to filter all theirs devices
+%BLACK_BOX = (
+	#'template' => 'something'
+	#'example_cell3' => 'yes',
+        #####GT bonus array cells
+	'a12gnc1lny3' => 'yes',
+	'a12gnc1wny3' => 'yes',
+	'a12bar0lny04' => 'yes',
+	'a12bar0lny08' => 'yes',
+	'a12bar0lny12' => 'yes',
+	'a12bar0lny16' => 'yes',
+	'a12bar0lny20' => 'yes',
+	'a12bar0lny24' => 'yes',
+	'a12bar0lny28' => 'yes',
+	'a12bar0lny32' => 'yes',
+	'a12bar0lny36' => 'yes',
+	'a12bar0lny40' => 'yes',
+	'a12bar0lny48' => 'yes',
+	'a12bar0lny64' => 'yes',
+	'a12bar0nny04' => 'yes',
+	'a12bar0nny08' => 'yes',
+	'a12bar0nny12' => 'yes',
+	'a12bar0nny16' => 'yes',
+	'a12bar0nny20' => 'yes',
+	'a12bar0nny24' => 'yes',
+	'a12bar0nny28' => 'yes',
+	'a12bar0nny32' => 'yes',
+	'a12bar0nny36' => 'yes',
+	'a12bar0nny40' => 'yes',
+	'a12bar0nny48' => 'yes',
+	'a12bar0nny64' => 'yes',
+	'a12bar0vny04' => 'yes',
+	'a12bar0vny08' => 'yes',
+	'a12bar0vny12' => 'yes',
+	'a12bar0vny16' => 'yes',
+	'a12bar0vny20' => 'yes',
+	'a12bar0vny24' => 'yes',
+	'a12bar0vny28' => 'yes',
+	'a12bar0vny32' => 'yes',
+	'a12bar0vny36' => 'yes',
+	'a12bar0vny40' => 'yes',
+	'a12bar0vny48' => 'yes',
+	'a12bar0vny64' => 'yes',
+	'a12bar0wny04' => 'yes',
+	'a12bar0wny08' => 'yes',
+	'a12bar0wny12' => 'yes',
+	'a12bar0wny16' => 'yes',
+	'a12bar0wny20' => 'yes',
+	'a12bar0wny24' => 'yes',
+	'a12bar0wny28' => 'yes',
+	'a12bar0wny32' => 'yes',
+	'a12bar0wny36' => 'yes',
+	'a12bar0wny40' => 'yes',
+	'a12bar0wny48' => 'yes',
+	'a12bar0wny64' => 'yes',
+);
+
+# Bonus cells are now filtered out from container level as DEs may want to implement other bonuses in their hierarchies
+if (open (NETLIST, "<$netlist")) {
+        while (<NETLIST>) {
+                if (/macro\s*(\w+_pdfd)\b/i) {
+                        my $dfd_container = $1;
+                        $BLACK_BOX{$dfd_container} = 1;
+                        print "-I- bonus cell $dfd_container added in purge black box list\n";
+                }
+        }
+        close NETLIST;
+}       else {
+        print "-W- Can't open for read the netlist file: $netlist\n\n\t($!)\n";
+}
+
+### Defined list of devices to filter
+%FILTER_DEVICE = (
+	'DECAP' => [
+		#'SRC GATE DRN DEV_TYPE',
+                # needs to be cell level power supply names
+                # may be different than the _dr_lvsLayoutPower - but should at
+                # minimum match _dr_lvsSchematicPower
+		#all decaps will be mpcap or mncap
+		'VSS VCC VSS  MNCAP',   #NMOS-9
+		'VSS VXX VSS  MNCAP',   #NMOS-9
+		'VCC VSS VCC  MPCAP',   #PMOS-9
+		'VXX VSS VXX  MPCAP',   #PMOS-9
+		'VCCXX VSS VCCXX  MPCAP',   #PMOS-9
+                # altenatively connected caps 
+		'VCC VSS VCC  MNCAP',   #NMOS-11mod
+		'VXX VSS VXX  MNCAP',   #NMOS-11mod
+		'VSS VCC VSS  MPCAP',   #PMOS-11mod
+		'VSS VXX VSS  MPCAP',   #PMOS-11mod
+		'VSS VCCXX VSS MPCAP',  #PMOS-11mod
+	],
+	
+	'DUMMY' => [
+		#'SRC GATE DRN DEV',
+		'DUMMY DUMMY DUMMY DUMMY', #no dummies to filter by purgedecap	
+	],
+	
+	'GNAC'     => ['* VSS VSS NGATEDNAC'],	#filter_gnac
+	'BJTDIODE' => ['* * * BJTDIODE'],
+);
+
+1;

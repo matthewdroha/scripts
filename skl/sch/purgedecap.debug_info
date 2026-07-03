@@ -1,0 +1,10 @@
+### Debug information for purge decap ###
+LN file: /p/mpg/proc/w/mroha/sklcore/test/msdecn.snprofile.sn
+purgedecap options:
+% Purging decap        = yes
+% Purging gnac         = yes
+% Purging BJT diodes   = no
+% Purging empty cells  = no
+% Purging dummy device = yes
+
+

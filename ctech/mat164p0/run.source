@@ -1,0 +1,1 @@
+/nfs/fm/disks/w.mroha.102/dts_cds_fedv-tsa_master-ctech/scripts/check_stdcell_verilog.pl --verilog-file-list s14nm.A9T.list --ctech-dir-list s14nm.ctech.A9T.list --run-name s14nm.A9T

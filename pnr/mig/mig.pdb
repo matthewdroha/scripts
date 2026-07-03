@@ -1,0 +1,95 @@
+{ advancedmacros
+  layer_arithmetics {
+    merge_ports_1264 {
+      new_layers [
+	FOR[ layer range [ poly metal1 metal2 metal3 metal4 metal5 metal6 metal7 metal8 ]
+	  body {
+            `layer'_port_merge { `layer'_portDrawing }
+            `layer'_port_merge_noprop { deleteprop(ALLPROPS,`layer'_port_merge) }
+            `layer'_port_text_polygons { texttopolygon(`layer'_port_merge_noprop,0.005) }
+            `layer'_portDrawing { `layer'_port_merge_noprop|(`layer'_port_merge_noprop&`layer'_port_text_polygons) }
+          }
+        ]
+	FOR[ layer range [ poly metal1 metal2 metal3 metal4 metal5 metal6 metal7 metal8 ]
+	  body {
+	    `layer'_marker_merge { `layer'keepout }
+            `layer'_marker_merge_noprop { deleteprop(ALLPROPS,`layer'_marker_merge) }
+            `layer'_text_polygons { texttopolygon(`layer',0.005) }
+            `layer'keepout { `layer'_marker_merge_noprop|(`layer'_marker_merge_noprop&`layer'_text_polygons) }
+          }
+        ]
+      ]
+      remove_layers [
+        FOR[ layer range [ poly metal1 metal2 metal3 metal4 metal5 metal6 metal7 metal8 ]
+          body {
+            `layer'_port_merge
+            `layer'_port_merge_noprop
+            `layer'_port_text_polygons
+	    `layer'_marker_merge
+            `layer'_marker_merge_noprop
+            `layer'_text_polygons    	
+          }
+        ]
+      ]
+    }
+    merge_ports_1266 {
+      new_layers [
+	FOR[ layer range [ vpoly TCN GCN metal1 metal2 metal3 metal4 metal5 metal6 metal7 metal8 ]
+	  body {
+            `layer'_port_merge { `layer'_portDrawing }
+            `layer'_port_merge_noprop { deleteprop(ALLPROPS,`layer'_port_merge) }
+            `layer'_port_text_polygons { texttopolygon(`layer'_port_merge_noprop,0.005) }
+            `layer'_portDrawing { `layer'_port_merge_noprop|(`layer'_port_merge_noprop&`layer'_port_text_polygons) }
+          }
+        ]
+	FOR[ layer range [ vpoly TCN GCN metal1 metal2 metal3 metal4 metal5 metal6 metal7 metal8 ]
+	  body {
+	    `layer'_marker_merge { `layer'keepout }
+            `layer'_marker_merge_noprop { deleteprop(ALLPROPS,`layer'_marker_merge) }
+            `layer'_text_polygons { texttopolygon(`layer',0.005) }
+            `layer'keepout { `layer'_marker_merge_noprop|(`layer'_marker_merge_noprop&`layer'_text_polygons) }
+          }
+        ]
+      ]
+      remove_layers [
+        FOR[ layer range [ vpoly TCN GCN metal1 metal2 metal3 metal4 metal5 metal6 metal7 metal8 ]
+          body {
+            `layer'_port_merge
+            `layer'_port_merge_noprop
+            `layer'_port_text_polygons
+	    `layer'_marker_merge
+            `layer'_marker_merge_noprop
+            `layer'_text_polygons    	
+          }
+        ]
+      ]
+    }
+    delete_text_1266 {
+       new_layers [
+	FOR[ layer range [ vpoly TCN GCN metal1 metal2 metal3 metal4 metal5 metal6 metal7 metal8 ]
+	  body {
+	    `layer' { selectshape(PATHS&POLYGONS,`layer') }
+	    `layer'_portDrawing { selectshape(PATHS&POLYGONS,`layer'_portDrawing) }
+            `layer'keepout { selectshape(PATHS&POLYGONS,`layer'keepout) }
+          }
+        ]
+      ]
+    }
+    tcnshort {
+      new_layers [
+        TCN_flat { flattenlayer(TCN) }
+	GCN_flat { flattenlayer(GCN) }
+	vpoly_flat { flattenlayer(vpoly) }
+	vpolyTCNGCN_flat { vpoly_flat&TCN_flat&GCN_flat }
+	vpolyTCNGCN_flat_os { vpolyTCNGCN_flat+0.005 }
+	
+	GCN_add { TCN&vpolyTCNGCN_flat_os }
+	TCN { TCN&!vpolyTCNGCN_flat_os }
+	GCN { GCN|GCN_addm }	
+      ]
+    }
+    settings {
+      verbose { YES }
+    }
+  }	
+}

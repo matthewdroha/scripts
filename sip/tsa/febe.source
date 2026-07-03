@@ -1,0 +1,5 @@
+dev/tests/run_simple_tdd_tests.csh -parallel -unit -toolset mat1.5.9 -ctech_style full_ctech -flow febe -process p1274 -dot_process '.7' -tool zirconqa >& p1274d7.febe.log
+dev/tests/run_simple_tdd_tests.csh -parallel -unit -toolset mat1.5.9 -ctech_style full_ctech -flow febe -process p1274 -dot_process '.13' -tool zirconqa >& p1274d13.febe.log
+dev/tests/run_simple_tdd_tests.csh -parallel -unit -toolset mat1.5.9 -ctech_style full_ctech -flow febe -process p1273 -dot_process '.1' -tool zirconqa >& p1273d1.febe.log
+dev/tests/run_simple_tdd_tests.csh -parallel -unit -toolset mat1.5.9 -ctech_style full_ctech -flow febe -process p1222 -dot_process '.2' -tool zirconqa >& p1222d2.febe.log
+dev/tests/run_simple_tdd_tests.csh -parallel -unit -toolset mat1.5.9 -ctech_style full_ctech -flow febe -process p1276 -dot_process '.21' -tool zirconqa >& p1276.21.febe.log

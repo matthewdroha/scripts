@@ -1,0 +1,24 @@
+#!/usr/intel/bin/perl5.85
+
+$| = 1 ;
+use DBI;
+
+## the project
+$project   = "pnr";
+
+require "/nfs/site/proj/mpg/proc/common/proj_skill/44_1.0/sql/passwd" ;
+$conn = DBI->connect("DBI:mysql:$project:$host_insert:$port_insert",$select_user,$select_password) || die "Can't connect: $DBI::errstr\n";
+
+#$rs = $conn->prepare("SELECT name,dev_count_lay FROM blocks_info WHERE type = 'fub'");
+$rs = $conn->prepare("select a.block,a.value from blocks_info as a, blocks_info as b WHERE a.prop='dev_count_lay' AND a.block=b.block and b.prop='type' and b.value='fub'");
+$rs->execute();
+
+print "Name\tDevice Count Lay\n";
+while (($name,$dev) = $rs->fetchrow_array) {
+	$hash{$name} = "$dev\n";
+
+}
+foreach $block (sort keys %hash) {
+	print "$block\t$hash{$block}";
+}
+$conn->disconnect ;

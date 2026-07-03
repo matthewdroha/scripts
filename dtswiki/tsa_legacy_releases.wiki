@@ -1,0 +1,84 @@
+Single TSA release will cover multiple toolsets
+
+== TSA Legacy: Latest Releases ==
+
+{| class="wikitable"
+|-
+! Lock
+! TSA Version
+! MAT Series
+|-
+| 1813
+| [[TSA/releases/1813.18ww15g|1813.18ww15g]]
+| 1713plus with the VCSMX/Verdi3 version moved to 2017.*: For static tools and VCSMX Deployment "Head-Start"
+|-
+| 1713plus
+| [[TSA/releases/1713plus.18ww15g|1713plus.18ww15g]]
+| 1713 PLUS MAT1.5 Static Tools: Spyglass-Lint, Spyglass-CDC, and VCLP Enabled For Deployment "Head-Start"
+|-
+| 1713
+| [[TSA/releases/1713.18ww15g|1713.18ww15g]]
+| MAT1.4   Starting with 18ww09c new nebulon and upf2.0 phase 1 upgrades are included
+|-
+| 1639
+| 1.04.11
+| MAT1.4
+|-
+| 1613
+| 1.03.11
+| MAT1.3
+|-
+|}
+
+
+== Legacy TSA: Release History ==
+
+=== 1813 (1713plus With VCSMX 2017) Release History ===
+
+[[TSA/releases/1813.18ww15g|1813.18ww15g]]
+
+[[TSA/releases/1813.18ww13d|1813.18ww13d]]
+
+[[TSA/releases/1813.18ww09c|1813.18ww09c]]
+
+[[TSA/releases/1813.18ww04b|1813.18ww04b]]
+
+
+=== 1713plus (MAT1.4 w/Additional MAT1.5 Static Tools) Release History ===
+
+[[TSA/releases/1713plus.18ww15g|1713plus.18ww15g]]
+
+[[TSA/releases/1713plus.18ww13d|1713plus.18ww13d]]
+
+[[TSA/releases/1713plus.18ww09c|1713plus.18ww09c]]
+
+[[TSA/releases/1713plus.18ww04b|1713plus.18ww04b]]
+
+[[TSA/releases/1713plus.18ww01e|1713plus.18ww01e]]
+
+[[TSA/releases/1713plus.17ww50f|1713plus.17ww50f]]
+
+
+=== 1713 (MAT1.4L) Release History ===
+
+[[TSA/releases/1713.18ww15g|1713.18ww15g]]
+
+[[TSA/releases/1713.18ww13d|1713.18ww13d]]
+
+[[TSA/releases/1713.18ww09c|1713.18ww09c]]
+
+
+=== 1713 (MAT1.4) Release History ===
+
+[[TSA/releases/1713.18ww04b|1713.18ww04b]]
+
+[[TSA/releases/1713.18ww01e|1713.18ww01e]]
+
+[[TSA/releases/1713.17ww50f|1713.17ww50f]]
+
+[[TSA/releases/1713.17ww38c|1713.17ww38c]]
+
+[[TSA/releases/1713.17ww31e|1713.17ww31e]]
+
+[[TSA/releases/1713.17ww24f|1713.17ww24f]]
+

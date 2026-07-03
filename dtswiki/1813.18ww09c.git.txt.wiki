@@ -1,0 +1,54 @@
+{| class="wikitable"
+! Type
+! style="white-space: nowrap;" | Date
+! Summary
+|-
+| style="color:white; background:#ff9500;" | '''New'''
+| style="white-space: nowrap;" | 2018-02-22 19:38:18
+| Installed zirconqarules tool data into 1713/1813 streams. Version set to 2.10.01. @fast(zirconqa)
+|-
+| style="color:white; background:#3399ff;" | '''Improved'''
+| style="white-space: nowrap;" | 2018-02-27 22:50:55
+| Upgraded collage from 3.7 to 4.11.  No coretools change. Refreshed ToolConfig hash from 1.5.0 baseline. @fast(collage)
+|-
+| style="color:white; background:#3399ff;" | '''Improved'''
+| style="white-space: nowrap;" | 2018-02-27 22:50:29
+| Upgraded vcsmx version from N-2017.12 to N-2017.12-1-T-20180212.  Upgraded verdi3 from N-2017.12 to N-2017.12-1-T-20180221. Refreshed ToolConfig hash from 1.5.0 baseline. @tsa(1813) @fast(vcsmx)
+|-
+| style="color:white; background:#3399ff;" | '''Improved'''
+| style="white-space: nowrap;" | 2018-02-27 13:14:44
+| Upgraded vc_static (vclp) from N-2017.12 to N-2017.12-1-20180214.  Upgraded vc_methodology_lp from 1.01.00.18ww03 to 1.01.03.18ww08. Refreshed ToolConfig hash from 1.5.0 baseline. @tsa(1713plus) @fast(vclp)
+|-
+| style="color:white; background:#3399ff;" | '''Improved'''
+| style="white-space: nowrap;" | 2018-02-27 13:06:10
+| Upgraded spyglass_lint version from 1.05.02.18ww01 to 1.05.04.18ww04. Upgraded spyglass_lint/spyglass from M2017.03-SP2-3 to M2017.03-SP2-4.  Refreshed ToolData hash from 1.5.0 baseline. @tsa(1713plus) @fast(spyglass_lint)
+|-
+| style="color:white; background:#3399ff;" | '''Improved'''
+| style="white-space: nowrap;" | 2018-02-27 12:50:26
+| Upgraded spyglass_cdc from 1.00.16 to 2.00.00.  Upgraded spyglass_cdc/spyglass from L2016.06-SP2-8-B4_Sept1 to M2017.03-SP2-4_18Jan31.  Refreshed ToolData hash from 1.5.0 baseline. @tsa(1713plus) @fast(spyglass_cdc)
+|-
+| style="color:white; background:#3399ff;" | '''Improved'''
+| style="white-space: nowrap;" | 2018-02-22 22:27:55
+| Upgraded nebulon version from d16ww36.2 to d18ww02.3 @fast(nebulon)
+|-
+| style="color:white; background:#3399ff;" | '''Improved'''
+| style="white-space: nowrap;" | 2018-02-22 22:23:56
+| Upgraded Magillem/MRE version (for Nebulon) from 5.9.1.8a to 5.2017.2.p1. @fast(mre)
+|-
+| style="color:white; background:#3399ff;" | '''Improved'''
+| style="white-space: nowrap;" | 2018-02-22 22:13:17
+| Upgraded saola version (for Nebulon) from 16.2.01 to 16.2.06 @fast(saola)
+|-
+| style="color:white; background:#3399ff;" | '''Improved'''
+| style="white-space: nowrap;" | 2018-02-22 18:37:37
+| Upgraded zirconqa version from 2.08.17 to 2.10.01 @fast(zirconqa)
+|-
+| style="color:white; background:#00b300;" | '''Fixed'''
+| style="white-space: nowrap;" | 2018-02-27 22:56:15
+| duet_sd version upgraded to 15.02.04 to disable the overriding of caliber environment vars.  Required for pre HDK1.4.6 baselines. @ddi(caliber) @hsd(https://hsdes.intel.com/appstore/article/#/1504559120)
+|-
+| style="color:white; background:#00b300;" | '''Fixed'''
+| style="white-space: nowrap;" | 2018-02-27 13:58:27
+| Removed ecl and clh switches from the sgcdc_test stage (not required for SetupChk) @tsa(1713plus) @fast(spyglass_cdc)
+|-
+|}

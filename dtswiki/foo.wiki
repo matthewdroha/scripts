@@ -1,0 +1,62 @@
+{| class="wikitable"
+! Facet
+! Built In Env Var
+! Purpose
+! Example Values
+! Comment
+|-
+| CUST
+| $ONECFG_CUST
+| Set SIIP configuration or program
+| "ADL, THUNDERCAT, p1273"
+| Values set by IP
+|-
+| dot_process
+| $ONECFG_dot_process
+| Set dot process for base technology
+| ".0, .1, .2, .3, …"
+| Values restricted by TSA
+|-
+| dut
+| $ONECFG_dut
+| Set design under test
+| "psf, fuse, gmm, …"
+| Values set by IP
+|-
+| process
+| $ONECFG_process
+| Set base process technology
+| "p1222, p1273, p1274, …"
+| Values restricted by TSA
+|-
+| CTECH
+| $ONECFG_CTECH
+| Switch between behavioral and structural
+| "BEH, STD"
+| Values restricted by TSA
+|-
+| STDLIB_TYPE
+| $ONECFG_STDLIB_TYPE
+| Set stdcell library
+| "b15, d04, e05, ec0, ec060pp"
+| Values restricted by TSA
+|-
+| toolset
+| $ONECFG_toolset
+| Set TFM contour
+| "m1713 mat1.4.10a, mat1.5.0,"
+| Values restricted by TSA
+|-
+| upf_version
+| $ONECFG_upf_version
+| Set upf standard
+| "1.0, 2.0, 2.1"
+| Values restricted by TSA
+|-
+| VT_TYPE
+| $ONECFG_VT_TYPE
+| Set structural variant selection
+| "bn, cn, dn, hn, ln, mn, nn, …"
+| Values restricted by TSA
+|-
+|}

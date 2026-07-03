@@ -1,0 +1,6 @@
+Type	Date	Summary
+Fixed	2018-03-30 13:13:00	Tied vcst (vc_static UI) version to the vc_static version for isogen. @fast(vc_static) @hsd(https://hsdes.intel.com/resource/1406924134) @hsd(https://hsdes.intel.com/resource/1406946880)
+New	2018-03-26 16:28:51	Added ToolConfig entries for onesourcebundle and os_utils to 1713 basetoolset. Set new variables for RDL_EXPORTER and RDL_IMPORTER to align with new nebulon version. @fast(onesource)
+Style	2018-03-26 16:27:25	Indenting update for m1713 toolset @vertical(tsa)
+Improved	2018-03-26 16:20:54	Added $CFG_PROJECT as a passthrough for febe. Newer stages are starting to reference this variable for configuration.  @vertical(tsa)
+Fixed	2018-03-26 16:16:09	Added 5 missing spyglass_cdc/sg_overrides variables to resolve fatal in sgcdc_test stage. Needed to be manually registered in TSA legacy despite existing in ToolConfig @tsa(vertical) @hsd(https://hsdes.intel.com/resource/1406929754)

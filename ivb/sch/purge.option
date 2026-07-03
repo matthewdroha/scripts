@@ -1,0 +1,147 @@
+
+#
+# This is purge-decap option file
+# This file is Perl file that requires by the purgedecap.pl script
+#
+# Note: All cell names, net and device type are case insensitive 
+#
+
+#----------------------------------------------------------#
+# PLEASE EDIT WITH CARE, BASE ON YOUR PROJECT DEFINITION!  #
+#----------------------------------------------------------#
+
+
+### Define cells to skip their device filtering
+%SKIP_CELL = (
+	#'template' => 'gnac decap dummy bjtdiode all'
+	#'example_cell1' => 'gnac dummy',
+	#'example_cell2' => 'all',
+);
+
+
+
+
+### Define cells to filter all theirs devices
+%BLACK_BOX = (
+	#'template' => 'something'
+	#'example_cell3' => 'yes',
+	'y80dcan4c' => 'yes',
+	'y80dcan4t' => 'yes',
+	'y80dcan4b' => 'yes',
+	### GIO decap
+	'gioddrdll_y80dcan4c_nom4' => 'yes',
+	'gioddrdll_y80dcan4b_nom4' => 'yes',
+	'gioddrdll_y80dcan4b_nom4' => 'yes',
+	'gioddrdll_y80dcan4t' => 'yes',
+	'gioddrdll_y80dcan4t_nom4' => 'yes',
+	'y80dcaisd4zp0'            => 'decap',
+        'y80dcaisd3zp0'            => 'decap',
+        'y80dcaisd2zp0'            => 'decap',
+	'gsr_m_y80dcaisd3zp0'     => 'decap',
+	'gsr_m_y80dcaisd2zp0'     => 'decap',
+	'giodpplldig_y80dcp0bnnz01' => 'decap',
+    'giodpplldig_y80dcp0innz02' => 'decap',
+    'giodpplldig_y80dcp0bnnz02' => 'decap',
+    'giodpplldig_y80dcp0innz03' => 'decap',
+    'giodpplldig_y80dcp0bnnz03' => 'decap',
+    'giodpplldig_y80dcp0bnnz08' => 'decap',
+    'giodpplldig_y80dcp0innz08' => 'decap',
+    'giodpplldig_y80dcp0bnnz05' => 'decap',
+    'giodpplldig_y80dcp0bnnz16' => 'decap',
+    'giodpplldig_y80dcp0innz05' => 'decap',
+    'giodpplldig_y80dcp0innz16' => 'decap',
+    'giodpplldig_y80dcp0bnnz06' => 'decap',
+    'giodpplldig_y80dcp0innz06' => 'decap',
+    'giodpplldig_yw8dcp0innz04' => 'decap',
+    'giodpplldig_yw8dcp0bnnz01' => 'decap',
+    'giodpplldig_yw8dcp0bnnz04' => 'decap',
+
+	### HV decap
+	'gsr_y80dcaihd4zp0_esr'   => 'decap',
+	'gsr_y80dcaihd3zp0_esr'   => 'decap',
+	'gsr_y80dcaihd2zp0_esr'   => 'decap',
+
+	# GT bonus arrays cells
+    'yt0bar00ln104' => 'yes',
+    'yt0bar00ln108' => 'yes',
+    'yt0bar00ln112' => 'yes',
+    'yt0bar00ln116' => 'yes',
+    'yt0bar00ln120' => 'yes',
+    'yt0bar00ln124' => 'yes',
+    'yt0bar00ln128' => 'yes',
+    'yt0bar00ln132' => 'yes',
+    'yt0bar00ln136' => 'yes',
+    'yt0bar00ln140' => 'yes',
+    'yt0bar00ln148' => 'yes',
+    'yt0bar00ln164' => 'yes',
+    'yt0bar00ln196' => 'yes',
+    'yt0bar00ln1c8' => 'yes',
+    'yt0bar00ln1j2' => 'yes',
+    'yt0bar00nn104' => 'yes',
+    'yt0bar00nn108' => 'yes',
+    'yt0bar00nn112' => 'yes',
+    'yt0bar00nn116' => 'yes',
+    'yt0bar00nn120' => 'yes',
+    'yt0bar00nn124' => 'yes',
+    'yt0bar00nn128' => 'yes',
+    'yt0bar00nn132' => 'yes',
+    'yt0bar00nn136' => 'yes',
+    'yt0bar00nn140' => 'yes',
+    'yt0bar00nn148' => 'yes',
+    'yt0bar00nn164' => 'yes',
+    'yt0bar00nn196' => 'yes',
+    'yt0bar00nn1c8' => 'yes',
+    'yt0bar00nn1j2' => 'yes',
+
+    'y80vargbnd36f' => 'yes',
+);
+
+
+
+
+### Defined list of devices to filter
+%FILTER_DEVICE = (
+	'DECAP' => [
+		#'SRC GATE DRN DEV_TYPE',
+		'VCC VSS VCC  P',
+		'VCC VSS VCC  PLL',	
+		'VCCXXX VSS VCCXXX P',
+		'VCCXXX VSS VCCXXX PLL',
+		'VCCXXH VSS VCCXXH P',
+		'VCCXXH VSS VCCXXH PLL',		
+	],
+	
+	'DUMMY' => [
+		#'SRC GATE DRN DEV',
+		'VSS VSS VSS N',  
+		'VSS VSS VSS NLL',
+                'VSS VSS VSS NAL',
+		'VCC VCC VCC P',
+		'VCC VCC VCC PLL',
+		'VCCP VCCP VCCP PAL',	
+		'VCCA VCCA VCCA PAL',
+                'VCCL VCCL VCCL P',
+                'VCCL VCCL VCCL PAL',
+                'VCCL1 VCCL1 VCCL1 P',
+                'VCCL1 VCCL1 VCCL1 PAL',
+                'VCCL2 VCCL2 VCCL2 P',
+                'VCCL2 VCCL2 VCCL2 PAL',
+		'VCCXXH VCCXXH VCCXXH P',
+		'VCCFHV VCCFHV VCCFHV P',
+		'VCCXXH VCCXXH VCCXXH PAL',
+                'VCCFHV VCCFHV VCCFHV PAL',
+                'VCCPLL VCCPLL VCCPLL PAL',
+		'VCCSFR VCCSFR VCCSFR P',
+		'VCCSFR VCCSFR VCCSFR PAL',
+                'VCCXX VCCXX VCCXX PAL',
+                'VCCXX VCCXX VCCXX PAL',
+		'VCCPPA VCCPPA VCCPPA PAL'
+
+
+	],
+	
+	'GNAC'     => ['* VSS * NGATEDNAC', ],	
+	'BJTDIODE' => ['* * * BJTDIODE'],
+);
+
+1;

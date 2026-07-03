@@ -1,0 +1,382 @@
+{| class="wikitable"
+! TOOL
+! MAT_RULE
+! VERSION
+! HDK_RELEASE_NOTES
+|-
+| ace
+| version_in_MAT
+| 2.05.10
+| http://nsec.ch.intel.com/cad_nfs/ace/doc/Release_Notes
+|-
+| ace_utils
+| 
+| 1.01.01
+| /p/hdk/rtl/proj_tools/ace_utils/master/1.01.01/doc/Release_Notes
+|-
+| array_dft_audit
+| 
+| 15.04.06
+| https://securewiki.ith.intel.com/download/attachments/195888070/array_dft_audit.docx
+|-
+| baseline_master
+| 
+| 1.4.2
+| 
+|-
+| caliber
+| 
+| 16.04.03
+| 
+|-
+| cdclint
+| 
+| 17.25.1_beta01
+| https://dtspedia.intel.com/CDC_Lint
+|-
+| collage
+| consumer_greater_or_equal
+| 4.11
+| http://wiki.ith.intel.com/download/attachments/127407579/2.6.2docx?version=1&modificationDate=1398317660617&api=v2
+|-
+| configulate
+| 
+| 1.0.33.p37
+| 
+|-
+| conformal
+| 
+| 16.20-s140
+| 
+|-
+| coretools
+| consumer_greater_or_equal
+| K-2015.06-SP7
+| 
+|-
+| designcompiler
+| version_in_MAT
+| L-2016.03-SP3
+| 
+|-
+| designware
+| 
+| 2014.01
+| 
+|-
+| dvt
+| 
+| 16.01.11-e45
+| 
+|-
+| effm
+| consumer_greater_or_equal
+| 2016.15
+| https://securewiki.ith.intel.com/display/PSS/EFFM+Design+Kit+-+EDK+2016.15
+|-
+| emubuild
+| 
+| 2.4.4
+| https://securewiki.ith.intel.com/display/PSS/Release+2.4.4
+|-
+| febe3
+| 
+| 3.2.23
+| https://dtspedia.intel.com/FE2BE/Release_Notes#3.2.23
+|-
+| fishtail
+| 
+| 2016.06b
+| 
+|-
+| flowbee
+| 
+| 1.04.04
+| /p/hdk/rtl/proj_tools/flowbee/master/1.04.04/doc/Release_Notes
+|-
+| flowdigest
+| 
+| 1.01.12
+| /p/hdk/rtl/proj_tools/FlowDigest/master/1.01.12/doc/Release_Notes
+|-
+| intelcdc
+| consumer_less_or_equal
+| v20170612
+| https://dtspedia.intel.com/ACE-CDC-v20170612-release
+|-
+| isaf
+| RULE_NOT_SET
+| 2.2.7.5
+| /p/hdk/rtl/cad/x86-64_linux30/dt/isaf/2.2.7.5/doc/ReleaseNotes.txt
+|-
+| jem
+| consumer_greater_or_equal
+| 16.1.2_64
+| 
+|-
+| lintra
+| consumer_less_or_equal
+| 15.3p33_shOpt64
+| https://dtspedia.intel.com/Lintra/Release_Notes/15.3p33_shOpt64
+|-
+| lintra-rules
+| consumer_less_or_equal
+| 1.10.03.15_3
+| https://dtspedia.intel.com/Lintra_UDR_Release_Notes
+|-
+| mre
+| consumer_greater_or_equal
+| 5.2017.2.p1
+| /p/hdk/rtl/cad/x86-64_linux30/magillem/mre/5.2017.2.p1/release_notes.txt
+|-
+| nebulon
+| consumer_greater_or_equal
+| d18ww02.3
+| https://intelpedia.intel.com/Nebulon_Release_Schedule#Release_Notes
+|-
+| onecfg
+| 
+| 1.02.08
+| /p/hdk/rtl/proj_tools/onecfg/master/1.02.08/doc/Release_Notes
+|-
+| ovm
+| version_in_MAT
+| 2.1.2_2a_ml
+| /p/hdk/rtl/cad/x86-64_linux30/ovm/ovm/2.1.2_2a_ml/release-notes.txt
+|-
+| power_templates
+| 
+| v16ww15a
+| 
+|-
+| PowerArtist
+| 
+| 2015.2.7p1
+| /p/hdk/rtl/cad/x86-64_linux30/apache/PowerArtist/2015.2.7p1/doc/PowerArtistReleaseNotes.pdf
+|-
+| psetup
+| 
+| 16.01.01
+| 
+|-
+| puni
+| 
+| 16.36.0
+| https://dtspedia.intel.com/PUNI/Release_Notes/16.36.0
+|-
+| questacdc
+| consumer_greater_or_equal
+| V10.4f_5
+| https://dtspedia.intel.com/Clock_Domain_Crossing#New_enhancements
+|-
+| rdlexporter
+| 
+| d16ww48.5
+| 
+|-
+| rdt
+| 
+| 1.4.2.p001
+| 
+|-
+| rdt_fev
+| 
+| 17.1.2
+| 
+|-
+| rdt_fev_overrides
+| 
+| siphdk_sip_overrides.p012
+| 
+|-
+| rdt_ft
+| 
+| 16.4.2
+| 
+|-
+| rdt_sd_1222_overrides
+| 
+| 16.04.001
+| 
+|-
+| rdt_sd_1273_overrides
+| 
+| refhdk_dts73_iov_d04_corp.p006
+| 
+|-
+| rdt_sd_1274_overrides
+| 
+| dts_empty
+| 
+|-
+| rdt_sd_1275_overrides
+| 
+| dts_empty
+| 
+|-
+| rdt_sd_1276_overrides
+| 
+| 15.47.3.dts_empty
+| 
+|-
+| rdt_sd_common_overrides
+| 
+| TSA1713_17.01.001
+| 
+|-
+| rtltools
+| 
+| 1.01.07
+| /p/hdk/rtl/proj_tools/rtltools/master/1.01.07/doc/Release_Notes
+|-
+| runtools
+| 
+| 1.04.05.p01.p02
+| /p/hdk/rtl/proj_tools/runtools/master/1.04.05.p01.p02/release_notes
+|-
+| sage
+| RULE_NOT_SET
+| 1.9.8
+| /p/hdk/rtl/cad/x86-64_linux30/dt/sage/1.9.8/doc/ReleaseNotes.txt
+|-
+| saola
+| consumer_greater_or_equal
+| 16.2.06
+| /p/hdk/rtl/cad/x86-64_linux30/intel/saola/16.2.06/release_note.txt
+|-
+| scanaudit
+| 
+| 2.2.5.2
+| /p/hdk/rtl/cad/x86-64_linux30/dt/isaf/2.2.5.2/doc/ReleaseNotes.txt
+|-
+| schedlib
+| 
+| 1.02.04
+| /p/hdk/rtl/proj_tools/SchedLib/master/1.02.04/doc/Release_Notes
+|-
+| sd_build
+| 
+| 16.4.3.3
+| 
+|-
+| socfusegen
+| consumer_greater_or_equal
+| 2.34
+| 
+|-
+| spyglass
+| consumer_less_or_equal
+| 5.6.0.6a
+| https://dtspedia.intel.com/Category:Spyglass/Release_Notes#SpyGlass_5.6.0.6a
+|-
+| spyglass_cdc
+| consumer_less_or_equal
+| 2.00.00
+| 
+|-
+| spyglass_dft
+| consumer_less_or_equal
+| 1.03.00
+| 
+|-
+| spyglass_lint
+| consumer_less_or_equal
+| 1.05.04.18ww04
+| 
+|-
+| spyglass_lp
+| consumer_less_or_equal
+| 1.03.02.16ww38
+| https://dtspedia.intel.com/Category:Low_power_lint_rtl/Release_Notes#SpyGlass_Methodology_LP_1.03.02.16ww38
+|-
+| spyglass_methodology
+| consumer_less_or_equal
+| 1.02.09.16ww18p2
+| 
+|-
+| spyglass_methodology_lp
+| consumer_less_or_equal
+| 1.03.02.16ww38
+| 
+|-
+| starving_artist
+| 
+| 15.26.1
+| https://dtspedia.intel.com/Starving_Artist/Starving_Artist_Release_Notes_15.26.1
+|-
+| synplifypro
+| 
+| I-2014.03_p1
+| 
+|-
+| tessent
+| 
+| 2016.2
+| 
+|-
+| uvm
+| version_in_MAT
+| 1.2
+| /p/hdk/rtl/cad/x86-64_linux30/accellera/uvm/1.2/release-notes.txt
+|-
+| vc_methodology_lp
+| RULE_NOT_SET
+| 1.01.03.18ww08
+| 
+|-
+| vc_static
+| RULE_NOT_SET
+| N-2017.12-1-20180214
+| https://dtspedia.intel.com/Category:Low_power_lint_rtl/Release_Notes#VC_STATIC_N-2017.12-1-20180214
+|-
+| vcsmx
+| version_in_MAT
+| L-2016.06-SP2-11
+| https://solvnet.synopsys.com/dow_retrieve/L-2016.06/ni/vcs_mx.html
+|-
+| vcst
+| RULE_NOT_SET
+| N-2017.12-1-20180214
+| 
+|-
+| verdi3
+| version_in_MAT
+| L-2016.06-SP1-1
+| /p/hdk/rtl/cad/x86-64_linux30/synopsys/verdi3/L-2016.06-SP1-1/doc/verdi3.pdf
+|-
+| vggnu
+| 
+| 2016.06
+| 
+|-
+| vipcat
+| version_in_MAT
+| vipcat_3psi_11.30-s035-28-08-2015
+| 
+|-
+| visaflow
+| consumer_greater_or_equal
+| 3.30.01
+| https://dtspedia.intel.com/Visa_IT/VisaFlow#Version_3.30.01
+|-
+| visait
+| consumer_greater_or_equal
+| 3.11.8
+| /p/hdk/rtl/cad/x86-64_linux30/intel/VisaIT/3.11.8/ReleaseNotes.txt
+|-
+| xvm
+| consumer_greater_or_equal
+| 1.0.1
+| /p/hdk/rtl/cad/x86-64_linux30/intel/xvm/1.0.1/release_notes.txt
+|-
+| zirconqa
+| version_in_MAT
+| 2.10.01
+| https://dtspedia.intel.com/ZirconQA/Release_Notes/rel_2.10.01
+|-
+| zirconqarules
+| RULE_NOT_SET
+| 2.10.01
+| 
+|-
+|}

@@ -1,0 +1,88 @@
+#!/usr/bin/perl -w
+use strict;
+
+
+die "\nPLEASE ENTER THREE ARGUMENTS: LIBRARY TAG MODEL\n\n" unless scalar(@ARGV) == 3;
+my ($lib,$tag,$model) = @ARGV;
+
+&test_commandline($lib,$tag,$model);
+&test_lib($lib);
+&test_model($lib,$model);
+my $release_tag = &test_tag($lib,$tag,$model);
+print "\n\n$tag\n$release_tag\n\n";
+&run_release2model($lib,$release_tag,$model);
+
+sub test_commandline {
+    my $l = shift;
+    my $t = shift;
+    my $m = shift;
+    print "\nCommand line syntax should read:  .../release2model_mod.pl library tag model\n\n";
+    print "You have input the following arguments:\n\n";
+    print "Library:  $l\nTag:      $t\nModel:    $m\n\n";
+    print "Continue? (y/n)";
+    chomp(my $response = <STDIN>);
+    until ($response =~ /^yes$|^y$|^no$|^n$/i) {
+        print "Continue? (y/n)";
+        chomp($response = <STDIN>);
+    }
+    exit if ($response =~ /no|n/i);
+}
+
+sub test_lib {
+    my $l = shift;
+    my ($cell_project,$libtype);
+    if ($l =~ /(\w+_\w+)_(\w+)/) {
+        ($cell_project,$libtype) = ($1,$2);
+    }
+    else {
+        die "\nThere is a problem with the library entered.\nIt should have the form ******_******_***\n\n";
+    }
+    unless (-e "$ENV{DB_ROOT}/$ENV{PROJECT}/$cell_project/$libtype") {
+        print "\nLIBRARY ($l) SPECIFIED DOES NOT EXIST IN ($ENV{PROJECT}) ENVIRONMENT\n\n";
+        exit;
+    }
+}
+
+sub test_model {
+    my $l = shift;
+    $l =~ s/.*_(\w+)_.*/$1/;
+    my $m = shift;
+    unless (-e "$ENV{DA_PROJECTS}/$ENV{PROJECT}/$l.$m.cfg") {
+        print "\nMODEL ($m) DOES NOT EXIST FOR THIS PROJECT ($l)\n\n";
+        exit;
+    }
+}
+
+sub test_tag {
+    my $l = shift;
+    my $t = shift;
+    my $m = shift;
+    my ($cell_project,$libtype,$test_tag,$return_tag);
+    if ($l =~ /(\w+_\w+)_(\w+)/) {
+        ($cell_project,$libtype) = ($1,$2);
+    }
+    if ($t =~ /^LATEST$|^work$/) {
+        $test_tag = "work";
+        $return_tag = "LATEST";
+    }
+    else {
+        $test_tag = $t;
+        $return_tag = $t;
+    }
+    
+    unless (-e "$ENV{DB_ROOT}/$ENV{PROJECT}/$cell_project/$libtype/$test_tag") {
+        print "\nTAG ($t) DOES NOT EXIST FOR LIBRARY ($l)\n\n";
+        exit;
+    }
+    $return_tag;
+}
+
+sub run_release2model {
+    my $l = shift;
+    my $t = shift;
+    my $m = shift;
+    chomp(my @output = `$ENV{PROJ_SKILL}/gallery/bin/release2model.tcl -lib $l -tag $t -model $m`);
+    print "\n";
+    print "$_\n" foreach @output;
+    print "\n\n";
+}

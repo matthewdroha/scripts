@@ -1,0 +1,319 @@
+FUB-NAME             : gioddrcmdn          
+PROJECT              : ivbio4cg            
+FUB-TYPE             : datap               
+NUMBER-DEVICES       : 1226832             
+LAYOUT-VERSION       : 1.178 lnf           
+DATE                 : 28/7/2010           
+RUNTIME              : 22h:09m:37s
+USER                 : sthouta             
+DFM                  : User supplied: DFM found to M9. No additional fill
+ATF requested        : lorf
+
+==========================
+Here are the RV results:
+==========================
+
+ATF status           : DIRTY
+
+Fub status           : DIRTY               
+
+************
+RV Summary:
+************
+--------------------------
+|     | Signal  | Power  |
+--------------------------
+| SH  | 0       | 0      |
+| EM  | 0       | 0      |
+| PK  | 0       | 0      |
+| SF  | 0       | 0      |
+--------------------------
+
+************
+DCC Summary:
+************
+-----------------
+|       | DCC   |
+-----------------
+| vss   | 929   |
+| vcc   | 8279  |
+| vccpeu | 0     |
+-----------------
+
+Hot Spots Summary:
+Number HotSpots      : 9                   
+HS layers            : via1 (1) m2 (1) via2 (1) m3 (1) via3 (1) m4 (1) via4 (1) m5 (2) 
+
+
+***********
+DETAILS:
+***********
+
+
+Number of non-simulated-nets 68 / Total number of nets 52917 (0.1%)
+************************************************************
+
+PAY ATTENTION:
+************************************************************
+68 nets were not analyzed since they are incomplete.
+Please review them by using the below Unix command:
+cat /p/mpg/proc/common2/utils/tool_utils/rv/ivb/a0_archive/fubs/gioddrcmdn/latest/drive/report/gioddrcmdn.error_warning | grep NRV_W_42
+************************************************************
+
+
+DCC summary on net VSS:
+--------------------------------------------------------------
+| Layer  |               Absolute IR Drop (mV)               |
+|        |  X(u)  |  Y(u)  | Worst   |Threshold| #Violations |
+--------------------------------------------------------------
+|   via7 | 552.02 | 846.32 |   27.01 |   57.00 |           0 |
+|   via6 | 543.48 | 431.51 |   34.69 |   67.00 |           0 |
+|   via5 | 553.23 | 846.47 |   48.31 |   77.00 |           0 |
+|   via4 | 543.51 | 435.48 |   77.40 |   87.00 |           0 |
+|   via3 | 554.62 | 839.04 |   98.27 |   97.00 |           2 |
+|   via2 | 312.52 | 436.33 |  124.24 |  109.00 |          44 |
+|   via1 | 312.21 | 436.33 |  139.02 |  116.00 |         359 |
+|   via0 | 312.21 | 436.36 |  147.83 |  129.00 |         133 |
+|    tcn | 312.21 | 436.22 |  159.22 |  135.00 |         391 |
+-------------------------------------------------------------
+
+DCC summary on net VCC:
+--------------------------------------------------------------
+| Layer  |               Absolute IR Drop (mV)               |
+|        |  X(u)  |  Y(u)  | Worst   |Threshold| #Violations |
+--------------------------------------------------------------
+|   via7 | 550.10 | 845.52 |   40.18 |   57.00 |           0 |
+|   via6 | 540.92 | 432.71 |   57.08 |   67.00 |           0 |
+|   via5 | 541.89 | 432.71 |   71.06 |   77.00 |           0 |
+|   via4 | 541.89 | 436.62 |  101.01 |   87.00 |          40 |
+|   via3 | 314.66 | 433.20 |  132.40 |   97.00 |         481 |
+|   via2 | 312.86 | 433.49 |  153.82 |  109.00 |         845 |
+|   via1 | 312.21 | 438.05 |  191.74 |  116.00 |        2351 |
+|   via0 | 312.21 | 438.02 |  199.91 |  129.00 |        1451 |
+|    tcn | 312.21 | 438.16 |  210.48 |  135.00 |        3111 |
+-------------------------------------------------------------
+
+DCC summary on net VCCPEU:
+--------------------------------------------------------------
+| Layer  |               Absolute IR Drop (mV)               |
+|        |  X(u)  |  Y(u)  | Worst   |Threshold| #Violations |
+--------------------------------------------------------------
+|   via7 | 194.19 | 400.79 |    9.61 |   57.00 |           0 |
+|   via6 | 194.35 | 382.55 |   24.16 |   67.00 |           0 |
+|   via5 | 200.22 | 382.55 |   37.06 |   77.00 |           0 |
+|   via4 | 204.75 | 380.51 |   54.26 |   87.00 |           0 |
+|   via3 | 226.26 | 398.75 |   79.68 |   97.00 |           0 |
+|   via2 | 202.16 | 401.56 |   94.39 |  109.00 |           0 |
+|   via1 | 209.79 | 972.13 |  113.26 |  116.00 |           0 |
+|   via0 | 209.79 | 972.15 |  123.65 |  129.00 |           0 |
+|    tcn | 209.70 | 971.97 |  133.36 |  135.00 |           0 |
+-------------------------------------------------------------
+
+RV Conditions:
+Frequency            : 1866                
+Junction_t           : 98                  
+Sh-Budget            : 10                  
+Voltage              : 1.05                
+
+
+Input Files :
+---------------
+Mandatory Input Files :
+aspen_rv_dis.net.report : /p/mpg/proc/common2/utils/tool_utils/rv/ivb/a0_archive/fubs/gioddrcmdn/latest/aspen/results/gioddrcmdn.aspen_rv_dis.net.report.gz
+slopes.report        : /p/mpg/proc/common2/utils/tool_utils/rv/ivb/a0_archive/fubs/gioddrcmdn/latest/tango/analysis/gioddrcmdn.slopes.report.gz
+aspen_rv_enb.net.report : /p/mpg/proc/common2/utils/tool_utils/rv/ivb/a0_archive/fubs/gioddrcmdn/latest/aspen/results/gioddrcmdn.aspen_rv_enb.net.report.gz
+domino_driven        : /p/mpg/proc/common2/utils/tool_utils/rv/ivb/a0_archive/fubs/gioddrcmdn/latest/tango/analysis/gioddrcmdn.domino_driven.gz
+rcd                  : /p/mpg/proc/common2/utils/tool_utils/rv/ivb/a0_archive/fubs/gioddrcmdn/latest/flipper/rcd/gioddrcmdn.rcd.gz
+clk_node_listing.rep : /p/mpg/proc/common2/utils/tool_utils/rv/ivb/a0_archive/fubs/gioddrcmdn/latest/tango/analysis/gioddrcmdn.clk_node_listing.rep.gz
+evr                  : /p/mpg/proc/common2/utils/tool_utils/rv/ivb/a0_archive/fubs/gioddrcmdn/latest/tango/evrbvr/gioddrcmdn.evr.gz
+smi.ovr              : /p/mpg/proc/common2/utils/tool_utils/rv/ivb/a0_archive/fubs/gioddrcmdn/latest/tango/analysis/gioddrcmdn.smi.ovr.gz
+rv_info              : /p/mpg/proc/common2/utils/tool_utils/rv/ivb/a0_archive/fubs/gioddrcmdn/latest/tango/analysis/gioddrcmdn.rv_info.gz
+
+No mandatory files were missing.
+
+No optional input Files given (af.dcfg, mutex.dcfg, coho).
+
+
+RESULTS ARE AT WORK AREA: /p/mpg/proc/common2/utils/tool_utils/rv/ivb/a0_archive/fubs/gioddrcmdn/latest
+
+
+If you need help - We are ready to help you.
+Regards,
+RV TEAM
+================================================================
+
+Tools Versions:
+Drive                : ebabb_ivbprivate    
+Tavor                : 2.1.11.p1_stPseOpt64X
+RV                   : 6.23.7.p1_stPseOpt64
+
+RV_TECH_FILE         : /p/mpg/proc/common2/utils/tool_utils/rv/ivb4cg/techfile/p1270_0x1r0_dts_4y_120c_0p1_rev1.3.rv_tech
+RVL_TECH_FILE        : /p/mpg/proc/common2/utils/tool_utils/rv/ivb4cg/techfile/p1270_0x1r0_dts_4y_120c_0p1_rev1.3.rvl_tech
+
+-----------------------------------------------------------------
+Special parameters were given in DCFG file: 
+/p/mpg/proc/common2/utils/tool_utils/rv/ivb/a0_archive/fubs/gioddrcmdn/latest/drive/cfg/gioddrcmdn.dcfg
+set DRIVE(carmel_flow_params) "-mpp -nometal_fill -analog -no_zones m1:m2:m3:m4:m5:m6:m7:m8:m9 -cml_file /nfs/site/proj/ivb/rv_archive01/lists/cml.tcl "
+set DRIVE(min_extr_quality) 10
+set DRIVE(allow_inconsistency) 1
+set DRIVE(pwr_disconnect_percentage_allowed) 100
+set DRIVE(high_layer_from_pwr_ntcl) 0
+#set DRIVE(ignore_carmel_error) 1
+set DRIVE(force_windowing) 1    
+set DRIVE(carmel_win_pdb_flat) 1
+
+### Added by the flow on Fri Jun  4 11:50:15 PDT 2010
+set DRIVE(section) gio4cg
+set DRIVE(junction_t) 98
+set DRIVE(frequency) 1866
+set DRIVE(vcc_val) 1.05
+set DRIVE(Tj) $DRIVE(junction_t)
+
+### Added by the flow on Fri Jun  4 12:39:16 PDT 2010
+set DRIVE(disconnection_full_report) 1
+set DRIVE(milestone_th) 0
+set DRIVE(take_carmel_archive_params) 0
+set DRIVE(sfactor_violation_threshold) 0.80
+set DRIVE(rv_tech_file) $env(PROJ_UTILS)/tool_utils/rv/ivb4cg/techfile/p1270_0x1r0_dts_4y_120c_0p1_rev1.3.rv_tech
+set DRIVE(rvl_tech_file) $env(PROJ_UTILS)/tool_utils/rv/ivb4cg/techfile/p1270_0x1r0_dts_4y_120c_0p1_rev1.3.rvl_tech
+set DRIVE(pwr_nets_top_layer_ovrd) {{vcc metal8} {vccd metal8} {vccpedllqu metal8} {vccpeu metal8} {vss metal8}}
+set DRIVE(pwr_nets_to_analyze) "vss vcc vccpeu"
+set DRIVE(grid_est) 0
+set DRIVE(read_active_pwr_evr) 1
+set DRIVE(active_pwr_evr_file) /p/mpg/proc/common2/utils/tool_utils/rv/ivb/a0_archive/fubs/gioddrcmdn/latest/tavor/input/gioddrcmdn.pwr_evr.sp
+-----------------------------------------------------------------
+
+###############################
+## SLA -  WARNING/ERRORS ##
+###############################
+Total Fatal messages  : 0
+Total Error messages  : 609731
+SLA_E_301:12562:	 The  name GIODDRCMDN_PDFD/FLOATISS_2964788 doesn't exist in gioddrcmdn.net_xref[.gz] or gioddrcmdn.dev_xref[.gz].
+SLA_E_304:597169:	() net {GIODDR_CMDNDLLS/SUPPLYCLAMP/RES[0]/MID4} from /p/mpg/proc/common2/utils/tool_utils/rv/ivb/a0_archive/fubs/gioddrcmdn/latest/rv/sla/tmp/gioddrcmdn.rv_net doesn't exist in {gioddrcmdn.net_xref[.gz]} or {gioddrcmdn.dev_xref[.gz]} file.
+Total Warning messages  : 3430
+SLA_W_306:3426:	 Cannot link GIODDRCMDN_PDFD/BONUS_AI0QNAA2NL0G0_107/4 legged transistors with their source nets...sourceName attribute will be undefined.
+Total Info messages  : 2
+IDMB_I_001:1:	 Connection to iDMB established
+IDMB_I_003:1:	 Connection to iDMB closed
+
+
+###############################
+## NETRV -  WARNING/ERRORS   ##
+###############################
+Total Error messages  : 71 real, 45050 can be ignored, 45121 total
+Total Warning messages  : 194 real, 19263 can be ignored, 19457 total
+Total Fatal messages  : 0 real, 0 can be ignored, 0 total
+
+======== Summary per Message: ========
+NRV_E_123: 0 real, 142 can be ignored, 142 total
+NRV_E_601: 0 real, 44899 can be ignored, 44899 total
+NRV_E_494: 71 real, 0 can be ignored, 71 total
+NRV_E_892: 0 real, 9 can be ignored, 9 total
+NRV_W_126: 79 real, 0 can be ignored, 79 total
+NRV_W_424: 68 real, 231 can be ignored, 299 total
+NRV_W_425: 0 real, 1075 can be ignored, 1075 total
+NRV_W_434: 0 real, 17956 can be ignored, 17956 total
+NRV_W_293: 0 real, 1 can be ignored, 1 total
+NRV_W_124: 47 real, 0 can be ignored, 47 total
+
+======== Errors/Warnings description: ========
+NRV_E_601:  group (meta device) is declared without an explicit signal to connect with: GIODDR_CMDNDLLS/CMP0/CMPCHOP/I0/I11
+NRV_E_123:  No pin on super-node. can't resolve open net. GIODDRCMDNCH1/GIODDRCMDN_CH/GIODDRCMDN30_CMDBUF/SCOMPCODINGBUF[4]
+NRV_E_494: Net <> won't be analyzed as it isn't connected to any transistor and no EVR/BVR data were provided.
+NRV_E_892: EMPTY NET <> NO CURRENT ALLOCATION
+NRV_W_425: can not check EM/SH on signal <> : net is incomplete - NO RECEIVER
+NRV_W_434: Cannot solve net <> Net got no type or no driver to associate with. Might be feed-through or circuit analysis failure to understand circuit.
+NRV_W_124: Net <> has opens. heuristic merge applied. over or under-estimation might occur.
+NRV_W_126: There are several options to resolve open net <> due to several pairs of pins with the same minimal distance. Only one pair will be chosen according to minimal X/Y coordinate or layer.
+NRV_W_424: can not check EM/SH on signal <> : net is incomplete - NO DRIVER
+NRV_W_293:  Some transistors got no driver. unexpexcted driver structure. look for a minus (-) at the driver field at the rv_dir_out file
+
+################################
+## TAVORPWR -  WARNING/ERRORS ##
+################################
+Total Fatal messages  : 0
+Total Error messages  : 0
+Total Warning messages  : 4495453
+Tavor_W_1213:89076:	CurrentSourcesGen: transistor ( ) doesn't have sig2pwr data
+Tavor_W_1214:210360:	reportDisconnections: Disconnected CLUSTER
+Tavor_W:3:	Total current on current sources: 0.27339 <-> Total current on voltage sources: 0.27345
+Tavor_W_1215:2014241:	reportDisconnections: Disconnected resistor: r0x824e215. layout is probably incomplete.
+Tavor_W_1216:2181765:	reportDisconnections: Disconnected node: n30230328.X461220Y80391_145_30230328. layout is probably incomplete.
+Tavor_W_1217:2:	reportDisconnections: Total disconnected Clusters: 142582
+Tavor_W_1218:2:	reportDisconnections: Total disconnected Resistors: 1263147
+Tavor_W_1220:2:	reportDisconnections: Total disconnected Current Sources: 264
+Tavor_W_1219:2:	reportDisconnections: Total disconnected Nodes: 1380423
+Total Info messages  : 525
+DesignBuilder_I_1027:10:	Build status Successful. 
+CARMEL_I_170511:1:	Using via modelling file: /p/mpg/proc/common2/utils/tool_utils/carmel_flow/2008ww08p19ivb/sub_tools/carmel/1270/p1270_0x1r0.ctf
+CARMEL_I_170550:1:	CarmelLayersMgr: start initialization.
+CARMEL_I_170551:1:	CarmelLayersMgr: finish initialization.
+Hspicebuilder_I_1022:5:	Adding composite cell vccpedllqu from /p/mpg/proc/common2/utils/tool_utils/rv/ivb/a0_archive/fubs/gioddrcmdn/latest/tavor/input/gioddrcmdn.pwr_evr.sp
+CARMEL_I_170553:3:	minWidth=0 for layer c4
+CARMEL_I_170593:2:	CarmelProcessConfiguration: Layer: mte does not appear in the current process.
+Tavor_I_1104:11:	Tdb::RVTechData: Reading RV tech file: /p/mpg/proc/common2/utils/tool_utils/rv/ivb4cg/techfile/p1270_0x1r0_dts_4y_120c_0p1_rev1.3.rv_tech.
+
+
+################################
+## TAVOR Thermal -  WARNING/ERRORS ##
+################################
+Total Fatal messages  : 0
+Total Error messages  : 3426
+Tavor_E:3426:	flow Failed to write net to hot-net file. Net: gioddrcmdn_pdfd/floatiss_2965156.
+Total Warning messages  : 29573
+Tavor_W_1558:40:	QDB: Resistor layer 2 doesn't match layer Metal1 resolved from node layers
+Tavor_W:28566:	setting integration_flow is deprecated (will not be available in 2010 and beyond). Please migrate to using thrml_integrator_hier_mode instead.
+Tavor_W_1253:967:	ThrmlResistorMasher::placeResistor: Resistor covers more than 50 pixels (sanity check). r0x116d from net gioddrcmdnch0/gioddrcmdn_ch0/mc2gdcommanddriveenableqnnnh[1] skipped.
+Total Info messages  : 47
+CARMEL_I_170511:1:	Using via modelling file: /p/mpg/proc/common2/utils/tool_utils/carmel_flow/2008ww08p19ivb/sub_tools/carmel/1270/p1270_0x1r0.ctf
+CARMEL_I_170550:1:	CarmelLayersMgr: start initialization.
+CARMEL_I_170551:1:	CarmelLayersMgr: finish initialization.
+CARMEL_I_170553:3:	minWidth=0 for layer c4
+CARMEL_I_170593:2:	CarmelProcessConfiguration: Layer: mte does not appear in the current process.
+Tavor_I_1104:1:	Tdb::RVTechData: Reading RV tech file: /p/mpg/proc/common2/utils/tool_utils/rv/ivb4cg/techfile/p1270_0x1r0_dts_4y_120c_0p1_rev1.3.rv_tech.
+
+
+################################
+## TAVOR RVchecks -  WARNING/ERRORS ##
+################################
+Total Fatal messages  : 0
+Total Error messages  : 7
+PDB_E_180200:1:	Zone layer number 93 is a non-routing layer. Ignored
+PDB_E_180203:6:	Neither net nor zone to add the shape to
+Total Warning messages  : 472037
+Tavor_W_1558:40:	QDB: Resistor layer 2 doesn't match layer Metal1 resolved from node layers
+Tavor_W_1113:318:	SFactor: Net gioddrcmdnch0/gioddrcmdn_ch0/delay_scomp_buf2[4], via array 105: Can't calculate SFactor of the upper stratum. Failed to choose a representative metal resistor.
+Tavor_W_1116:414534:	SFactor: Net gioddrcmdnch0/gioddrcmdn_ch0/gioddrctln21_ctlbuf/mc2gdcmddriveenableqnnnh, via array 14, resistor r0x2dd does not have valid Imax.
+Tavor_W:57130:	SAV is reqired but was not supplied, assuming size B
+Tavor_W_1252:15:	ThermalAnalysis::getLocation: Resistor exceeds the fub border. r0x1699 from net vref, (322098,1366784) (322098,1396500). Skipped.
+Total Info messages  : 9
+CARMEL_I_170511:1:	Using via modelling file: /p/mpg/proc/common2/utils/tool_utils/carmel_flow/2008ww08p19ivb/sub_tools/carmel/1270/p1270_0x1r0.ctf
+CARMEL_I_170550:1:	CarmelLayersMgr: start initialization.
+CARMEL_I_170551:1:	CarmelLayersMgr: finish initialization.
+CARMEL_I_170553:3:	minWidth=0 for layer c4
+CARMEL_I_170593:2:	CarmelProcessConfiguration: Layer: mte does not appear in the current process.
+Tavor_I_1104:1:	Tdb::RVTechData: Reading RV tech file: /p/mpg/proc/common2/utils/tool_utils/rv/ivb4cg/techfile/p1270_0x1r0_dts_4y_120c_0p1_rev1.3.rv_tech.
+
+
+################################
+## TAVOR RVchecks -  WARNING/ERRORS ##
+################################
+Total Fatal messages  : 0
+Total Error messages  : 7
+PDB_E_180200:1:	Zone layer number 93 is a non-routing layer. Ignored
+PDB_E_180203:6:	Neither net nor zone to add the shape to
+Total Warning messages  : 11834811
+Tavor_W_1111:22286:	SFactor: Net vccd, via array 2069052 doesn't have any crossing resistor in layer Via4. Can't calculate its S-Factor.
+Tavor_W_1113:1750:	SFactor: Net vccpedllqu, via array 14: Can't calculate SFactor of the upper stratum. Failed to choose a representative metal resistor.
+Tavor_W_1116:11757679:	SFactor: Net vccpedllqu, via array 515, resistor r0x23ed5 does not have valid Imax.
+Tavor_W:52420:	SAV is reqired but was not supplied, assuming size B
+Tavor_W_1252:676:	ThermalAnalysis::getLocation: Resistor exceeds the fub border. r0x55e64f5 from net vccd, (627990,1394320) (629610,1396500). Skipped.
+Total Info messages  : 9
+CARMEL_I_170511:1:	Using via modelling file: /p/mpg/proc/common2/utils/tool_utils/carmel_flow/2008ww08p19ivb/sub_tools/carmel/1270/p1270_0x1r0.ctf
+CARMEL_I_170550:1:	CarmelLayersMgr: start initialization.
+CARMEL_I_170551:1:	CarmelLayersMgr: finish initialization.
+CARMEL_I_170553:3:	minWidth=0 for layer c4
+CARMEL_I_170593:2:	CarmelProcessConfiguration: Layer: mte does not appear in the current process.
+Tavor_I_1104:1:	Tdb::RVTechData: Reading RV tech file: /p/mpg/proc/common2/utils/tool_utils/rv/ivb4cg/techfile/p1270_0x1r0_dts_4y_120c_0p1_rev1.3.rv_tech.
+
+
