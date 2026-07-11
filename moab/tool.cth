@@ -1,0 +1,3 @@
+[PARAMS]
+moab_search_level_limit = 3
+moab_relative_ips_limit = 3
