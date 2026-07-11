@@ -1,0 +1,8 @@
+# Set -local true for now so the h2b flows will be in blocking mode if called by iflow feeder
+
+iflow_h2b:
+	${IFLOW_CHEETAH_RTL_ROOT}/iflow/scripts/iflow_run.py -local ${iflow_local} -ini ${WORKAREA}/iflow/icm/icm_h2b.ini -outdir ${WORKAREA}/output/iflow_h2b -mode h2b -block_info_file ${WORKAREA}/partition/blocks.cfg -fromCfg -block -skip_block icm_top
+
+
+iflow_h2bpkg:
+	${IFLOW_CHEETAH_RTL_ROOT}/iflow/scripts/iflow_run.py -local ${iflow_local} -ini ${WORKAREA}/iflow/icm/icm_h2bpkg.ini -outdir ${WORKAREA}/output/iflow_h2bpkg -mode h2b -block_info_file ${WORKAREA}/partition/blocks.cfg -fromCfg -block
