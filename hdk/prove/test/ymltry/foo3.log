@@ -1,0 +1,10 @@
+[13:50:05] t/test6.t .. ok     5206 ms ( 0.00 usr  0.00 sys +  0.14 cusr  0.03 csys =  0.17 CPU)
+[13:50:10] t/test2.t .. ok     5186 ms ( 0.00 usr  0.00 sys +  0.15 cusr  0.04 csys =  0.19 CPU)
+[13:50:25] t/test3.t .. ok    15187 ms ( 0.00 usr  0.00 sys +  0.16 cusr  0.02 csys =  0.18 CPU)
+[13:50:30] t/test4.t .. ok     5198 ms ( 0.00 usr  0.00 sys +  0.15 cusr  0.03 csys =  0.18 CPU)
+[13:50:35] t/test5.t .. ok     5182 ms ( 0.00 usr  0.00 sys +  0.15 cusr  0.03 csys =  0.18 CPU)
+[13:50:41] t/test1.t .. ok     5185 ms ( 0.00 usr  0.00 sys +  0.16 cusr  0.03 csys =  0.19 CPU)
+[13:50:41]
+All tests successful.
+Files=6, Tests=8, 42 wallclock secs ( 0.04 usr  0.00 sys +  0.91 cusr  0.18 csys =  1.13 CPU)
+Result: PASS

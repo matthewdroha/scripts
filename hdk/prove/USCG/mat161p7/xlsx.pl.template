@@ -1,0 +1,22 @@
+#!/usr/intel/pkgs/perl/5.26.1/bin/perl
+
+
+use v5.26.1;
+use strict;
+use warnings;
+use IO::File;
+use File::Basename;
+use Getopt::Long;
+use File::Spec;
+
+my $plfile;
+
+BEGIN {
+  $plfile = File::Spec->rel2abs(__FILE__);
+  push @INC, dirname($plfile);
+}
+
+use ProveUtils;
+
+my $dut = q([% DUT %]);
+write_prove_summary_and_xlsx($plfile, $dut);

@@ -1,0 +1,94 @@
+---
+seq:
+  - seq:
+    - t/prove_start.t
+    - t/basic.t
+    - t/clean.t
+  - seq:
+    - t/simbuild_doa_[% CUST %].t
+    - t/febe_doa_[% CUST %].t
+  - seq:
+    - t/ipgen_[% CUST %].t
+    - t/genrtl_collage_[% CUST %].t
+    - t/visa_insertion_[% CUST %].t
+  - par:
+    - t/visa_generate_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/visa_generate_[% FEBEBLOCK1 %]_[% CUST %].t
+  - seq:
+    - t/vcs_build_[% CUST %].t
+    - t/vcs_test_single_[% CUST %].t
+    - t/verdi_build_[% CUST %].t
+    - t/lintra_build_[% CUST %].t
+    - t/sglint_build_[% CUST %].t
+    - t/sgcdc_build_[% CUST %].t
+    - t/vclp_build_[% CUST %].t
+  - par:
+    - t/lintra_openlatch_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/lintra_openlatch_[% FEBEBLOCK1 %]_[% CUST %].t
+  - par:
+    - t/sglint_test_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/sglint_test_[% FEBEBLOCK1 %]_[% CUST %].t
+  - par:
+    - t/sgcdc_setupchk_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/sgcdc_setupchk_[% FEBEBLOCK1 %]_[% CUST %].t
+  - par:
+    - t/sgcdc_verifystruct_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/sgcdc_verifystruct_[% FEBEBLOCK1 %]_[% CUST %].t
+  - par:
+    - t/sgcdc_verifyrdc_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/sgcdc_verifyrdc_[% FEBEBLOCK1 %]_[% CUST %].t
+  - par:
+    - t/vclp_test_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/vclp_test_[% FEBEBLOCK1 %]_[% CUST %].t
+  - par:
+    - t/emulation_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/emulation_[% FEBEBLOCK1 %]_[% CUST %].t
+  - seq:
+    - t/febe_lintra_build_[% CUST %].t
+    - t/febe_spyglass_build_[% CUST %].t
+    - t/febe_build_blocksinfo_[% CUST %].t
+    - t/febe_tophiergen_[% CUST %].t
+    - t/febe_v2k_prep_[% CUST %].t
+  - par:
+    - t/febe_flg_v2k_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/febe_flg_v2k_[% FEBEBLOCK1 %]_[% CUST %].t
+  - par:
+    - t/febe_lintra_elab_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/febe_lintra_elab_[% FEBEBLOCK1 %]_[% CUST %].t
+  - par:
+    - t/febe_hip_list_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/febe_hip_list_[% FEBEBLOCK1 %]_[% CUST %].t
+  - par:
+    - t/febe_fishtail_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/febe_fishtail_[% FEBEBLOCK1 %]_[% CUST %].t
+  - par:
+    - t/febe_sgdft_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/febe_sgdft_[% FEBEBLOCK1 %]_[% CUST %].t
+  - par:
+    - t/febe_gen_collateral_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/febe_gen_collateral_[% FEBEBLOCK1 %]_[% CUST %].t
+  - par:
+    - t/febe_dc_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/febe_dc_[% FEBEBLOCK1 %]_[% CUST %].t
+  - par:
+    - t/febe_fv_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/febe_fv_[% FEBEBLOCK1 %]_[% CUST %].t
+  - par:
+    - t/febe_sage_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/febe_sage_[% FEBEBLOCK1 %]_[% CUST %].t
+  - par:
+    - t/febe_sage_loc_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/febe_sage_loc_[% FEBEBLOCK1 %]_[% CUST %].t
+  - par:
+    - t/febe_caliber_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/febe_caliber_[% FEBEBLOCK1 %]_[% CUST %].t
+  - par:
+    - t/febe_scan_audit_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/febe_scan_audit_[% FEBEBLOCK1 %]_[% CUST %].t
+  - par:
+    - t/qor_scan_audit_[% FEBEBLOCK0 %]_[% CUST %].t
+    - t/qor_scan_audit_[% FEBEBLOCK1 %]_[% CUST %].t
+  - seq:
+    - t/zirconqa_[% CUST %].t
+  - seq:
+    - t/prove_finish.t

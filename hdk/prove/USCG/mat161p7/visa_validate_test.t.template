@@ -1,0 +1,40 @@
+#!/usr/intel/pkgs/perl/5.26.1/bin/perl
+
+use v5.26.1;
+use strict;
+use warnings;
+use IO::File;
+use File::Basename;
+use Getopt::Long;
+use File::Spec;
+
+my ($tfile, $logfileh, $dut, $ip_root);
+
+BEGIN {
+  $tfile = File::Spec->rel2abs(__FILE__);
+   push @INC, dirname($tfile);
+}
+
+use Test::More;
+use ProveUtils;
+
+my $tdir = dirname($tfile);
+$ip_root = $tdir =~ s/\/t$//r;
+# If --ip-root <path> specified, it wins
+Getopt::Long::Configure("prefix_pattern=(--)");
+my $options_ok = GetOptions("ip-root=s", => \$ip_root);
+
+
+my $command_string = <<'ENDCMD';
+simbuild -dut [% DUT %] -1c -CUST [% CUST %] -1c- -ace_args ace ace -x -m fmhc_top_lib_visa_validate_tb_model -simv_args "+VISA_DEBUG +VISA_TEST_UNIT_IDS +VISA_REPORT_PROBES +VISA_INT_PROBES +VISA_TEST_SECURITY +VISA_TEST_UNIT_IDS +VISA_TEST_CTRL_CONNECTIONS +VISA_TEST_USER_ROUTES +VISA_TEST_VERSION_MATCH +VISA_TEST_EXTRA_CRS" -tim -t dummy -ace_args-
+ENDCMD
+
+
+my @commands = get_commands_from_string($command_string);
+my $count = scalar @commands;
+
+plan tests =>  $count + 1;
+
+is(-d "${ip_root}/cfg", 1, '$ip_root/cfg exists') or BAIL_OUT("\$ip_root/cfg directory doesn't exist: ${ip_root}/cfg");
+open_handles($tfile, \$logfileh);
+test_commands($tfile, \@commands, $ip_root, $logfileh);

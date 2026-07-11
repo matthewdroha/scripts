@@ -1,0 +1,25 @@
+#!/usr/intel/pkgs/perl/5.26.1/bin/perl
+
+use v5.26.1;
+use strict;
+use warnings;
+use IO::File;
+use File::Basename;
+use Getopt::Long;
+use File::Spec;
+
+my $tfile;
+
+BEGIN {
+  push @INC, q(/nfs/fm/disks/w.mroha.102/prove);
+  $tfile = File::Spec->rel2abs(__FILE__);
+}
+
+use Test::More;
+use ProveUtils;
+
+my $dut = q([% DUT %]);
+
+plan tests => 1;
+write_prove_summary_xlsx($tfile, $dut);
+

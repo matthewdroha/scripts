@@ -1,0 +1,114 @@
+# Environment test simbuild
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix basic_simbuild_test
+
+# Environment test febe
+febe -dut fmhc -1c -CUST ADL -1c- -logprefix basic_febe_test -s all +s build_blocksinfo,.gen_collateral
+
+# Visa generate
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix visa_generate -ace_args ace -g -egc -ace_args-
+
+# Visa validate
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix visa_validate_compile -ace_args ace -cc -ASSIGN -mc=fmhc_top_lib_visa_validate_tb_model -noegc -ASSIGN -m2e=fmhc_top_lib_visa_validate_tb_model -elab_models -vlog_opts "+define+SVA_OFF" -vlog_opts "+define+FL_SYNTHESIS_ON" -noeps -en__fmhc_top_lib_VISA_INSERTION -ace_args-
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix visa_validate_test -ace_args ace ace -x -m fmhc_top_lib_visa_validate_tb_model -simv_args "+VISA_DEBUG +VISA_TEST_UNIT_IDS +VISA_REPORT_PROBES +VISA_INT_PROBES +VISA_TEST_SECURITY +VISA_TEST_UNIT_IDS +VISA_TEST_CTRL_CONNECTIONS +VISA_TEST_USER_ROUTES +VISA_TEST_VERSION_MATCH +VISA_TEST_EXTRA_CRS" -tim -t dummy -ace_args-
+
+# ISOGEN
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix isogen -ace_args $IP_ROOT/tools/isogen/ADL/run_ADL_fmhc_isogen.sh -ace_args-
+
+# Compile
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix vcs_compile -ace_args ace -cc -ace_args- -nf
+
+# Test
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix vcs_test_single -ace_args ace -x -ace_args-
+
+# Testlist
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix vcs_test_doalist -ace_args acereg -x -tl doa.list -ace_args-
+
+# Lintra build
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix lintra_build -ace_args ace -colt -mc fmss_rtl -ace_args-
+
+# Lintra test
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix lintra_test -ace_args ace -sc -t lintra/fmhc_top -ace_args-
+
+# Lintra OL
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix lintra_openlatch -ace_args ace -sc -t openlatch/fmhc_top -ace_args-
+
+# Spyglass lint compile
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix sglint_build -s all +s sglint_build -sglint_build "-ASSIGN -mc=fmss_rtl"
+
+# Spyglass lint test
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix sglint_test -s all +s sglint_test -sglint_test "-t spyglass_lint/fmhc_sg_lint_test -noepi"
+
+# Spyglass CDC compile
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix sgcdc_build -s all +s sgcdc_build -sgcdc_build "-ASSIGN -mc=fmss_rtl -vlog_opts '+define+SVA_OFF' -vlog_opts '+define+INTEL_SVA_OFF'"
+
+# Spyglass CDC setup check
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix sgcdc_setup_check -s all +s sgcdc_test -sgcdc_test "-t spyglasscdc/fmss_rtl:SetupChk"
+
+# Spyglass CDC test
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix sgcdc_test -s all +s sgcdc_test -sgcdc_test "-t spyglasscdc/fmss_rtl"
+
+# VCLP compile
+#setenv VC_METHODOLOGY_LP_PATH $RTL_PROJ_TOOLS/vc_methodology_lp/master/1.02.03.18ww42
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix vclp_compile -ace_args setenv VC_METHODOLOGY_LP_PATH $RTL_PROJ_TOOLS/vc_methodology_lp/master/1.02.03.18ww42\; ace -ccvclp -vlog_opts +define+SVA_OFF+INTEL_SVA_OFF+RFIP_POWER_PINS -ace_args-
+
+# Fix isogen upf edit
+echo '-logprefix cp_upf_for_vclp';/bin/cp $IP_ROOT/tools/upf/2.0/fmhc_top/fmhc_top.upf.fixed $IP_ROOT/tools/upf/2.0/fmhc_top/ADL/fmhc_top.upf
+
+# VCLP test
+#unsetenv __ADL_VCS ; unsetenv ACE_RTL_SIM ; unsetenv ENABLE_NLP_RUN ; setenv ENABLE_SLP_RUN 1;
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix vclp_test -ace_args setenv VC_METHODOLOGY_LP_PATH $RTL_PROJ_TOOLS/vc_methodology_lp/master/1.02.03.18ww42\; unsetenv __ADL_VCS\; unsetenv ACE_RTL_SIM\; unsetenv ENABLE_NLP_RUN\; setenv ENABLE_SLP_RUN 1\; ace -sc -t vclp/fmhc_top -ace_args-
+
+# Emulation build
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix emul_compile -ace_args ace -emul -compiler_tag=emu -jem_dump_bin -ace_args-
+
+# Emulation test Zebu
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix emul_zse -ace_args ace -emul -emul_run_flow CHECK_ZSE -emul_filter Emulation -jem_dump_bin -ace_args-
+
+# FPGA
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix emul_fpga -ace_args ace -emul -emul_run_flow CHECK_FPGA -emul_filter FPGA -jem_dump_bin -ace_args-
+
+# febe lintra build
+febe -dut fmhc -1c -CUST ADL -1c- -logprefix febe_lintra_build -s all +s lintra_build
+
+# febe lintra elab
+febe -dut fmhc -1c -CUST ADL -1c- -logprefix febe_lintra_elab -s all +s .lintra_elab
+
+# febe build_blocksinfo
+febe -dut fmhc -1c -CUST ADL -1c- -logprefix febe_build_blocksinfo -s all +s build_blocksinfo
+
+# febe spyglass_build
+febe -dut fmhc -1c -CUST ADL -1c- -logprefix febe_spyglass_build -s all +s spyglass_build
+
+# febe isaf/sgdft
+febe -dut fmhc -1c -CUST ADL -1c- -logprefix febe_sgdft -s all +s .sgdft
+
+# febe gen_collateral
+febe -dut fmhc -1c -CUST ADL -1c- -logprefix febe_gen_collateral -s all +s .gen_collateral
+
+# febe fishtail
+febe -dut fmhc -1c -CUST ADL -1c- -logprefix febe_fishtail -s all +s .fishtail
+
+# febe array_dft_audit
+febe -dut fmhc -1c -CUST ADL -1c- -logprefix febe_array_dft_audit -s all +s .array_dft_audit
+
+# febe DC
+febe -dut fmhc -1c -CUST ADL -1c- -logprefix febe_dc -s all +s .dc
+
+# febe FV
+febe -dut fmhc -1c -CUST ADL -1c- -logprefix febe_fv -s all +s .fv
+
+# febe sage stuck at
+febe -dut fmhc -1c -CUST ADL -1c- -logprefix febe_sage -s all +s .sage
+
+# febe sage at speed
+febe -dut fmhc -1c -CUST ADL -1c- -logprefix febe_sage_loc -s all +s .sage_loc
+
+# febe syn_caliber
+febe -dut fmhc -1c -CUST ADL -1c- -logprefix febe_caliber -s all +s .caliber
+
+# febe scan_audit
+febe -dut fmhc -1c -CUST ADL -1c- -logprefix febe_scan_audit -s all +s .scan_audit
+
+# Puni
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix puni1 -ace_args $RTL_PROJ_TOOLS/puni_methodology/master/17.05.0/tools/uniquification/uniquify.pl -prefix fmhc -model_root $IP_ROOT -filelist $IP_ROOT/tools/uniquification/inputs/fmhc.RTL.filelist -checker_mode -delete_orig_file -ace_args-
+simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix puni2 -ace_args $RTL_PROJ_TOOLS/puni_methodology/master/17.05.0/tools/uniquification/uniquify.pl -prefix fmhc -model_root $IP_ROOT -filelist $IP_ROOT/tools/uniquification/inputs/fmhc.RTL.filelist -checker_mode -delete_orig_file -ace_args-

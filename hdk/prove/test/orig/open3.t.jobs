@@ -1,0 +1,15 @@
+/bin/sleep 7
+/bin/sleep 5t
+/bin/sleepy 5
+
+# Visa generate ok
+#simbuild -dut fmhc -1c -CUST ADL -1c- -logprefix visa_generate_ok -ace_args ace -g -egc -ace_args-
+
+# FEBE build_blocksinfo_ok
+#febe -dut fmhc -1c -CUST ADL -1c- -logprefix febe_buildblocks_info_ok -s all +s buildblocks_info
+
+# FEBE build_blocksinfo_fail
+#febe -dut fmhc -1c -CUST ADL -1c- -logprefix febe_buildblocks_info_fail -s all +s buildblocks_infod
+
+# FEBE bad_command
+#febed -dut fmhc -1c -CUST ADL -1c- -logprefix febe_sgdft -s all +s spyglass_build

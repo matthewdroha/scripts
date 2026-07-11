@@ -1,0 +1,5 @@
+#!/usr/intel/bin/tcsh -f
+
+# t/runprove.csh
+prove --jobs 2 --state=save --trap --timer |& tee t/[% DUT %].prove.log
+t/xlsx.pl

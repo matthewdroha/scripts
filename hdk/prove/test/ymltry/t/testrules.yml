@@ -1,0 +1,10 @@
+seq:
+  - seq:
+    - t/test6.t
+    - t/test2.t
+  - par:
+    - t/test3.t
+    - t/test4.t
+    - t/test5.t
+  - seq:
+    - t/test1.t

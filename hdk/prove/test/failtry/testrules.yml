@@ -1,0 +1,14 @@
+seq:
+  - seq:
+    - t/prove_start.t
+    - t/basic.t
+    - t/simbuild_doa.t
+    - t/simbuild_doa_bad1.t
+    - t/simbuild_doa_bad2.t
+    - t/febe_doa.t
+  - par:
+    - t/test3.t
+    - t/test4.t
+    - t/test5.t
+  - seq:
+    - t/prove_finish.t

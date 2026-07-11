@@ -1,0 +1,29 @@
+t/test6.t .. 
+1..1
+ok 1
+ok
+t/test2.t .. 
+1..1
+ok 1
+ok
+t/test3.t .. 
+1..2
+ok 1
+ok 2
+ok
+t/test4.t .. 
+1..2
+ok 1
+ok 2
+ok
+t/test5.t .. 
+1..1
+ok 1
+ok
+t/test1.t .. 
+1..1
+ok 1
+ok
+All tests successful.
+Files=6, Tests=8, 42 wallclock secs ( 0.02 usr  0.01 sys +  1.04 cusr  0.11 csys =  1.18 CPU)
+Result: PASS
