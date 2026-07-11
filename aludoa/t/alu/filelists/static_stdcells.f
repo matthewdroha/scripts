@@ -1,0 +1,6 @@
+/p/hdk/cad/stdcells/lib802_h144p48l14/pdk01e_r0v0p0_uv1_pre/base_lvt/verilog/lib802_h144p48l14_base_lvt_bmod.v
+/p/hdk/cad/stdcells/lib802_h144p48l14/pdk01e_r0v0p0_uv1_pre/ldrbase_lvt/verilog/lib802_h144p48l14_ldrbase_lvt_bmod.v
+/p/hdk/cad/stdcells/lib802_h144p48l14/pdk01e_r0v0p0_uv1_pre/ldrclk_lvt/verilog/lib802_h144p48l14_ldrclk_lvt_bmod.v
+/p/hdk/cad/stdcells/lib802_h144p48l14/pdk01e_r0v0p0_uv1_pre/ldrseq_lvt/verilog/lib802_h144p48l14_ldrseq_lvt_bmod.v
+/p/hdk/cad/stdcells/lib802_h144p48l14/pdk01e_r0v0p0_uv1_pre/seq_lvt/verilog/lib802_h144p48l14_seq_lvt_bmod.v
+/p/hdk/cad/stdcells/lib802_h144p48l14/pdk01e_r0v0p0_uv1_pre/clk_lvt/verilog/lib802_h144p48l14_clk_lvt_bmod.v

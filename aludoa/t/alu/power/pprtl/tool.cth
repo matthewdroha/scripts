@@ -1,0 +1,8 @@
+[ENVS]
+SNPSLMD_LICENSE_FILE = 26586@synopsys103p.elic.intel.com:26586@synopsys10p.elic.intel.com:26586@synopsys01b.elic.intel.com:26586@synopsys02b.elic.intel.com
+SNPSLMD_DISABLE_DEBUG_LICENSE_CHECKS = 1
+SNPSLMD_DISABLE_NTA_LICENSE_CHECKS = 1
+
+[License]
+feature = synopsys/RTLArchitect
+mode = append

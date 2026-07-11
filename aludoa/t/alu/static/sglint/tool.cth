@@ -1,0 +1,23 @@
+[includes]
+/p/hdk/cad/Cheetah-RTL/2023.03.sp2.p26/rtl_tools.cth
+
+
+
+[envs]
+    LINT_SPYGLASS_PATH            = /p/hdk/rtl/cad/x86-64_linux26/atrenta/spyglass/toolversion(LINT_SPYGLASS_VERSION)/SPYGLASS_HOME
+    LINT_METHODOLOGY_PATH         = /p/hdk/rtl/proj_tools/spyglass_methodology_lint/master/toolversion(LINT_METHODOLOGY_VERSION)
+    LINT_SPYGLASS_DC_PATH         = /p/hdk/cad/designcompiler/toolversion(LINT_SPYGLASS_DC_VERSION)/
+    SPYGLASS_HOME                 = envs(LINT_SPYGLASS_PATH)
+    SPYGLASS_METHODOLOGY_RTL_LINT = envs(LINT_METHODOLOGY_PATH)/rtl_lint
+    SPYGLASS_DC_PATH              = envs(LINT_SPYGLASS_DC_PATH)
+    SPYGLASS_LINT_GOAL_OVERRIDE   = /p/hdk/rtl/proj_tools/sg_overrides/master/1.00.00/sglint/SGLintCRSOverride.spq
+    SPYGLASS_ENABLE_LICENSE_QUEUE = 1
+    PATH = envs(LINT_SPYGLASS_PATH)/bin:${PATH}
+
+[License]
+    feature = synopsys/spyglass
+    mode    = append
+
+[License]
+    feature = synopsys/designcompiler
+    mode = append

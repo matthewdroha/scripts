@@ -1,0 +1,15 @@
+# Initialize block template
+N eou_block_init
+J eouMGR --block BLOCK --init eou-block
+
+# Cheetah FE prereqs: make h2b and make package to create the CTHBE area
+N populate
+J eouMGR --block BLOCK --febe_output_path <FE_WORKAREA>/output/alu2/h2b/trial/CTHBE/fe_collateral --populate --force 
+D eou_block_init
+
+# FC import_design
+N import_design
+I $ward/global/snps/apr_fc/run_import_design.tcl
+J -xt vw  Ifc_shell -fe -B BLOCK -F apr_fc -output_log_file logs/fc.import_design.full.log -f $ward/global/snps/apr_fc/run_import_design.tcl
+O $ward/runs/BLOCK/h210_snps_m15/apr_fc/logs/fc.import_design.full.log
+D populate

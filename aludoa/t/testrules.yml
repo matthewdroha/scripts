@@ -1,0 +1,7 @@
+seq:
+  - seq:
+    - t/prove_start.t
+    - t/clean.t
+    - t/schema.t
+    - t/basic.t
+    - t/prove_finish.t

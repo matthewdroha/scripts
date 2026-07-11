@@ -1,0 +1,78 @@
+# Initialize block template
+N eou_block_init
+J eouMGR --block BLOCK --init eou-block
+
+# Cheetah FE prereqs: make h2b and make package to create the CTHBE area
+N populate
+J eouMGR --block BLOCK --febe_output_path <FE_WORKAREA>/output/cxp/h2b/trial/CTHBE/fe_collateral --populate --force 
+D eou_block_init
+
+# Make directory before copy commands of configs
+N mkdir_src_dir
+J mkdir -p $ward/<SRC>/BLOCK/TECH/scripts/
+D populate
+
+# Note about OR with /bin/true:
+#   This is done so the files do not need to exist and the command will still return a zero exit status
+#   This allows for flexibility to only create the directories/files which are needed and not the whole directory structure
+
+
+### bscript section
+
+# Copy any non-block specific bscript files
+N cp_bscript_non_block_specific
+J (set nonomatch; /usr/intel/bin/rsync -avzl <FE_WORKAREA>/flows/r2g/common/bscript/           $ward/<SRC>/BLOCK/TECH/scripts || /bin/true)
+D mkdir_src_dir
+
+# Copy any block specific bscript files
+N cp_bscript_block_specific
+J (set nonomatch; /usr/intel/bin/rsync -avlz <FE_WORKAREA>/flows/r2g/BLOCK/bscript/            $ward/<SRC>/BLOCK/TECH/scripts || /bin/true)
+D cp_bscript_non_block_specific
+
+# Copy any tech specific bscript files
+N cp_bscript_tech_specific
+J (set nonomatch; /usr/intel/bin/rsync -avzl <FE_WORKAREA>/flows/r2g/BLOCK/bscript_<FE_TECH>/  $ward/<SRC>/BLOCK/TECH/scripts || /bin/true)
+D cp_bscript_block_specific
+
+
+### fscript section
+
+# Copy any non-block specific fscript files
+N cp_fscript_non_block_specific
+J (set nonomatch; /usr/intel/bin/rsync -avzl <FE_WORKAREA>/flows/r2g/common/fscript/           $ward/<SRC>/BLOCK/TECH || /bin/true)
+D cp_bscript_tech_specific 
+
+# Copy any block specific fscript files
+N cp_fscript_block_specific
+J (set nonomatch; /usr/intel/bin/rsync -avzl <FE_WORKAREA>/flows/r2g/BLOCK/fscript/            $ward/<SRC>/BLOCK/TECH || /bin/true)
+D cp_fscript_non_block_specific
+
+# Copy any tech specific fscript files
+N cp_fscript_tech_specific
+J (set nonomatch; /usr/intel/bin/rsync -avzl <FE_WORKAREA>/flows/r2g/BLOCK/fscript_<FE_TECH>/  $ward/<SRC>/BLOCK/TECH || /bin/true)
+D cp_fscript_block_specific
+
+
+# prepare_hip Adjusted file_patterns.csv to match the ship release structure for MMG/MEV
+N prepare_hip
+J eouMGR --block BLOCK --prepare_hip --file_pattern <FE_WORKAREA>/flows/r2g/common/hardip_file_patterns.csv
+D cp_fscript_tech_specific
+
+# prepare_hip post fix for hierarchical ndm files
+N prepare_hip_ndmfix
+J (/bin/sed -i.before_ndmfix 's/\/reflib.ndm//' $ward/runs/BLOCK/TECH/hip_data/hip_ivars.tcl) 
+D prepare_hip
+
+
+# FC import_design
+N import_design
+I $ward/global/snps/apr_fc/run_import_design.tcl
+J -xt vw  Ifc_shell -fe -B BLOCK -F apr_fc -output_log_file logs/fc.import_design.full.log -f $ward/global/snps/apr_fc/run_import_design.tcl
+O $ward/runs/BLOCK/h210_snps_m15/apr_fc/logs/fc.import_design.full.log
+D prepare_hip_postfix
+
+# FC read_upf
+N read_upf
+I $ward/global/snps/apr_fc/run_read_upf.tcl
+J -xt vw  Ifc_shell -fe -B BLOCK -F apr_fc -output_log_file logs/fc.read_upf.full.log -f $ward/global/snps/apr_fc/run_read_upf.tcl
+D import_design

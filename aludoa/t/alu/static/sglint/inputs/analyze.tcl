@@ -1,0 +1,2 @@
+set_option define INTEL_NO_PWR_PINS
+set_option define INTEL_SVA_OFF

@@ -1,0 +1,14 @@
+-view sv
+-enable_work_yvlib
+-sv
+-v93
+-vlogext v,vs,sv,svh,vh,pkg
+-compcnfg
+-abv_lrmcompliant_asrtctrl
+-enable_abv_asrtctrl_enh
+-ENABLE_FINALDEFASRT
+-vlogcontrolrelax UMINQT
+-xlm_bq1
+-enable_new_let
+-64bit
+-timescale 1ps/1ps

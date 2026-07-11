@@ -1,0 +1,6 @@
+//ALU : p2v0
+parameter ALU_WIDTH=4;
+parameter ALU_ENABLE_ADDER=1;
+parameter ALU_ENABLE_SUBTRACTOR=1;
+parameter ALU_ENABLE_GRAYCODE=0;
+parameter ALU_ENABLE_MULTIPLIER=1;

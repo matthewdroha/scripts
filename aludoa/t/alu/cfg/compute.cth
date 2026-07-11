@@ -1,0 +1,26 @@
+#[COMPUTE]
+#queue     = ${EC_SITE}_normal
+#qslot     = /pds/fast
+#os        = SLES11
+#mem       = 4G
+#site      = pdx
+[ COMPUTE ]
+Name = _DEFAULT@iind
+qslot = /DTEG/ip
+target = iind_normal
+RAM = 8G
+CPU = 1C
+#OS = SLES11
+OS = SLES12SP5
+site = iind
+
+[compute]
+Name = _DEFAULT@ba
+qslot = /pds/fast
+target = sc_normal
+RAM = 8G
+CPU = 1C
+#OS = SLES11
+OS = SLES12SP5
+site = ba
+
