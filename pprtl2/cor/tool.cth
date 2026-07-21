@@ -1,0 +1,21 @@
+[INCLUDES]
+/p/hdk/cad/Cheetah-RTL/2026.06.p02/rtl_tools.cth
+
+[TOOLVERSION]
+PPRTL2_VERSION  = X-2025.06-SP3-20260214
+PPRTL2_VCS_VERSION = X-2025.06-SP2-3
+
+[ENVS]
+LC_PATH             = /p/hdk/cad/librarycompiler/toolversion(LC_VERSION)
+VERDI_HOME          = /p/hdk/rtl/cad/x86-64_linux26/synopsys/verdi3/toolversion(PPRTL2_VERDI_VERSION)
+VCS_HOME            = /p/hdk/rtl/cad/x86-64_linux44/synopsys/vcsmx/toolversion(PPRTL2_VCS_VERSION)
+PPRTL2_HOME_PATH    = /p/hdk/cad/primepowerrtl/toolversion(PPRTL2_VERSION)
+PATH                =  envs(PPRTL2_HOME_PATH)/bin:envs(LC_PATH)/bin:${PATH}/bin:envs(VCS_HOME)
+
+[LICENSE]
+feature = synopsys/primepower
+mode    = append
+
+[LICENCE]
+feature = synopsys/rtla
+mode    = append
