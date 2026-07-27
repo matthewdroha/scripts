@@ -44,8 +44,6 @@ Confirmed with Remi this is a dead archive area, not used by IOH
 /p/cth/bin/cth_psetup -p cor_fe -cfg cor_fe.cth -read_only
 git config --global --add safe.directory /nfs/site/disks/corhub_fe_git_0001/corhub_oks-a0
 git clone $GIT_REPOS/corhub_oks-a0 corhub_oks-a0-pprtl2-partitions
-# rsync is temporary until scripts areas is turned in to $WORKAREA/power/pprtl2/scripts
-rsync -av /nfs/site/disks/xpg_dmrhub2_0053/mroha/corpower/scripts .
 cd corhub_oks-a0-pprtl2-partitions
 
 # bash
@@ -66,10 +64,11 @@ cd $WORKAREA/power/pprtl2
 # Fill in YOUR_MODEL_VERSION_HERE with the one you selected
 ln -sfn /nfs/site/disks/corhub_fe_mod_0000/corhub_oks/YOUR_MODEL_VERSION_HERE REF_MODEL
 ln -sfn /nfs/site/disks/corimh.arc.proj_archive/arc SDC_ARCHIVE
+ln -sfn /nfs/site/disks/xpg_dmrhub2_0053/mroha/corpower/scripts scripts
 
 # mroha: TODO: Turnin scripts/ to $WORKAREA/power/pprtl2
 # Generate pprtl2 workarea
-python3 $WORKAREA/../scripts/pprtl2/prep_pprtl2.py --force --dut imh
+python3 scripts/pprtl2/prep_pprtl2.py --force --dut imh
 ```
 
 ### COR IMH Workflow
@@ -78,12 +77,20 @@ python3 $WORKAREA/../scripts/pprtl2/prep_pprtl2.py --force --dut imh
 # Run one partition locally
 grdlbuild :power:parfws --project-dir $WORKAREA/power/pprtl2/grdlbuild -Pdut=imh -Ptopip=imh -Ph2b_pass=trial
 
-# Run two partitions locally via netbatch
-grdlbuild :power:parfws :power:pars3m --project-dir $WORKAREA/power/pprtl2/grdlbuild -Pdut=imh -Ptopip=imh -Ph2b_pass=trial -nb
+# Run three partitions locally via netbatch
+grdlbuild :power:parfws :power:pars3m :power:parocs --project-dir $WORKAREA/power/pprtl2/grdlbuild -Pdut=imh -Ptopip=imh -Ph2b_pass=trial -nb
 
 # Run all partitions via netbatch
 grdlbuild :power --project-dir $WORKAREA/power/pprtl2/grdlbuild -Pdut=imh -Ptopip=imh -Ph2b_pass=trial -nb
 ```
+
+### COR IMH Post Run Report
+
+```sh
+python3 scripts/pprtl2/report_pprtl2.py --dut imh
+```
+
+
 
 ## COR IOH
 
@@ -91,8 +98,8 @@ grdlbuild :power --project-dir $WORKAREA/power/pprtl2/grdlbuild -Pdut=imh -Ptopi
 
 ```sh
 /p/cth/bin/cth_psetup -p dmr_fe -cfg dmr_fe_dmrhub2.cth -read_only
+git config --global --add safe.directory /nfs/site/disks/dmr_fe_git_0001/dmrhub2-a0
 git clone $GIT_REPOS/dmrhub2-a0 -b corioh dmrhub2-a0-corioh-pprtl2-partitions
-rsync -av /nfs/site/disks/xpg_dmrhub2_0053/mroha/corpower/scripts .
 cd dmrhub2-a0-corioh-pprtl2-partitions
 
 # bash
@@ -114,10 +121,12 @@ cd $WORKAREA/power/pprtl2
 # Fill in YOUR_MODEL_VERSION_HERE with the one you selected
 ln -sfn /nfs/site/disks/dmr_fe_mod_0000/dmrhub2/YOUR_MODEL_VERSION_HERE REF_MODEL
 ln -sfn /nfs/site/disks/dmr2_arc_proj_archive/arc SDC_ARCHIVE
+ln -sfn /nfs/site/disks/xpg_dmrhub2_0053/mroha/corpower/scripts scripts
+
 
 # mroha: TODO: Turnin scripts/ to $WORKAREA/power/pprtl2
 # Generate pprtl2 workarea
-python3 $WORKAREA/../scripts/pprtl2/prep_pprtl2.py --force --dut ioh
+python3 scripts/pprtl2/prep_pprtl2.py --force --dut ioh
 ```
 
 ### COR IOH Workflow
@@ -133,14 +142,21 @@ grdlbuild :power:parfws :power:pars3m --project-dir $WORKAREA/power/pprtl2/grdlb
 grdlbuild :power --project-dir $WORKAREA/power/pprtl2/grdlbuild -Pdut=ioh -Ptopip=ioh -Ph2b_pass=trial -nb
 ```
 
+### COR IOH Post Run Report
+
+```sh
+python3 scripts/pprtl2/report_pprtl2.py --dut ioh
+```
+
+
 ## COR CBBP
 
 ### COR CBBP Setup
 
 ```sh
 /p/cth/bin/cth_psetup -p cor_fe -cfg corcbbp_fe.cth -read_only
+git config --global --add safe.directory /nfs/site/disks/corcbb_fe_git_0001/corcbbp-a0
 git clone $GIT_REPOS/corcbbp-a0 corcbbp-a0-pprtl2-partitions
-rsync -av /nfs/site/disks/xpg_dmrhub2_0053/mroha/corpower/scripts .
 cd corcbbp-a0-pprtl2-partitions
 
 # bash
@@ -161,10 +177,11 @@ cd $WORKAREA/power/pprtl2
 # Fill in YOUR_MODEL_VERSION_HERE with the one you selected
 ln -sfn /nfs/site/disks/corcbb_fe_mod_0000/corcbbp/YOUR_MODEL_VERSION_HERE REF_MODEL
 ln -sfn /nfs/site/disks/corcbbp.arc.proj_archive/arc SDC_ARCHIVE
+ln -sfn /nfs/site/disks/xpg_dmrhub2_0053/mroha/corpower/scripts scripts
 
 # mroha: TODO: Turnin scripts/ to $WORKAREA/power/pprtl2
 # Generate pprtl2 workarea
-python3 $WORKAREA/../scripts/pprtl2/prep_pprtl2.py --force --dut cbb0
+python3 scripts/pprtl2/prep_pprtl2.py --force --dut cbb0
 ```
 
 ### COR CBBP Workflow
@@ -180,12 +197,17 @@ grdlbuild :power:par_base_ese_cse :power:par_compute_fabric --project-dir $WORKA
 grdlbuild :power --project-dir $WORKAREA/power/pprtl2/grdlbuild -Pdut=cbb0 -Ptopip=soc -Ph2b_pass=cbb0 -nb
 ```
 
+### COR CBBP Post Run Report
+
+```sh
+python3 scripts/pprtl2/report_pprtl2.py --dut cbb0
+```
+
 ## Backup notes
 
 ### How To: Run pprtl2 on a single partition outside of grdlbuild
 
 ```sh
-
 # IMH example
 make -C $WORKAREA/power/pprtl2 elab DUT=imh TOP_IP_NAME=imh TOP_MODULE_NAME=pars3m CONFIG=partition/pars3m.flow.cfg
 
