@@ -74,6 +74,7 @@ unless (-d $opt_clock_collateral_dir) {
 
 # Get the script start time
 our $start_time = time;
+our $start_time_human = scalar localtime($start_time);
 
 # Variables for output file naming and global logfile
 our ($basefile, $log);
@@ -111,7 +112,8 @@ $log->debug($opt_debug);
 my $machine_info = `hostname --long`;
 chomp $machine_info;
 $log->info("Command: $exe_name $command_line");
-$log->info("Start date: $start_time");
+$log->info("Start date: $start_time_human");
+$log->info("Start date epoch: $start_time");
 $log->info("Machine: $machine_info");
 $log->info("CWD: " . getcwd());
 
@@ -205,12 +207,12 @@ $log->info("Start processing SDC file: $sdcfile");
 while (<$sdcfileh>) {
   my $skip = 0;
   if (/ivar/) {
-    $log->info_d(2, "Found ivar in line: $_");
+    $log->info_d(1, "Found ivar in line: $_");
   }
   # Replace backend Cheetah work area with central clock collateral areas
   #if (/$replace_string_before/) {
   #  s/$replace_string_before/${opt_clock_collateral_dir}/;
-  #  $log->info_d(2, "Replaced with: ${opt_clock_collateral_dir} in line: $_");
+  #  $log->info_d(1, "Replaced with: ${opt_clock_collateral_dir} in line: $_");
   # }
   # Add pwr_shell support
   if (/\$::synopsys_program_name == "pt_shell"/) {
@@ -219,6 +221,21 @@ while (<$sdcfileh>) {
   # Add rtl_shell support
   elsif (/\$::synopsys_program_name == "icc2_shell"/) {
     s/\$::synopsys_program_name == "icc2_shell"/\$::synopsys_program_name == "icc2_shell" || \$::synopsys_program_name == "rtl_shell"/;
+  }
+  # Handle this _clocks.tcl hack that was added by COR.  It is not processed correctly by pprtl2 wattson
+  # regsub {\-source\s+\[get_pins\s+\{(\S+)\}\]} $command_text "\-source \[get_pins $new_source\]" new_command_text
+  elsif (/^\s*regsub\s+\S+\-source.+new_command_text\s*$/) {
+    $log->info_d(1, "Found regsub hack in _clocks.tcl line: $_");
+    my $original_command = $_;
+    $skip = 1;
+    my @regsub_modified_command = ();
+    my ($indent) = $original_command =~ /^(\s*)/;
+    @regsub_modified_command = (
+      qq(\n${indent}# Added by ${exe_name}\n),
+      qq(${indent}# Original regsub call removed.  Curly braces being interpreted even under a comment\n),
+      qq(${indent}set new_command_text \$command_text\n),
+    );
+    push(@outfilelist, @regsub_modified_command);
   }
   # Guard create_clock calls.  Run command only if one or more source objects exist after black boxing
   elsif (/^\s*create_clock\s+/) {
@@ -657,13 +674,13 @@ sub Pipe {
       SEVERITY     => q(),
       SPACER       => q(),
       FLOW_NAME    => q(),
-      DEBUG_STRING => q([DEBUG]),
+      DEBUG_STRING => q(DEBUG-),
       INFO_STRING  => q(-I-),
       WARN_STRING  => q(-W-),
       ERROR_STRING => q(-E-),
       FATAL_STRING => q(-F-),
     };
-    $self->{DEBUG_SPACER} = length($self->{DEBUG_STRING});
+    $self->{DEBUG_SPACER} = length($self->{DEBUG_STRING}) + 4;
     bless ($self, $class);
     return $self;
   }
@@ -699,7 +716,7 @@ sub Pipe {
     for (my $i = 0; $i <= $#message; $i++) {
       if ($i == 0) {
         if ($self->{WRITEDEBUG}) {
-          $header = qq($self->{DEBUG_STRING});
+          $header = qq([$self->{DEBUG_STRING}$self->{WRITEDEBUG}] );
         } else {
           $header = q(); 
         }
@@ -831,7 +848,7 @@ sub Pipe {
     my @message = @_;
     $self->{SEVERITY} = $self->{INFO_STRING};
     if ((defined $self->{DEBUG}) and ($debug_level <= $self->{DEBUG})) {
-      $self->{WRITEDEBUG} = 1;
+      $self->{WRITEDEBUG} = $debug_level;
       $self->write_to_log_only(@message);
     }
   }
