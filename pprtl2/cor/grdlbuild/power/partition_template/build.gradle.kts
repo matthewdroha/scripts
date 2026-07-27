@@ -8,12 +8,15 @@ var H2B_PASS  = project.findProperty("h2b_pass")
 var partition = project.name
 
 task<BuildTask>("pprtl2_elab") {
-    commandLine("make elab DUT=${DUT} CONFIG=partition/${partition}.flow.cfg TOP_MODULE_NAME=${partition} TOP_IP_NAME=${TOPIP} H2B_PASS=${H2B_PASS}")
+    commandLine("make elab DUT=${DUT} CONFIG=partition/${partition}.flow.cfg TOP_MODULE_NAME=${partition} BLOCK=${partition} TOP_IP_NAME=${TOPIP} H2B_PASS=${H2B_PASS}")
     runDir("${WORKAREA}/power/pprtl2")
     useNBResource("NB_384G_4C")
 }
+
+// Will add in optional fsdb stage when timebased runs are activated
+
 task<BuildTask>("pprtl2_power") {
-    commandLine("make power DUT=${DUT} CONFIG=partition/${partition}.flow.cfg TOP_MODULE_NAME=${partition} TOP_IP_NAME=${TOPIP} H2B_PASS=${H2B_PASS}")
+    commandLine("make power DUT=${DUT} CONFIG=partition/${partition}.flow.cfg TOP_MODULE_NAME=${partition} BLOCK=${partition} TOP_IP_NAME=${TOPIP} H2B_PASS=${H2B_PASS}")
     runDir("${WORKAREA}/power/pprtl2")
     dependsOn(":power:${partition}:pprtl2_elab")
     useNBResource("NB_384G_4C")
