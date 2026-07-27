@@ -564,7 +564,7 @@ def execute_plan(
     )
     _copy_tree(cfg.templates / "grdlbuild", cfg.out_root / "grdlbuild", force, outcome, verbose)
 
-    flow_tmpl = cfg.templates / "partition.flow.cfg"
+    flow_tmpl = cfg.templates / cfg.dut / "partition.flow.cfg"
     elab_tmpl = cfg.templates / "elab.pre.tcl"
 
     results: list[PartitionResult] = []

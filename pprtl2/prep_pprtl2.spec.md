@@ -29,7 +29,7 @@ tree from the same inputs. It does **not** run the pprtl2 flow itself, nor does 
 | S2 | **Partition/blocks config** — `$WORKAREA/partition/<blocks.cfg>` (imh/ioh: `<DUT>.blocks.cfg`; cbb0: `cbb0_h2b.blocks.cfg`; override via `--blocks-cfg`) | List of `<partition>` names | **Selection:** if the file has any `hier_type` field, take `hier_type = part` (imh); otherwise fall back to `block_type = partition` **and** name starts with `par` (ioh/cbb0). Comment lines and commented-out headers (`#[...]`) are ignored. Verified counts: imh 187, ioh 146, cbb0 47. |
 | S3 | **stdcell libraries** — `/p/hdk/cad/stdcells/...` | `stdcell.ldb.list` contents | See open question Q1 (static template vs. generated) |
 | S4 | **Cheetah-RTL** — `cth_query -tool cheetah-rtl` → `$CHEETAH_RTL_ROOT` | `Makefile` include target (`lowpower/pprtl2/Makefile.pprtl2`) | Referenced at make-time, not copied |
-| S5 | **Templates** — `scripts/pprtl2/cor/` (`Makefile`, `partition.flow.cfg`, `tool.cth`, `activity_dir.map`, `grdlbuild/`, per-die `<DUT>/stdcell.ldb.list`) | Static/near-static output templates | Curated in-repo |
+| S5 | **Templates** — `scripts/pprtl2/cor/` (`Makefile`, `<DUT>/partition.flow.cfg`, `tool.cth`, `activity_dir.map`, `grdlbuild/`, per-die `<DUT>/stdcell.ldb.list`) | Static/near-static output templates | Curated in-repo |
 | S6 | **Perl helpers** — `scripts/pprtl2/minimizehip.pl`, `scripts/pprtl2/fixclocks.pl` | Transform S1 collateral into minimized/fixed outputs | Called as subprocesses |
 | S7 | **Clock SDC** — symlinked as `$WORKAREA/power/pprtl2/SDC_ARCHIVE` (e.g. `/nfs/site/disks/corimh.arc.proj_archive/arc`) | Per-partition clock collateral release dir | Release dir = `$SDC_ARCHIVE/<partition>/clock_collateral/<sdc release>/`. **Selection rule:** per die profile (§2.1) — keep dirs whose name (case-insensitive) starts with the die prefix **and** contains the die's required token, then pick the **newest by directory mtime**. Quick-reject the partition if `<release>/<partition>_clocks.tcl` is missing before running fixclocks. Partition dir names match S2 blocks.cfg names (verified). |
 ---
@@ -117,7 +117,7 @@ Followed by a bracketed section per category listing the partition names: `[miss
 | `tool.cth` | S5 `scripts/pprtl2/cor/tool.cth` | Copy verbatim |
 | `activity_dir.map` | S5 `scripts/pprtl2/cor/activity_dir.map` | Copy verbatim (used as `FE_ACTIVITY_MAPPING`) |
 | `grdlbuild/` | S5 `scripts/pprtl2/cor/grdlbuild/` | Copy the directory tree verbatim (overlay copy; NFS-safe, no rmtree). DUT is supplied to gradle at run time via `-Pdut=<DUT>`. |
-| `partition/<partition>.flow.cfg` | S5 `scripts/pprtl2/cor/partition.flow.cfg` | Copy per partition, renamed to `<partition>.flow.cfg`. `${DUT}` / `${TOP_MODULE_NAME}` stay as make-time vars — **not** expanded by prep. |
+| `partition/<partition>.flow.cfg` | S5 `scripts/pprtl2/cor/<DUT>/partition.flow.cfg` | Copy per partition, renamed to `<partition>.flow.cfg`. `${DUT}` / `${TOP_MODULE_NAME}` stay as make-time vars — **not** expanded by prep. |
 | `partition/<partition>/hip.ldb.list.minimized` | `$REF_MODEL/output/<DUT>/partition/<partition>/h2b/<sub>/hip_collaterals/hip.ldb.list` | `minimizehip.pl <hip.ldb.list> <outdir>` where `<outdir>` = `$WORKAREA/power/pprtl2/partition/<partition>/`. Disqualifies the partition if `#HIPS_MISSING_LDB_OR_LIB_COUNT > 0`. |
 | `partition/<partition>/<partition>_clocks.tcl.fixclocks` | `<selected release>` dir (§2.1) | `fixclocks.pl --module <partition> --clock-collateral-dir <release-dir>` run **with cwd = the partition output dir** (fixclocks writes `<partition>_clocks.tcl.fixclocks` into cwd). No `--tag`. |
 | `partition/<partition>/elab.pre.tcl` | S5 `scripts/pprtl2/cor/elab.pre.tcl` | Copy per partition, verbatim (static template, present in `cor/`). |
@@ -193,8 +193,8 @@ Start small, table-driven, no live tool dependency in unit tests.
   ([prep_pprtl2.py](prep_pprtl2.py), [test_prep_pprtl2.py](test_prep_pprtl2.py)); dry-run results:
   imh 212/216, ioh 179/190, cbb0 43/47 partitions eligible.
 - **Phase 2:** static outputs — `Makefile`, `stdcell.ldb.list`, `tool.cth`, per-partition
-  `<partition>.flow.cfg`. Unit test 3. ✅ **DONE** — `${DUT}.stdcell.ldb.list` selected per die;
-  `--force`/idempotent-skip handling; validated live on imh (215 outputs: 3 static + 212 flow.cfg).
+  `<partition>.flow.cfg`. Unit test 3. ✅ **DONE** — die-specific templates under `cor/<DUT>/`
+  (`stdcell.ldb.list`, `partition.flow.cfg`); `--force`/idempotent-skip handling; validated live.
 - **Phase 3:** generated outputs — wire `minimizehip.pl` and `fixclocks.pl`; produce
   `hip.ldb.list.minimized`, `<partition>_clocks.tcl.fixclocks`, `elab.pre.tcl`. Integration test 4.
   ✅ **DONE** — injectable perl runners (mocked in test 4), per-partition gating, report CSV +
@@ -210,5 +210,5 @@ Start small, table-driven, no live tool dependency in unit tests.
 
 - Running the pprtl2 flow itself (only preparing the work area).
 - Timebased power mode collateral (`.mtl`, `MTL_INST_TO_RUN`) — vectorless only.
-- Multi-DUT orchestration beyond `imh`.
+- Dies beyond `imh`/`ioh`/`cbb0` (add a new entry to the `DIE_PROFILES` map + a `cor/<DUT>/` template dir to extend).
 ```

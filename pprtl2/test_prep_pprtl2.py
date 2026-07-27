@@ -193,9 +193,9 @@ class TestExecuteStaticOutputs(unittest.TestCase):
         (templates / "Makefile").write_text("MK\n", encoding="utf-8")
         (templates / "imh").mkdir()
         (templates / "imh" / "stdcell.ldb.list").write_text("STD-imh\n", encoding="utf-8")
+        (templates / "imh" / "partition.flow.cfg").write_text("FLOW\n", encoding="utf-8")
         (templates / "tool.cth").write_text("CTH\n", encoding="utf-8")
         (templates / "activity_dir.map").write_text("ACT\n", encoding="utf-8")
-        (templates / "partition.flow.cfg").write_text("FLOW\n", encoding="utf-8")
         (templates / "elab.pre.tcl").write_text("ELAB\n", encoding="utf-8")
         grdl = templates / "grdlbuild" / "power" / "partition_template"
         grdl.mkdir(parents=True)
