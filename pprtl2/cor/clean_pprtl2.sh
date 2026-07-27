@@ -15,6 +15,7 @@ rm -f $WORKAREA/power/pprtl2/Makefile
 rm -f $WORKAREA/power/pprtl2/stdcell.ldb.list
 rm -f $WORKAREA/power/pprtl2/activity_dir.map
 rm -f $WORKAREA/power/pprtl2/prep_pprtl2_*
+rm -f $WORKAREA/power/pprtl2/report_pprtl2.*
 rm -f $WORKAREA/power/pprtl2/tool.cth
 rm -f $WORKAREA/power/pprtl2/output
 echo "Cleaned regular files in $WORKAREA/power/pprtl2"
