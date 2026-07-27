@@ -1,6 +1,6 @@
 # Spec: `prep_tech` — Cheetah process technology list files prep for ctech and synthesis
 
-Status: **COMPLETE** — generation + 40 hermetic tests green; REGEX filters, contour library resolution, and `.cth` precedence landed (2026-07-20).  
+Status: **COMPLETE** — generation + 52 hermetic tests green. Configuration files are absolute paths (no backend area); supports multi-library configs (compound `LIB_NAME` and no-`LIB_NAME` auto-detect), `//`-delimited REGEX filters, contour resolution, first-config precedence, and fatal duplicate detection (2026-07-22).  
 Owner: mroha  
 Language: **Python 3** (driver)  
 Test framework: **pytest**  
@@ -14,6 +14,8 @@ Test framework: **pytest**
 > **Using this document as a template.** This spec is structured so it can be reused for future automation. The reusable skeleton is: **Purpose → Inputs (sources of truth) → Path/resolution handling → Validation & dry-run → Outputs (generated tree + file formats) → Derivation/selection rules → Architecture & module responsibilities → CLI/usage → Testing → Resolved decisions**. Section 8 ("Reusable automation template") distills the generic pattern. Replace the domain-specific content of each section while keeping the section contract.
 
 > **Terminology.** A **bundle** is a per-directory grouping under the stdcell library root (e.g. `base_lvt`, `clk_svt`) — a stdcell *function* combined with a threshold *variant* (`lvt`, `svt`, `hvt`, `ulvt`). Throughout this document, **bundle** = the directory; **variant** = the threshold flavor only.
+>
+> A **configuration file** is a Cheetah backend configuration file with a `[DESIGNPACKAGE]` section that resolves to one or more stdcell libraries. It was historically a `.cth` file, but it may be named anything and is referenced by an **absolute path**; wherever this document says `.cth`, read “configuration file.”
 
 ---
 
@@ -21,30 +23,48 @@ Test framework: **pytest**
 
 | # | Source | Provides | Notes |
 |---|--------|----------|-------|
-| S1 | **prep_tech.input.md** — markdown file provided as input | Cheetah backend cheetah release containing needed .cth files; for each die listed contains ctech directories containing verilog and .cth files which contain the technology definition for stdcells used in ctech and ctech_exp verilog files |  |
+| S1 | **prep_tech.input.md** — markdown file provided as input | For each die listed contains ctech directories containing verilog and cheetah configuration files which contain the technology definition for stdcells used in ctech and ctech_exp verilog files |  |
 
-The tech .cth files, for example 76p4_g1i_opt4.cth, contains the following interesting parameters in the [DESIGNPACKAGE] section:
+The cheetah configuration files,  which can be named anything,  contain a [DESIGNPACKAGE] section with some interesting parameters:
 
 lib_height_class  
 lib_name  
-
-<lib_name> will point to the stdcell library
-
-example:  
-i0m = designpackage(name=1278.6,path)/lib786_i0m_180h_50pp_pdk10_r8v2p0_fv
-
 path  
 version  
+
+examples:
+
+```ini
+LIB_NAME = g1m
+```
+
+```ini
+LIB_NAME = g1m_g1i    # Contains both g1m and g1i libraries
+```
+
+The `lib_name` value can contain one or more `designpackage(name=<pkg>,<field>)` tokens, for example:
+
+```ini
+i0m = designpackage(name=1278.6,path)/lib786_i0m_180h_50pp_pdk10_r8v2p0_fv
+```
+
+But it is also possible that direct paths are provided,  for example:
+
+```ini
+         g1i = /p/hdk/cad/stdcells/lib765_g1i_210h_50pp/pdk091_r0v0p0_fv
+         g1m = /p/hdk/cad/stdcells/lib765_g1m_240h_50pp/pdk091_r0v0p0_fv
+```
+
+
 
 ### 2.1 `prep_tech.input.md` format
 
 - The `prep_tech.input.md` file remains **Markdown**, but its content is **machine-readable**.
 - Sections are markdown headings:
-  - `## Cheetah backend reference` — followed by a single vanity path to the Cheetah backend reference area (where `.cth` files live).
   - `## <NAME> DIE` — one section per die. The die's output directory name is `<NAME>` lowercased (e.g. `CORIMH DIE` → `corimh`).
 - Within each die section:
-  - A line whose **first token ends in `.cth`** is a **required** `.cth` filename (bare name). A die may list **one or many** `.cth` files; **all listed are required** (e.g. CORIMH needs both `g1i` and `g1m` to elaborate the reference stdcell instances inside the ctech verilog cells). The list of `.cth` files is mutually exclusive,  i.e. a definition of a standard cell needs to be unique per `.cth` file.  If the same standard cell is defined more than once,  then this is a fatal condition and will results in an error during processing.  However,  if --allow-duplicates is specified, multiple definitions are permitted, with the first .cth file taking precedence.  A duplicate summary report will be generated in either case.
-  - Such a `.cth` line may carry an optional `REGEX=<regexp>` suffix on the **same line**, e.g. `76p5_g1i_opt8.cth  REGEX=tttt\S+850v\S+100c`. The pattern runs to end-of-line. Per die, all `REGEX=` patterns are collected as a **union** and used to build the optional `*.list.ctech.regex` outputs (see 3.0). Omit it when no filtering is needed.
+  - One or more lines which contains a full path to a text file. A die may list **one or many** of these Cheetah configuration files; **all listed are required** (e.g. CORIMH needs both `g1i` and `g1m` to elaborate the reference stdcell instances inside the ctech verilog cells). The list of files is mutually exclusive,  i.e. a definition of a standard cell needs to be unique per Cheetah configuration file.  If the same standard cell is defined more than once,  then this is a fatal condition and will results in an error during processing.  However,  if `--allow-duplicates` is specified, multiple definitions are permitted, with the first configuration file taking precedence.  A duplicate summary report will be generated in either case.  The file may or may not have a `.cth` suffix,  you can't count on it.
+  - Such a configuration line may carry an optional `REGEX=/<pattern>/` suffix on the **same line**, e.g. `/p/hdk/etc/Projects/refcth2/2026.06.plus/76p5_g1i_opt8.cth  REGEX=/tttt\S+850v\S+100c/`. The pattern is delimited by `/.../` (perl-style); the inner text is compiled as a standard Python regex. Per die, all `REGEX=` patterns are collected as a **union** and used to build the optional `*.list.ctech.regex` outputs (see 3.0). Omit it when no filtering is needed.
   - All other non-empty content lines are **ctech structural release areas** (directory vanity paths), matched **exactly** as written.
 - **Comment-only lines** beginning with `#` (pound sign, not a markdown heading) are permitted and ignored.
 - Blank lines are ignored.
@@ -53,23 +73,37 @@ version
 
 - All paths are treated as **vanity paths** and are **NOT symlink-resolved** (e.g. `/p/hdk/cad/stdcells/`, `/p/hdk/cad/ctech/`).
 - The directory paths under the dies are **ctech structural release areas** and must match `prep_tech.input.md` **exactly**.
-- `.cth` files are located in the **Cheetah backend reference area** given in `prep_tech.input.md`.
-- `.cth` parsing uses a **custom regex-based parser**.
+- Configuration files are given as **absolute paths**, one per line.
+- configuration parsing uses a **custom regex-based parser**.
 
 
 ### 2.3 DesignPackage resolution
 
-The stdcell library root is **resolved from the `.cth`** `[DESIGNPACKAGE]` section, not from any `/p/hdk/cad/stdcells/...` entry in the die's ctech dirs.
+The stdcell library root is **resolved from the configuration** `[DESIGNPACKAGE]` section, not from any `/p/hdk/cad/stdcells/...` entry in the die's ctech dirs.
 
-The `lib_name` value contains one or more `designpackage(name=<pkg>,<field>)` tokens, for example:
+Look for the "LIB_NAME" token in the `[DESIGNPACKAGE]` section of the configuration file.
 
-```
+**Identify the stdcell library key(s):**
+
+- If `LIB_NAME` is present, split it on `_`. `LIB_NAME = g1m` → `[g1m]`; `LIB_NAME = g1m_g1i` → `[g1m, g1i]`.
+- If `LIB_NAME` is absent, **auto-detect**: any `[DESIGNPACKAGE]` field whose resolved value contains a `/lib<digits>_<key>_` path component is a stdcell library, and the field key is the library prefix. Non-stdcell fields (`esd_lib`, `cpipad_lib`, `path`, `version`, `name`) are excluded.
+
+A single configuration file may therefore resolve to **multiple** stdcell library roots; each key is resolved independently.
+
+**Resolve each key to a library path.** The key dereferences to a same-section field whose value is a direct path or a `designpackage(...)` token expression:
+
+```ini
+# token expression (crt / i0m style)
 i0m = designpackage(name=1278.6,path)/lib786_i0m_180h_50pp_pdk10_r8v2p0_fv
+
+# direct paths (project config style)
+g1i = /p/hdk/cad/stdcells/lib765_g1i_210h_50pp/pdk091_r0v0p0_fv
+g1m = /p/hdk/cad/stdcells/lib765_g1m_240h_50pp/pdk091_r0v0p0_fv
 ```
 
 Resolution is **recursive token substitution** performed by a custom (self-written) parser:
 
-- `designpackage(name=<pkg>,<field>)` resolves to the value of `<field>` in the same `[DESIGNPACKAGE]` section of the `.cth`.
+- `designpackage(name=<pkg>,<field>)` resolves to the value of `<field>` in the same `[DESIGNPACKAGE]` section of the configuration file.
 - The substituted value may itself contain further `designpackage(...)` tokens; repeat substitution until none remain.
 
 Worked example:
@@ -90,7 +124,7 @@ Worked example:
 
 The resolved path is treated as a **vanity path** (NOT symlink-resolved); the symlink at that location points to the actual release area. Bundle directories (e.g. `base_lvt`, `clk_svt`) and `*bmod.v` files are enumerated under this resolved root.
 
-**Two `.cth` styles are supported:**
+**Two configuration styles are supported:**
 
 - **Explicit library field** (crt / i0m style): a field named exactly `<lib_name>` holds the library path (possibly via tokens), e.g. `i0m = designpackage(name=1278.6,path)/lib786_i0m_180h_50pp_pdk10_r8v2p0_fv`. The worked example above is this style.
 - **Contour style (no explicit field):** `<lib_name>` has no matching field; only `path` and `version` are given. The library directory is then **discovered** under the resolved `path` by selecting the directory whose name (a) starts with `lib` and contains `_<lib_name>_`, (b) contains the **pitch** token from `lib_height_class` (e.g. `50pp`), and (c) ends in `_fv` (functional views). Lexically-first wins if several remain; error if none. Example: `/p/hdk/cad/dp_contour/76p5/v1.0_2/` + `lib_name=g1m` + `lib_height_class=g1m_8dg_50pp` → `lib765_g1m_240h_50pp_pdk10_r4v0p0_fv`.
@@ -101,17 +135,18 @@ The resolved path is treated as a **vanity path** (NOT symlink-resolved); the sy
 
 Confirm:
 - All ctech directories exist and contain SystemVerilog files (`.sv`). ctech verilog files start with `ctech_lib`.
-- All required `.cth` files exist in the Cheetah backend reference area.
+- All specified configuration files exist and there is at least one per die
 - All `REGEX=` patterns compile as valid Python regular expressions.
+- If check if target output area is writable, regardless if $WORKAREA is set or not.
 
 Validation raises on the first missing path. Two non-writing modes are provided:
 - `--check` — parse + validate only; print a one-line OK summary; write and plan nothing.
 - `--dry-run` — parse, validate, and print the planned output paths **without writing** any files.
-- `--allow-duplicates` — allow multiple `.cth` files to define the same standard cell. By default, this is disallowed and will raise an error if duplicates are found. 
+- `--allow-duplicates` — allow multiple configuration files to define the same standard cell. By default, this is disallowed and will raise an error if duplicates are found. 
 
 ## 3. Outputs (the generated tree)
 
-If `$WORKAREA` is set, create a directory `prep_tech` under `$WORKAREA`; otherwise create it in the current working directory. Output filenames are **bare** (no `<tech>` prefix — a die may list multiple `.cth` files resolving to different libraries, so a single per-die tech prefix is ambiguous and was removed). The output tree is:
+If `$WORKAREA` is set, create a directory `prep_tech` under `$WORKAREA`; otherwise create it in the current working directory. Output filenames are **bare** (no `<tech>` prefix — a die may list multiple configuration files resolving to different libraries, so a single per-die tech prefix is ambiguous and was removed). The output tree is:
 
 ```
 $WORKAREA/prep_tech/
@@ -160,8 +195,8 @@ Two families of list files are produced per die. (The earlier term "minimal" was
 - For each die, list:
   - Number of ctech cells found.
   - Number of stdcells referenced by the ctechs, **deduplicated** (a stdcell referenced by multiple ctechs is counted once). Stdcell names are unique per bundle.
-  - Number of duplicate stdcell cell definitions found for the provided `.cth` files
-  - Number of **unresolved stdcell instantiations** — ctech instances whose name begins with a die stdcell-library prefix (e.g. `g1i`, `g1m`, `i0m`, taken from each `.cth` `lib_name`) but has **no matching `*bmod.v` definition** in any bundle. Each is listed on its own indented line as `<stdcell> <- <ctech_cell> (<path to ctech .sv>)`. Tokens that do **not** match a known library prefix are treated as non-stdcell (ctech submodules / SV constructs) and are not reported. This is **report-only** (it does not fail the run).
+  - Number of duplicate stdcell cell definitions found for the provided configuration files
+  - Number of **unresolved stdcell instantiations** — ctech instances whose name begins with a die stdcell-library prefix (e.g. `g1i`, `g1m`, `i0m`, taken from each configuration file `lib_name`) but has **no matching `*bmod.v` definition** in any bundle. Each is listed on its own indented line as `<stdcell> <- <ctech_cell> (<path to ctech .sv>)`. Tokens that do **not** match a known library prefix are treated as non-stdcell (ctech submodules / SV constructs) and are not reported. This is **report-only** (it does not fail the run).
   - `ctech-referenced .lib files` / `.ldb/.db files` — line counts of `stdcell.lib.list.ctech` / `stdcell.ldb.list.ctech` (one selected file per referenced bundle).
   - `regex-filtered .lib files` / `.ldb/.db files` — line counts of `stdcell.lib.list.ctech.regex` / `stdcell.ldb.list.ctech.regex` (shown only when the die has a `REGEX`).
   - `full-list .lib files` / `.ldb/.db files` — line counts of `stdcell.lib.list` / `stdcell.ldb.list`.
@@ -171,29 +206,29 @@ Two families of list files are produced per die. (The earlier term "minimal" was
 - Written to the output root.
 - Columns:
   ```
-  die,ctech_cell,stdcell name,.cth file,stdcell library,path to stdcell verilog,path to ctech verilog
+  die,ctech_cell,stdcell name,stdcell library,path to configuration file,path to stdcell verilog,path to ctech verilog
   ```
 - `stdcell library` is the **bundle directory name** (e.g. `base_lvt`).
-- `.cth file` is the `.cth` file that contributed the stdcell library for this reference (e.g. `76p5_g1i_opt8.cth`)
+- `path to configuration file` is the absolute path of the configuration file that contributed the stdcell library for this reference (e.g. `/p/hdk/etc/Projects/corioh/26.03.001/CORIOHA0_1p0_g1i`). Under precedence, this is the first configuration that defined the cell.
 - `stdcell name` is extracted by **parsing the ctech `.sv` verilog files** (the instantiated stdcell module names). The `*bmod.v` files in each bundle determine which standard cells exist in that library.
 - `path to stdcell verilog` is the bundle `*bmod.v` that defines the stdcell; `path to ctech verilog` is the `ctech_lib_*.sv` file that instantiates it.
 - **All rows** are emitted (one per stdcell reference per ctech; deduplicated per bundle within a die).
 - Example:
   ```
-  corimh,ctech_lib_triplesync_setb,g1iinv000ab1n24x5,76p5_g1i_opt8.cth,base_lvt,<path to bmod.v>,<path to ctech .sv>
+  corimh,ctech_lib_triplesync_setb,g1iinv000ab1n24x5,base_lvt,<path to configuration file>,<path to bmod.v>,<path to ctech .sv>
   ```
 
 ### 3.5 `prep_tech.duplicates.csv`
 
 - Written to the output root.  Always contains the header row; data rows only when duplicates are found.
-- Purpose is to detect whether there is overlap in the stdcell definitions across different `.cth` files for the same die and stdcell library.  Can cause problems with EDA tools.
+- Purpose is to detect whether there is overlap in the stdcell definitions across different configuration files for the same die and stdcell library.  Can cause problems with EDA tools.
 - Columns:
   ```
-  die,stdcell library,stdcell name,.cth file list
+  die,stdcell library,stdcell name,configuration file list
   ```
 - `stdcell library` is the **bundle directory name** (e.g. `base_lvt`).
 - `stdcell name` is extracted by **parsing the ctech `.sv` verilog files** (the instantiated stdcell module names). The `*bmod.v` files in each bundle determine which standard cells exist in that library.
-- `.cth file list` is a colon-separated list of `.cth` files that contain the duplicates (e.g. `76p5_g1i_opt8.cth:76p5_g1i_opt16.cth`).
+- `configuration file list` is a colon-separated list of configuration files that contain the duplicates (e.g. `/p/hdk/etc/Project/corioh/26.03.001/CORIOHA0_1p0_g1i:/nfs/site/disks/crt_tools_0125/refcth2/.2026.06.plus_26.03.018/76p5_g1m_dot4_opt5.cth`).
 
 ---
 
@@ -210,7 +245,7 @@ The trailing library directory name splits at the **4th underscore group**:
 - `<tech>_<lib>_<h>_<pp>` (e.g. `lib786_i0m_180h_50pp`) — the library-prefix form.
 - `<version>` (e.g. `pdk10_r8v2p0_fv`) — the release version segment.
 
-> **Note (tech prefix removed).** Output filenames no longer carry a `<tech>` prefix (a die may list several `.cth` files resolving to different libraries, making a single per-die prefix ambiguous). The library-prefix form is retained here only as a naming reference; it is not used to name output files.
+> **Note (tech prefix removed).** Output filenames no longer carry a `<tech>` prefix (a die may list several configuration files resolving to different libraries, making a single per-die prefix ambiguous). The library-prefix form is retained here only as a naming reference; it is not used to name output files.
 
 Under this area are directories for each `<stdcell function>_<variant>` — a **bundle**.
 
@@ -265,7 +300,7 @@ prep-tech/
 │       ├── __init__.py
 │       ├── main.py       # CLI entrypoint (argparse; --check, --dry-run); orchestration
 │       ├── config.py     # parse prep_tech.input.md -> dict (custom regex parser; no 3rd-party deps)
-│       ├── discover.py   # .cth/.sv/bmod parsing, DesignPackage resolution, bundle enumeration, PVT+nldm selection
+│       ├── discover.py   # configuration file/.sv/bmod parsing, DesignPackage resolution, bundle enumeration, PVT+nldm selection
 │       ├── validate.py   # pre-flight validation (raises on first missing path)
 │       └── generate.py   # per-die plan build + output rendering/writing
 ├── tests/
@@ -279,11 +314,12 @@ prep-tech/
 ```
 
 Key data contracts:
-- `config.parse_input(path) -> {"cheetah_backend": str, "dies": {<die>: {"cth_files": [...], "ctech_dirs": [...], "regexes": [...]}}}` (regexes = union of `REGEX=` patterns).
-- `discover.resolve_lib_root(params)` — explicit-field style (`lib_name` -> field -> path via tokens) **or** contour style (discover under `path` by lib_name + pitch + `_fv`).
+- `config.parse_input(path) -> {"dies": {<die>: {"config_files": [<abs paths>], "ctech_dirs": [<abs dirs>], "regexes": [<inner REGEX patterns>]}}}`. Lines are classified by filesystem type (directory -> ctech area; file -> configuration file). No backend prefix.
+- `discover.lib_keys(params)` — library keys for a configuration: split `LIB_NAME` on `_`, or (no `LIB_NAME`) auto-detect fields whose value contains `/lib<digits>_<key>_`.
+- `discover.resolve_lib_roots(params) -> [<lib root>, ...]` — resolve each key via its explicit field (direct path / designpackage tokens) or contour discovery; a config may yield multiple roots. `resolve_lib_root(params)` returns the first.
 - `discover.enumerate_bundles(lib_root) -> {<bundle>: {root, bmod, cells, lib, ldb, ndm}}` (only dirs with a `verilog/*bmod.v`).
 - `discover.compile_regexes(patterns)` / `discover.regex_filter(files, compiled)` — union `re.search` on basenames.
-- `generate.build_die_plan(...) -> {bundles, referenced_keys, refs, ctech_cells, unresolved, regexes}`; `generate.generate_all(...)` writes the tree.
+- `generate.build_die_plan(die, die_info) -> {bundles, referenced_keys, refs, ctech_cells, unresolved, duplicates, regexes}`; `generate.generate_all(parsed, output_root, allow_duplicates) -> (written, plans, has_duplicates)`.
 
 Output root resolution: `$WORKAREA/prep_tech/` if `WORKAREA` is set, else `./prep_tech/`.
 
@@ -304,13 +340,13 @@ PYTHONPATH=src python3 -m prep_tech.main prep_tech.input.md
 
 ## 7. Testing
 
-Tests are **hermetic** (pytest `tmp_path` fixtures build a fake backend + lib tree + ctech dir); they do not depend on real `/p/hdk` release areas.
+Tests are **hermetic** (pytest `tmp_path` fixtures build absolute config files + a lib tree + a ctech dir); they do not depend on real `/p/hdk` release areas.
 
 ```bash
 PYTHONPATH=src python3 -m pytest -q
 ```
 
-Coverage: `.cth`/DesignPackage resolution (incl. key-deref and mixed-case fields), ctech `.sv` instance parsing, bundle enumeration, PVT/nldm selection, input parsing, pre-flight validation, and end-to-end `generate_all` (tree + report + CSV).
+Coverage: configuration parsing (filesystem-type classification, `//` REGEX), DesignPackage resolution (token deref, direct paths, compound `LIB_NAME`, no-`LIB_NAME` auto-detect, contour discovery), ctech `.sv` instance parsing, bundle enumeration, PVT/nldm selection, pre-flight validation (missing files/dirs, output writability), duplicate detection (fatal vs `--allow-duplicates`), and end-to-end `generate_all` (tree + report + duplicates CSV + CSV).
 
 ---
 
@@ -358,8 +394,8 @@ Coverage: `.cth`/DesignPackage resolution (incl. key-deref and mixed-case fields
 Use this section as the skeleton for a new generative/idempotent automation. Keep each section's **contract**; replace the domain content.
 
 1. **Purpose** — one paragraph: what it generates, that it is idempotent, and what it must *not* do (e.g. not run downstream flows, not modify sources).
-2. **Inputs (sources of truth)** — table of inputs; define a **machine-readable** input format (headings, required vs optional lines, comment/blank handling). Allow optional per-line modifiers (here: `REGEX=` on a `.cth` line) and state how repeats combine (union). State **precedence** when the same logical item is defined by multiple sources (here: the first-listed `.cth` wins).
-3. **Path & resolution handling** — state vanity-path vs symlink-resolution policy; describe any **indirection/token resolution** (here: DesignPackage key-deref + recursive `designpackage(...)` substitution) with a worked example, and cover **multiple input styles / fallbacks** for the same logical value (here: explicit library field vs contour discovery under `path`).
+2. **Inputs (sources of truth)** — table of inputs; define a **machine-readable** input format (headings, required vs optional lines, comment/blank handling). Classify ambiguous lines robustly (here: by **filesystem type** — directory vs file). Allow optional per-line modifiers (here: `REGEX=/.../` on a configuration line) and state how repeats combine (union). State **precedence** when the same logical item is defined by multiple sources (here: the first-listed configuration file wins).
+3. **Path & resolution handling** — state vanity-path vs symlink-resolution policy; describe any **indirection/token resolution** (here: DesignPackage key-deref + recursive `designpackage(...)` substitution) with a worked example, and cover **multiple input styles / fallbacks** for the same logical value (here: explicit library field, direct paths, compound keys that resolve to several targets, and contour discovery / auto-detection when the explicit form is absent).
 4. **Validation & non-writing modes** — enumerate pre-flight checks; provide `--check` (validate only) and `--dry-run` (plan only, no writes).
 5. **Outputs (generated tree + file formats)** — show the exact tree; specify each file's content, ordering (sorted/deterministic), and comment conventions. Mark **optional** outputs and their trigger conditions (here: `*.list.ctech.regex` only when a `REGEX` is given). Give the human report a **header** (tool name + run timestamp) and a **top summary** printed identically to STDOUT; surface anomalies as **report-only** entries (don't fail the run).
 6. **Derivation / selection rules** — how concrete artifacts are chosen (here: bundle enumeration, PVT-closest + format filter, one-per-group selection, routing by extension).

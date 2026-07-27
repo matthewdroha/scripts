@@ -108,6 +108,41 @@ def test_resolve_lib_root_contour_missing(tmp_path):
         )
 
 
+def test_lib_keys_from_lib_name_single():
+    assert discover.lib_keys({"lib_name": "i0m", "i0m": "/x"}) == ["i0m"]
+
+
+def test_lib_keys_compound_split():
+    params = {"lib_name": "g1m_g1i", "g1i": "/a", "g1m": "/b"}
+    assert discover.lib_keys(params) == ["g1m", "g1i"]
+
+
+def test_lib_keys_autodetect_no_lib_name():
+    # No lib_name; stdcell fields detected by '/lib<digits>_<key>_' component.
+    params = {
+        "name": "1276.4",
+        "PDK_DIR": "/p/hdk/cad/pdk/pdk765_r0.9.1",
+        "g1i": "/p/hdk/cad/stdcells/lib765_g1i_210h_50pp/pdk091_r0v0p0_fv",
+        "g1m": "/p/hdk/cad/stdcells/lib765_g1m_240h_50pp/pdk091_r0v0p0_fv",
+        "esd_lib": "/p/hdk/cad/pdk_addon/esd_lib/esd765_r0.9.1",
+        "cpipad_lib": "/p/hdk/cad/pdk_addon/cpipad_lib/cpipad765_r0.9.1",
+    }
+    assert discover.lib_keys(params) == ["g1i", "g1m"]
+
+
+def test_resolve_lib_roots_compound_direct_paths():
+    params = {
+        "g1i": "/p/hdk/cad/stdcells/lib765_g1i_210h_50pp/pdk091_r0v0p0_fv",
+        "g1m": "/p/hdk/cad/stdcells/lib765_g1m_240h_50pp/pdk091_r0v0p0_fv",
+        "esd_lib": "/p/hdk/cad/pdk_addon/esd_lib/esd765_r0.9.1",
+    }
+    roots = discover.resolve_lib_roots(params)
+    assert roots == [
+        "/p/hdk/cad/stdcells/lib765_g1i_210h_50pp/pdk091_r0v0p0_fv",
+        "/p/hdk/cad/stdcells/lib765_g1m_240h_50pp/pdk091_r0v0p0_fv",
+    ]
+
+
 
 # ---------------------------------------------------------------------------
 # ctech .sv parsing
