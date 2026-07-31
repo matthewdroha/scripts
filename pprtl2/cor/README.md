@@ -64,7 +64,7 @@ cd $WORKAREA/power/pprtl2
 # Fill in YOUR_MODEL_VERSION_HERE with the one you selected
 ln -sfn /nfs/site/disks/corhub_fe_mod_0000/corhub_oks/YOUR_MODEL_VERSION_HERE REF_MODEL
 ln -sfn /nfs/site/disks/corimh.arc.proj_archive/arc SDC_ARCHIVE
-ln -sfn /nfs/site/disks/xpg_dmrhub2_0053/mroha/corpower/scripts scripts
+ln -sfn /nfs/site/disks/corimhoks_rtl_h2b_011/mroha/scripts scripts
 
 # mroha: TODO: Turnin scripts/ to $WORKAREA/power/pprtl2
 # Generate pprtl2 workarea
@@ -121,7 +121,7 @@ cd $WORKAREA/power/pprtl2
 # Fill in YOUR_MODEL_VERSION_HERE with the one you selected
 ln -sfn /nfs/site/disks/dmr_fe_mod_0000/dmrhub2/YOUR_MODEL_VERSION_HERE REF_MODEL
 ln -sfn /nfs/site/disks/dmr2_arc_proj_archive/arc SDC_ARCHIVE
-ln -sfn /nfs/site/disks/xpg_dmrhub2_0053/mroha/corpower/scripts scripts
+ln -sfn /nfs/site/disks/corimhoks_rtl_h2b_011/mroha/scripts scripts
 
 
 # mroha: TODO: Turnin scripts/ to $WORKAREA/power/pprtl2
@@ -177,7 +177,7 @@ cd $WORKAREA/power/pprtl2
 # Fill in YOUR_MODEL_VERSION_HERE with the one you selected
 ln -sfn /nfs/site/disks/corcbb_fe_mod_0000/corcbbp/YOUR_MODEL_VERSION_HERE REF_MODEL
 ln -sfn /nfs/site/disks/corcbbp.arc.proj_archive/arc SDC_ARCHIVE
-ln -sfn /nfs/site/disks/xpg_dmrhub2_0053/mroha/corpower/scripts scripts
+ln -sfn /nfs/site/disks/corimhoks_rtl_h2b_011/mroha/scripts scripts
 
 # mroha: TODO: Turnin scripts/ to $WORKAREA/power/pprtl2
 # Generate pprtl2 workarea
