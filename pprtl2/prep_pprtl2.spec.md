@@ -1,6 +1,6 @@
 # Spec: `prep_pprtl2` — pprtl2 run-area preparation workflow
 
-Status: **PHASE 3 COMPLETE** — full workflow implemented + validated live on imh (2026-07-14). Generated collateral (`hip.ldb.list.minimized`, `<partition>_clocks.tcl.fixclocks`, `elab.pre.tcl`) via the perl helpers + report CSV/summary. Multi-die, SDC_ARCHIVE, auto h2b sublevel, per-die blocks.cfg, hier_type/par-fallback partition selection all resolved.
+Status: **PHASE 3 COMPLETE + vectorless/timebased** — full workflow validated live (imh, and ioh with real MTL: 146/146 vectorless, 143 timebased). Two flow modes (`vectorless.flow.cfg` always; `timebased.flow.cfg` when an MTL matches), optional `MTL_FILE`, per-die templates, auto h2b sublevel, `minimizehip_fail` disqualification, per-die blocks.cfg, hier_type/par-fallback selection all resolved.
 Owner: mroha
 Language: **Python 3** (driver), reusing existing Perl helpers
 Scope: "start small" — generate the output tree deterministically from known sources for a given DUT (`imh`, `ioh`, or `cbb0`) across its partitions.
@@ -29,9 +29,10 @@ tree from the same inputs. It does **not** run the pprtl2 flow itself, nor does 
 | S2 | **Partition/blocks config** — `$WORKAREA/partition/<blocks.cfg>` (imh/ioh: `<DUT>.blocks.cfg`; cbb0: `cbb0_h2b.blocks.cfg`; override via `--blocks-cfg`) | List of `<partition>` names | **Selection:** if the file has any `hier_type` field, take `hier_type = part` (imh); otherwise fall back to `block_type = partition` **and** name starts with `par` (ioh/cbb0). Comment lines and commented-out headers (`#[...]`) are ignored. Verified counts: imh 187, ioh 146, cbb0 47. |
 | S3 | **stdcell libraries** — `/p/hdk/cad/stdcells/...` | `stdcell.ldb.list` contents | See open question Q1 (static template vs. generated) |
 | S4 | **Cheetah-RTL** — `cth_query -tool cheetah-rtl` → `$CHEETAH_RTL_ROOT` | `Makefile` include target (`lowpower/pprtl2/Makefile.pprtl2`) | Referenced at make-time, not copied |
-| S5 | **Templates** — `scripts/pprtl2/cor/` (`Makefile`, `<DUT>/partition.flow.cfg`, `tool.cth`, `activity_dir.map`, `grdlbuild/`, per-die `<DUT>/stdcell.ldb.list`) | Static/near-static output templates | Curated in-repo |
+| S5 | **Templates** — `scripts/pprtl2/cor/` (`Makefile`, `tool.cth`, `activity_dir.map`, `grdlbuild/`, `elab.pre.tcl`; per-die `<DUT>/stdcell.ldb.list`, `<DUT>/vectorless.flow.cfg`, `<DUT>/timebased.flow.cfg`) | Static/near-static output templates | Curated in-repo |
 | S6 | **Perl helpers** — `scripts/pprtl2/minimizehip.pl`, `scripts/pprtl2/fixclocks.pl` | Transform S1 collateral into minimized/fixed outputs | Called as subprocesses |
 | S7 | **Clock SDC** — symlinked as `$WORKAREA/power/pprtl2/SDC_ARCHIVE` (e.g. `/nfs/site/disks/corimh.arc.proj_archive/arc`) | Per-partition clock collateral release dir | Release dir = `$SDC_ARCHIVE/<partition>/clock_collateral/<sdc release>/`. **Selection rule:** per die profile (§2.1) — keep dirs whose name (case-insensitive) starts with the die prefix **and** contains the die's required token, then pick the **newest by directory mtime**. Quick-reject the partition if `<release>/<partition>_clocks.tcl` is missing before running fixclocks. Partition dir names match S2 blocks.cfg names (verified). |
+| S8 | **MTL (master test list)** — symlinked as `$WORKAREA/power/pprtl2/MTL_FILE` (**optional**; e.g. `.../MTL/CORIOH/WW31/ww31b_corioh_control.mtl`) | Per-partition timebased test instance + FSDB | Colon-separated rows: `INST`=field 1, `RTL_PATH`=field 2, `FSDB_PTR`=field 6, `TEMPLATE`=**last** field. Match partition to `TEMPLATE`; first matching row wins. A row is rejected for timebased if `RTL_PATH` (trimmed) contains whitespace (multiple paths). Comment/blank lines ignored. Absent ⇒ vectorless-only. When present, its content is also copied to `$WORKAREA/power/pprtl2/<DUT>.mtl`. |
 ---
 
 ## 2.1 Die profiles (multi-die support)
@@ -57,6 +58,8 @@ The designer pre-creates two symlinks as the run's starting point: `$WORKAREA/po
 - `REF_MODEL/output/<DUT>/partition/` exists, **and**
 - `SDC_ARCHIVE/` contains at least one `<partition>/clock_collateral/` subdir.
 
+`MTL_FILE` (S8) is **optional**: if the symlink is absent, prep runs vectorless-only; if it is present it must resolve to a readable file, else prep **fails fast**.
+
 Partition list file (per die, verified for imh/ioh/cbb0): `$WORKAREA/partition/<blocks.cfg>` per §2.1 (imh/ioh `<DUT>.blocks.cfg`, cbb0 `cbb0_h2b.blocks.cfg`).
 
 ## 3. Outputs (the generated tree)
@@ -69,10 +72,13 @@ $WORKAREA/power/pprtl2/
 ├── stdcell.ldb.list                             # from S3/S5
 ├── tool.cth                                     # cth config for the power run   (Q2)
 ├── activity_dir.map                             # verbatim copy (FE_ACTIVITY_MAPPING)
+├── <DUT>.mtl                                    # copy of MTL_FILE target (when present; MASTER_TEST_LIST)
 ├── grdlbuild/                                   # verbatim copy of scripts/pprtl2/cor/grdlbuild
-├── prep_pprtl2_partition.list                   # all non-skipped partitions, one per line
+├── prep_pprtl2_partition.list                   # clean-run partitions (vectorless), one per line
+├── prep_pprtl2_timebased_partition.list         # partitions that got a timebased.flow.cfg
 └── partition/
-    ├── <partition>.flow.cfg                      # per partition, from S5 template
+    ├── <partition>.vectorless.flow.cfg           # per partition (always), from S5 <DUT>/vectorless.flow.cfg
+    ├── <partition>.timebased.flow.cfg            # per partition (when MTL matches), %TOP_INSTANCE_NAME% expanded
     └── <partition>/
         ├── hip.ldb.list.minimized               # minimizehip.pl on S1 hip ldb list
         ├── <partition>_clocks.tcl.fixclocks     # fixclocks.pl on S1 clock collateral
@@ -91,24 +97,29 @@ $WORKAREA/power/pprtl2/
 
 where `<sub>` is the auto-detected h2b sublevel (§2.1).
 
-**minimizehip disqualification (post-generation):** for an eligible partition, `minimizehip.pl` runs **first**. If the resulting `hip.ldb.list.minimized` reports `#HIPS_MISSING_LDB_OR_LIB_COUNT: N` with `N > 0` (some HIPs had no ldb/lib — a silent minimize failure), the partition is **disqualified**: `flow.cfg`, `elab.pre.tcl`, and `fixclocks` are **not** generated, it is excluded from `ran` and from `prep_pprtl2_partition.list`, and it is reported under the `fail minimizehip` category. The `hip.ldb.list.minimized` file is kept as evidence. Accounting: `total = ran + skipped + fail_minimizehip`.
+**minimizehip disqualification (post-generation):** for an eligible partition, `minimizehip.pl` runs **first**. If the resulting `hip.ldb.list.minimized` reports `#HIPS_MISSING_LDB_OR_LIB_COUNT: N` with `N > 0` (some HIPs had no ldb/lib — a silent minimize failure), the partition is **disqualified**: `vectorless.flow.cfg`, `elab.pre.tcl`, `fixclocks`, and any `timebased.flow.cfg` are **not** generated, it is excluded from the vectorless set and from `prep_pprtl2_partition.list`, and it is reported under the `fail minimizehip` category. The `hip.ldb.list.minimized` file is kept as evidence. Accounting: `total = vectorless + missing-input-skipped + fail_minimizehip`; the summary's `vectorless skipped` = `missing-input-skipped + fail_minimizehip`.
+
+**timebased flow (per clean-run partition):** `<partition>.timebased.flow.cfg` is generated only when **all** hold: (a) `MTL_FILE` present, (b) partition matches an MTL row by `TEMPLATE`, (c) that row's `RTL_PATH` (field 2) is a single path (no embedded whitespace), (d) that row's `FSDB_PTR` file exists and is readable. The template is copied with `%TOP_INSTANCE_NAME%` expanded to the MTL `INST` value. Otherwise the partition is recorded with a reason: `no_mtl`, `not_in_mtl`, `strip_path_bad`, or `fsdb_missing` (checked in that order). This only affects **timebased**; `vectorless.flow.cfg` is always produced for clean-run partitions.
 
 The DUT-level static outputs (`Makefile`, `stdcell.ldb.list`, `tool.cth`, `activity_dir.map`, `grdlbuild/`) are always created regardless of per-partition gating.
 
 **Report CSV** — `$WORKAREA/power/pprtl2/prep_pprtl2_report.csv`, columns:
-`partition, 2stage_filelist_exists, hip_ldb_list_exists, clocks_tcl_exists, clock_release_used, created_hip_ldb_list_minimized, created_clocks_tcl_fixclocks, created_elab_pre_tcl, minimizehip_fail`.
-`clock_release_used` = selected release dir name (§2.1), or `N/A` if the partition was skipped. `minimizehip_fail` = `yes`/`no` for eligible partitions, `N/A` for input-skipped ones.
+`partition, 2stage_filelist_exists, hip_ldb_list_exists, clocks_tcl_exists, clock_release_used, created_hip_ldb_list_minimized, created_clocks_tcl_fixclocks, created_elab_pre_tcl, minimizehip_fail, created_vectorless_flow_cfg, created_timebased_flow_cfg, timebased_strip_path_bad`.
+`clock_release_used` = selected release dir name (§2.1), or `N/A` if skipped. `minimizehip_fail` / `created_*_flow_cfg` / `timebased_strip_path_bad` = `yes`/`no` for eligible/clean-run partitions, `N/A` otherwise.
 
-**Report summary** — `$WORKAREA/power/pprtl2/prep_pprtl2_report.summary`, computed against **total partitions** (all percentages to 1 decimal place), with aligned columns:
+**Report summary** — `$WORKAREA/power/pprtl2/prep_pprtl2_report.summary`, computed against **total partitions** (all percentages to 1 decimal place), aligned columns, in this order:
 - total partitions
-- ran (all 3 inputs present AND minimizehip clean) + %
-- skipped (≥1 input missing) + %
-- missing 2stage + %, missing hiplist + %, missing clocks + % (counted independently)
+- vectorless setup generated (= clean-run partitions) + %
+- timebased setup generated + % (annotated `[MTL_FILE not present]` when absent)
+- vectorless skipped (total − vectorless) + %
+- timebased skipped (vectorless − timebased) + %
+- missing 2stage + %, missing hiplist + %, missing clocks + %
 - fail minimizehip + %
+- timebased not in mtl + %, timebased strip path bad + %, timebased fsdb missing + %
 
-Followed by a bracketed section per category listing the partition names: `[missing 2stage]`, `[missing hiplist]`, `[missing clocks]`, `[fail minimizehip]`.
+(“vectorless” replaces the earlier “ran” label — vectorless setup is generated for every clean-run partition.) Followed by a bracketed section per category listing the partition names: `[missing 2stage]`, `[missing hiplist]`, `[missing clocks]`, `[fail minimizehip]`, `[timebased not in mtl]`, `[timebased strip path bad]`, `[timebased fsdb missing]`.
 
-**Partition list** — `$WORKAREA/power/pprtl2/prep_pprtl2_partition.list`: every fully-generated (clean-run) partition, one per line, in blocks.cfg order. Excludes input-skipped and fail-minimizehip partitions.
+**Partition lists** — `prep_pprtl2_partition.list`: every clean-run partition (got vectorless), one per line, in blocks.cfg order (excludes input-skipped and fail-minimizehip). `prep_pprtl2_timebased_partition.list`: partitions that got a `timebased.flow.cfg`.
 
 | Output | Source | Transform |
 |--------|--------|-----------|
@@ -116,8 +127,10 @@ Followed by a bracketed section per category listing the partition names: `[miss
 | `stdcell.ldb.list` | S5 `scripts/pprtl2/cor/<DUT>/stdcell.ldb.list` | Copy the die-specific template (`cor/imh|ioh|cbb0/stdcell.ldb.list`) to `stdcell.ldb.list` |
 | `tool.cth` | S5 `scripts/pprtl2/cor/tool.cth` | Copy verbatim |
 | `activity_dir.map` | S5 `scripts/pprtl2/cor/activity_dir.map` | Copy verbatim (used as `FE_ACTIVITY_MAPPING`) |
+| `<DUT>.mtl` | S8 `MTL_FILE` target | When `MTL_FILE` is present, copy its content to `<DUT>.mtl` (referenced by timebased.flow.cfg's `MASTER_TEST_LIST = ${DUT}.mtl`). |
 | `grdlbuild/` | S5 `scripts/pprtl2/cor/grdlbuild/` | Copy the directory tree verbatim (overlay copy; NFS-safe, no rmtree). DUT is supplied to gradle at run time via `-Pdut=<DUT>`. |
-| `partition/<partition>.flow.cfg` | S5 `scripts/pprtl2/cor/<DUT>/partition.flow.cfg` | Copy per partition, renamed to `<partition>.flow.cfg`. `${DUT}` / `${TOP_MODULE_NAME}` stay as make-time vars — **not** expanded by prep. |
+| `partition/<partition>.vectorless.flow.cfg` | S5 `scripts/pprtl2/cor/<DUT>/vectorless.flow.cfg` | Copy per clean-run partition, renamed. `${DUT}` / `${TOP_MODULE_NAME}` stay as make-time vars \u2014 **not** expanded by prep. |
+| `partition/<partition>.timebased.flow.cfg` | S5 `scripts/pprtl2/cor/<DUT>/timebased.flow.cfg` + S8 MTL | Copy per matching partition with `%TOP_INSTANCE_NAME%` \u2192 MTL `INST`. Gated on MTL present + partition in MTL + FSDB readable. |
 | `partition/<partition>/hip.ldb.list.minimized` | `$REF_MODEL/output/<DUT>/partition/<partition>/h2b/<sub>/hip_collaterals/hip.ldb.list` | `minimizehip.pl <hip.ldb.list> <outdir>` where `<outdir>` = `$WORKAREA/power/pprtl2/partition/<partition>/`. Disqualifies the partition if `#HIPS_MISSING_LDB_OR_LIB_COUNT > 0`. |
 | `partition/<partition>/<partition>_clocks.tcl.fixclocks` | `<selected release>` dir (§2.1) | `fixclocks.pl --module <partition> --clock-collateral-dir <release-dir>` run **with cwd = the partition output dir** (fixclocks writes `<partition>_clocks.tcl.fixclocks` into cwd). No `--tag`. |
 | `partition/<partition>/elab.pre.tcl` | S5 `scripts/pprtl2/cor/elab.pre.tcl` | Copy per partition, verbatim (static template, present in `cor/`). |
@@ -132,6 +145,7 @@ prep_pprtl2.py \
   --workarea    <path>          # default: $WORKAREA
   --ref-model   <path|symlink>  # default: $WORKAREA/power/pprtl2/REF_MODEL
   --sdc-archive <path|symlink>  # default: $WORKAREA/power/pprtl2/SDC_ARCHIVE
+  --mtl-file    <path|symlink>  # optional; default: $WORKAREA/power/pprtl2/MTL_FILE
   --partitions  <a,b,c>         # default: all from the die's blocks.cfg (§2.1)
   --blocks-cfg  <path>          # override the die's blocks.cfg path
   --templates   scripts/pprtl2/cor
@@ -151,8 +165,8 @@ Behavior:
 
 **Verified on disk (2026-07-11):** partition names match between `blocks.cfg` and `$SDC_ARCHIVE`; 2stage + hip paths confirmed under the `h2b/` level; `<partition>_clocks.tcl` and the clock params file present in the newest H2B release.
 
-> **Note N1 — flow.cfg path drift (flag only, not fixed here):** the template [scripts/pprtl2/cor/partition.flow.cfg](scripts/pprtl2/cor/partition.flow.cfg) sets `H2B_TCL_FILE = $WORKAREA/REF_MODEL/output/${DUT}/partition/${TOP_MODULE_NAME}/trial/fe_collateral/rtl_list_2stage.tcl` — **missing the `h2b/` level** present in the real model. Confirm whether the template needs updating to `.../h2b/trial/fe_collateral/...`.
-> ANSWER: update the template to include h2b/
+> **Note N1 — flow.cfg path drift (resolved):** the flow.cfg template (now per-die `cor/<DUT>/{vectorless,timebased}.flow.cfg`) once set `H2B_TCL_FILE = .../partition/${TOP_MODULE_NAME}/trial/fe_collateral/rtl_list_2stage.tcl` — **missing the `h2b/` level** present in the real model.
+> ANSWER: update the template to include `h2b/` (`.../h2b/${H2B_PASS}/fe_collateral/...`).
 
 > **Note N2 — "newest" release:** newest **by mtime** among `/h2b/i`-matching dirs resolves to `CORIMH_H2B_0P0/` for `paracccpc`, not the `WW24K` example. Confirm mtime is the intended tiebreaker (vs. lexical WW sort).
 > ANSWER: yes, mtime is the intended tiebreaker.  The WW24K example was just a placeholder.
@@ -177,7 +191,7 @@ Start small, table-driven, no live tool dependency in unit tests.
 2. **Unit — path derivation:** given `workarea/dut/ref-model/partition`, assert every
    output path and every expected source path string.
 3. **Unit — template copy:** copy templates into a temp tree; assert content is byte-identical
-   and `<partition>.flow.cfg` is named/placed correctly.
+   and `<partition>.vectorless.flow.cfg` / `<partition>.timebased.flow.cfg` are named/placed correctly.
 4. **Integration (mocked):** stub `minimizehip.pl` / `fixclocks.pl` with fakes that write
    sentinel files; assert the full tree is produced and `--dry-run` writes nothing.
 5. **Smoke (manual/opt-in):** run against one real partition with the real REF_MODEL and
@@ -194,7 +208,7 @@ Start small, table-driven, no live tool dependency in unit tests.
   imh 212/216, ioh 179/190, cbb0 43/47 partitions eligible.
 - **Phase 2:** static outputs — `Makefile`, `stdcell.ldb.list`, `tool.cth`, per-partition
   `<partition>.flow.cfg`. Unit test 3. ✅ **DONE** — die-specific templates under `cor/<DUT>/`
-  (`stdcell.ldb.list`, `partition.flow.cfg`); `--force`/idempotent-skip handling; validated live.
+  (`stdcell.ldb.list`, `vectorless.flow.cfg`, `timebased.flow.cfg`); `--force`/idempotent-skip handling; validated live.
 - **Phase 3:** generated outputs — wire `minimizehip.pl` and `fixclocks.pl`; produce
   `hip.ldb.list.minimized`, `<partition>_clocks.tcl.fixclocks`, `elab.pre.tcl`. Integration test 4.
   ✅ **DONE** — injectable perl runners (mocked in test 4), per-partition gating, report CSV +
@@ -209,6 +223,6 @@ Start small, table-driven, no live tool dependency in unit tests.
 ## 9. Non-goals (for now)
 
 - Running the pprtl2 flow itself (only preparing the work area).
-- Timebased power mode collateral (`.mtl`, `MTL_INST_TO_RUN`) — vectorless only.
+- Expanding make-time variables in vectorless/timebased flow.cfg beyond `%TOP_INSTANCE_NAME%`.
 - Dies beyond `imh`/`ioh`/`cbb0` (add a new entry to the `DIE_PROFILES` map + a `cor/<DUT>/` template dir to extend).
 ```
