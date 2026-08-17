@@ -1,6 +1,8 @@
 [INCLUDES]
 #/p/hdk/cad/Cheetah-RTL/2026.06.p02/rtl_tools.cth
-/nfs/site/disks/xpg_dmrhub2_0053/mroha/corpower/2026.06.p02/rtl_tools.cth
+# SS bug in vectorless mode. https://hsdes.intel.com/appstore/article-one/#/14028298865
+#/nfs/site/disks/xpg_dmrhub2_0053/mroha/corpower/2026.06.p02/rtl_tools.cth
+/p/hdk/cad/Cheetah-RTL/2026.09.pre07/rtl_tools.cth
 
 [TOOLVERSION]
 PPRTL2_VERSION  = X-2025.06-SP3-20260214
