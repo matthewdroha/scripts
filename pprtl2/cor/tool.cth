@@ -1,9 +1,12 @@
 [INCLUDES]
 #/p/hdk/cad/Cheetah-RTL/2026.06.p02/rtl_tools.cth
-/nfs/site/disks/xpg_dmrhub2_0053/mroha/corpower/2026.06.p02/rtl_tools.cth
+# SS bug in vectorless mode. https://hsdes.intel.com/appstore/article-one/#/14028298865
+#/nfs/site/disks/xpg_dmrhub2_0053/mroha/corpower/2026.06.p02/rtl_tools.cth
+/p/hdk/cad/Cheetah-RTL/2026.09.pre07/rtl_tools.cth
 
 [TOOLVERSION]
-PPRTL2_VERSION  = X-2025.06-SP3-20260214
+#PPRTL2_VERSION  = X-2025.06-SP3-20260214
+PPRTL2_VERSION  = Y-2026.03-SP1-20260711
 PPRTL2_VCS_VERSION = X-2025.06-SP2-3
 
 [ENVS]
@@ -12,6 +15,15 @@ VERDI_HOME          = /p/hdk/rtl/cad/x86-64_linux26/synopsys/verdi3/toolversion(
 VCS_HOME            = /p/hdk/rtl/cad/x86-64_linux44/synopsys/vcsmx/toolversion(PPRTL2_VCS_VERSION)
 PPRTL2_HOME_PATH    = /p/hdk/cad/primepowerrtl/toolversion(PPRTL2_VERSION)
 PATH                =  envs(PPRTL2_HOME_PATH)/bin:envs(LC_PATH)/bin:${PATH}/bin:envs(VCS_HOME)
+
+
+# LD_PRELOAD from COR compression setup is interfering with pprtl2 wsh_exec
+# COR IMH: wattson/bin/wsh_exec: /usr/intel/pkgs/gcc/12.2.0/lib64/libstdc++.so.6: version `GLIBCXX_3.4.31' not found
+# COR IOH: wattson.log   Warning: Could not wait for the job to complete, reason: Operation cancelled. (WDSM-039)
+# COR IOH: #5  <signal handler called>   inflateEnd () from /p/cth/pu_tu/prd/zlib-ng/2.2.2/zlib-compat/lib/libz.so.1.3.1.zlib-ng
+[UNSETENVS]
+COMPRESSOR_LD_PRELOAD
+LD_PRELOAD
 
 [LICENSE]
 feature = synopsys/primepower

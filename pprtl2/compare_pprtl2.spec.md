@@ -1,4 +1,4 @@
-# Spec: `<tool_name>` — <one-line purpose>
+# Spec: `compare_pprtl2` — cross-run comparison / trend analysis of PPRTL2 report data
 
 <!--
 =============================================================================
@@ -16,6 +16,12 @@ Completed, real-world examples:
     its raw per-metric sources, "every target item must appear in the output even
     if it never ran" completeness guarantee, and grep-with-context-window
     failure triage. See §6 for the full list of verified-on-disk corrections.)
+  - scripts/pprtl2/compare_pprtl2.spec.md   (THIS doc: a second-order tool whose
+    inputs are ANOTHER tool's CSV outputs across N workareas -- dynamic metric
+    derivation from the source header minus an exclusion list, a display-value vs.
+    numeric-backing-value split for human-formatted columns (durations, "12.63 GB"),
+    a compare key that had to be widened after real data disproved the assumed one,
+    and union-of-keys coverage across runs.)
 
 How to use:
   1. Work top-down. Nail Purpose + Inputs + Outputs before anything else.
@@ -28,7 +34,12 @@ How to use:
 =============================================================================
 -->
 
-Status: **Draft**
+Status: **DONE** — phases 1-3 plus enhancements E1 (§3.5), E2 (§3.6) and E3 (§3.7)
+  complete, 86 unit tests pass, and smoke-tested end-to-end against two real
+  workareas. Re-verified 2026-08-14 against the renamed `report_pprtl2` qor
+  columns (§6 Q14): no code change needed, fixtures and §2.3/§3.2 refreshed.
+  See §8 for phase-by-phase results and §6 for every verified-on-disk correction
+  to this doc's original assumptions.
 Owner: mroha
 Language: Python 3 (driver)
 Scope: Combine and summarize data from multiple PPRTL runs. Purpose is to spot change trends in power analysis results over time,  models,  and possibly tool versions.  Will be using the existing report_pprtl2 outputs as the primary data source.
@@ -38,482 +49,697 @@ Implementation: scripts/pprtl2/compare_pprtl2.py (+ scripts/pprtl2/test_compare_
 
 ## 1. Purpose
 
-This tool accepts a an ordered list of PPRTL run areas and generates comparative reports highlighting changes and trends across these runs.
+This tool accepts an ordered list of model→PPRTL2-workarea pairs and generates
+comparative reports highlighting changes and trends across those runs.
 
-It uses the outputs from the `report_pprtl2` tool as its primary data source to perform the comparison and trend analysis.
+It reads the outputs of the `report_pprtl2` tool (`report_pprtl2.qor.csv` and
+`report_pprtl2.compute.csv`) as its primary — and only — data source. It never
+re-derives metrics from the raw run area; if a number is wrong, the fix belongs in
+`report_pprtl2`, not here.
 
-State the two properties most automation should guarantee:
+Guaranteed properties:
 
-- **Generative & idempotent:** re-running reproduces the same output tree from the
+- **Generative & idempotent:** re-running reproduces the same output files from the
   same inputs.
-- **Non-destructive to sources:** it does not modify its inputs.
+- **Non-destructive to sources:** it does not modify its inputs (neither the models
+  `.md` file nor any workarea).
 
 ---
 
 ## 2. Inputs (sources of truth)
 
-The user configured input is a list of model names and directories, one model-directory pair per line, listed in a .md file. Each directory should contain the .csv outputs of the `report_pprtl2` tool in the $WORKAREA/power/pprtl2 area.
-
-
+The user-configured input is a list of model names and directories, one
+model\u21a6directory pair per line, in a `.md` file. Each directory is a PPRTL2
+workarea that must contain the `report_pprtl2` CSV outputs under `power/pprtl2/`.
 
 | # | Source | Provides | Notes (exact paths, selection rules, gotchas) |
 |---|--------|----------|-----------------------------------------------|
-| S1 | flow_inputs/config.log | PPRTL2 input configuration variables | An ASCII box-drawing TABLE (`\| Config \| Value \| Source \|` columns), NOT key=value. Duplicate keys (e.g. SDC_FILE) can appear more than once -- first occurrence wins. TOP_MODULE_NAME is the authoritative module identity (see path note above). POWER_ANALYSIS_MODE is written here as a run INPUT, so it's readable even if elab/power never ran. BLOCK is empty for a bulk DUT-level run, set to the module name for a single-block/partition-style rerun. |
-| S2 | $WORKAREA/output/grdlbuild_power/logs/power.*.log | Contains grdlbuild netbatch logfile.  Exit status, memory, runtime. | |
-| S2 | elab/log/flow.log | elaboration run results, errors | elaboration run log file;  exists for all power analysis modes |
-| S3 | elab/elab.PASS | elaboration success indicator, no contents | exists for all power analysis modes |
-| S4 | elab/reports/<module>.elab_clocks.rpt | contains list of applied clocks | exists for all power analysis modes |
-| S5 | elab/pprtl_work/wattson.log | wattson summary run log execution errors | exists for all power analysis modes |
-| S6 | elab/pprtl_work/vcs/vcs.log | wattson vcs run log execution errors | exists for all power analysis modes |
-| S7 | fsdb/log/flow.log | fsdb run results and runtime information | only exists for timebased power analysis mode |
-| S8 | fsdb/fsdb.PASS | fsdb success indicator, no contents | only exists for timebased power analysis mode |
-| S9 | power/power.PASS | power success indicator, no contents | only exists for power analysis modes |
-| S10 | power/<power analysis mode>/default/log/vectorless.flow.log | vectorless power run log | only exists for vectorless power analysis mode |
-| S11| power/<power analysis mode>/default/reports/<module>.cells.rpt | overall cell count breakdowns by category| only exists for vectorless power analysis mode |
-| S12| power/<power analysis mode>/default/reports/<module>.cge.hier.rpt | CGE and bit count data | only exists for vectorless power analysis mode |
-| S13| power/<power analysis mode>/default/reports/<module>.power_groups.rpt | cell power group buckets | only exists for vectorless power analysis mode |
-| S14| power/<power analysis mode>/<test name>/<instance>/log/timebased.flow.log | timebased power run log | only exists for timebased power analysis mode |
-| S15| power/<power analysis mode>/<test name>/<instance>/reports/<module>.stat2.rpt | timebased power run summary | only exists for timebased power analysis mode |
-| S16| power/<power analysis mode>/<test name>/<instance>/reports/<module>.cells.rpt | overall cell count breakdowns by category | only exists for timebased power analysis mode |
-| S17| power/<power analysis mode>/<test name>/<instance>/reports/<module>.cge.hier.rpt | CGE and bit count data | only exists for timebased power analysis mode |
-| S18| power/<power analysis mode>/<test name>/<instance>/reports/<module>.power_groups.rpt | cell power group buckets | only exists for timebased power analysis mode |
-| S19| $WORKAREA/power/pprtl2/prep_pprtl2_report.summary | Partition count stats created before pprtl2 run execution | Plain text, not a table: `total partitions : N` and `ran : N (P%)` lines (regex-parsed). "total partitions" (N, e.g. 184) is the denominator for every percentage in 3.3; "ran" (the pre-flight-pass count, e.g. 181) is what S20's list actually contains. |
-| S20| $WORKAREA/power/pprtl2/prep_pprtl2_partition.list | Target partition list for power runs (bare module name per line). **Every partition listed here must appear as at least one row in report_pprtl2.compute.csv/report_pprtl2.qor.csv**, even if it never reached elab or power (see 3.1/3.4). ||
-| S21 | elab/pprtl_work/sdc/read_sdc.log | wattson read sdc log execution errors | exists for all power analysis modes; grep target for 3.6 (fail.details) |
-| S22 | $WORKAREA/output/grdlbuild_power/logs/tasks_summary.log | Summary of tasks executed by grdlbuild including exit statuses  | NOT YET CONSUMED -- see §9 Non-goals. |
+| S1 | `<models.md>` (via `--models-for-compare`) | Ordered list of model\u21a6workarea pairs | `<model> = <workarea>`; see §2.2. First entry is the **baseline**. |
+| S2 | `<workarea>` | A PPRTL2 run workarea | Must contain the `power/pprtl2/` subdirectory written by `prep_pprtl2`/`report_pprtl2`. |
+| S3 | `<workarea>/power/pprtl2/report_pprtl2.compute.csv` | Per-run compute metrics (runtime, memory, cell count) | Header row + data rows. See §2.3. |
+| S4 | `<workarea>/power/pprtl2/report_pprtl2.qor.csv` | Per-run QoR metrics (clock gating, cell/bit counts, annotations) | Header row + data rows. See §2.3. |
 
+**Verified on disk (2026-08-12)** against the two workareas named in the user's
+example `compare_pprtl2.models.md`:
 
-<!-- Tip: where a real input layout varies between targets, prefer AUTO-DETECT
-     (probe the disk) over hardcoding, and record the observed variants. -->
+- `26ww27a` = `/nfs/site/disks/corimhoks_rtl_h2b_011/mroha/dmrhub2-a0-corioh-pprtl2-partitions-b`
+- `26ww32d` = `/nfs/site/disks/corimhoks_rtl_h2b_011/mroha/dmrhub2-a0-corioh-pprtl2-partitions-c`
 
-** Precedence:** For the timebased power mode,  the stat2.rpt contains a summarized view of the data and has precedence over other sources containing the same data.
-
----
+Both contain `power/pprtl2/report_pprtl2.{compute,qor}.csv` (plus
+`report_pprtl2.fail.details`, which this tool ignores). Each CSV has 1 header +
+296 data rows covering 146 unique modules. The two runs' key sets are **identical**
+(`diff` of the sorted key columns is empty) \u2014 but the tool must not assume that
+(§3.1 union rule).
 
 ### 2.1 Pre-flight validation (fail fast)
 
-**Checks:**
-- Existence of input directory
-- Existence of the input .md file containing the list of model-directory pairs.
-- Existence 
+Validate everything below **before writing any output**. Any failure \u21d2 error
+message on STDERR + exit code 2, nothing written.
 
+**Checks:**
+- `--models-for-compare` file exists and is readable.
+- At least **two** model\u21a6workarea pairs parse out of it (a comparison of one run is
+  meaningless).
+- Model names are unique (a duplicate would produce duplicate output columns).
+- No model name contains a comma or a double quote (it becomes a CSV header field).
+- Each workarea directory exists and is a directory.
+- `report_pprtl2.compute.csv` and `report_pprtl2.qor.csv` exist and are readable
+  under `<workarea>/power/pprtl2/` in **every** workarea.
+- Each CSV has a header row containing all four key columns
+  (`module`, `power_mode`, `test_name`, `instance`).
+- **Key uniqueness:** within any single CSV, the compare key
+  (`module`+`power_mode`+`test_name`+`instance`, after the §2.3 normalization) must
+  appear at most once. A duplicate is a hard error naming the file and the key.
+- `--outdir`, if given, exists and is a directory (**not** created \u2014 see §6 Q9).
+
+### 2.2 Input model-directory.md
+
+Example (`/nfs/site/disks/xpg_dmrhub2_0053/mroha/corpower/scripts/pprtl2/compare_pprtl2.models.md`,
+verified on disk 2026-08-12):
+
+```md
+# compare_pprtl2 input model list
+# format is <model>=<workarea>
+
+26ww27a=/nfs/site/disks/corimhoks_rtl_h2b_011/mroha/dmrhub2-a0-corioh-pprtl2-partitions-b
+26ww32d=/nfs/site/disks/corimhoks_rtl_h2b_011/mroha/dmrhub2-a0-corioh-pprtl2-partitions-c
+```
+
+Parsing rules, in order:
+
+1. Skip blank lines and lines whose first non-whitespace character is `#`.
+2. Match the remaining lines against `^\s*(\S+)\s*=\s*(\S+)(\s+.*)?$` \u2014
+   group 1 = model name, group 2 = workarea, group 3 = ignored trailing text.
+3. A non-blank, non-comment line that does **not** match is an error (do not
+   silently skip it \u2014 a typo'd path must not vanish).
+4. **Order is preserved.** The first pair is the **baseline** model; every other
+   model is compared against it (never against its predecessor \u2014 §6 Q6).
+
+### 2.3 Input .csv files
+
+Both source CSVs share the same first four columns, which together form the
+**compare key**:
+
+```
+module, power_mode, test_name, instance
+```
+
+Verified headers (2026-08-12, identical in both workareas):
+
+```csv
+# report_pprtl2.compute.csv
+module,power_mode,test_name,instance,elab_run_status,fsdb_run_status,power_run_status,
+cell_count,elab_runtime,elab_runtime_seconds,fsdb_runtime,fsdb_runtime_seconds,
+power_runtime,power_runtime_seconds,total_runtime,total_runtime_seconds,
+elab_peak_memory,fsdb_peak_memory,power_peak_memory
+
+# report_pprtl2.qor.csv    (re-verified 2026-08-14 — see §6 Q14 for the rename)
+module,power_mode,test_name,instance,elab_run_status,fsdb_run_status,power_run_status,
+untraced_sequentials_percentage,annotation_primary_io,annotation_bb,annotation_seq,
+CGR,CGE,DACGE,
+cell_count,combinational_cell_count,unclocked_sequential_cell_count,
+register_cell_count,register_bit_count,
+flop_cell_count,mbflop_cell_count,eqfb,latch_cell_count,mblatch_cell_count,eqlb,
+VCS_VERSION,VERDI_VERSION,PPRTL_VERSION
+```
+
+Reading rules:
+
+- Parse with `csv.DictReader` (values may be quoted; do not `str.split(",")`).
+- Lines whose first non-whitespace character is `#` are comments and are skipped.
+  (Verified: the current `report_pprtl2` emits **zero** comment lines, but the
+  reader must tolerate them.)
+- Strip surrounding whitespace from every field.
+- **Normalization:** a blank `test_name` on a **vectorless** row is read as
+  `default`. A blank `test_name` on a **timebased** row stays blank \u2014 see §6 Q10.
+- `instance` is legitimately blank for vectorless rows; that blank is part of the key.
+
+Example key with two instances (verified, workarea `-b`) \u2014 this is why `instance`
+is in the key:
+
+```csv
+parscfllcsftype3,vectorless,default,,...
+parscfllcsftype3,timebased,active_idle,parllcsf_a_parscfllcsftype3,...
+parscfllcsftype3,timebased,active_idle,parllcsf_a_parscfllcsftype4,...
+```
 
 ---
 
 ## 3. Outputs (the generated tree)
 
-Output root is <workarea>/power/pprtl2 (or the workarea specified by --workarea <path> if $WORKAREA does not exist).
-
-Show the full output tree with a one-line comment per entry and its source.
+Output root is the current working directory, or `--outdir <path>` if given
+(§6 Q4/Q9 — the directory must already exist; it is never created).
 
 ```
 <output_root>/
-├── report_pprtl2.summary.md             # Human readable summary of execution rollup for all partitions
-├── report_pprtl2.compute.csv            # Machine readable .csv containing cell count, runtime, and memory usage for each pprtl2 target stage (elab, fsdb, power)
-├── report_pprtl2.qor.csv                # Machine readable .csv containing quality of results from each power run
-├── report_pprtl2.fail.details           # Human readable summary of error message for stages that failed to provide some clue as to the cause of failure
+├── compare_pprtl2.qor.csv       # from every workarea's S4  (§3.2)
+├── compare_pprtl2.compute.csv   # from every workarea's S3  (§3.3)
+└── compare_pprtl2.status.csv    # from every workarea's S4  (§3.6)
 ```
 
-**CSV files** When multiple power modes are present, and/or if there are multiple tests within the timebased mode, the reports will write one row for each existing combination of power mode and test instance.
+All three files are regenerated (overwritten) on every run.
 
-**Completeness:** Every partition in S20 (prep_pprtl2_partition.list) must appear in
-report_pprtl2.compute.csv and report_pprtl2.qor.csv, with at least one row, regardless
-of how far it progressed:
-- A partition that never started at all (no discoverable output run area) gets one
-  row with `elab_run_status`/`fsdb_run_status`/`power_run_status` all `Not Ran`.
-- A partition whose elab ran (Pass/Fail/Running) but whose power stage never started
-  (no `power/vectorless` or `power/timebased` dir yet) gets one row with the real
-  `elab_run_status` and `fsdb_run_status`/`power_run_status` both `Not Ran`.
-- There is no "Skipped" status (see 3.1) -- an unreached stage is always `Not Ran`;
-  determining *why* (never attempted vs. blocked by a failed dependency) is deferred.
+## 3.1 Shared row/column model
 
+All output CSVs use the same shape. For `N` models `m1` (baseline), `m2` … `mN`:
 
-## 3.1 How to determine by-stage (elab, fsdb, power) run status
-
-- Pass   (Determined by whether the .PASS file exists for each stage)
-- Fail   (Determined by the absence of the .PASS file for each stage.  If S2 is present, then capture the exit status also)
-- Not Ran (Determined by whether execution has not started or was never reached, e.g.
-  a stage blocked by an earlier failed/not-run dependency. There is no separate
-  "Skipped" status -- disambiguating *why* a stage was Not Ran is deferred to a
-  future iteration.)
-- Running (Determined by whether flow execution is currently in progress).  You can use grdlbuild to check the status of the running stage... if the log is present but there is no netbatch exit footer then the run is in progress.
-- Not Required (fsdb stage not required because vectorless power analysis mode)
-- Unknown (Determined by whether the stage's status cannot be classified into any of the above categories)
-
-
-## 3.2 How to determine runtime and memory usage
-
-**Runtime:** The runtime for each stage (elab, fsdb, power) is recorded in the corresponding `_runtime` column in `report_pprtl2.compute.csv`. The `total_runtime` column is the sum of all individual stage runtimes.
-
-**Memory Usage:** The peak memory usage for each stage is recorded in the corresponding `_peak_memory` column in `report_pprtl2.compute.csv`.   
-
-- If grdlbuild is used, then look for power.*.elab.log and power.*.fsdb.log, power.*.power.log for the respective stage runtimes.  This information will be in the netbatch footer at the end of the run.
-      - For runtime,  CPU time key,  the "WC" value such as 1d:14h:47m:11s. Also calculate and store this value in seconds.
-      - For peak memory, Rusage  "Mem" field which is memory in GB
-- If grdlbuild is not used, then the runtime and memory usage information must be obtained from the flow.log files
-      - Runtime: Elapsed time for this session:
-      - Peak Memory: Maximum memory usage for this session: 75,510,064 KB (72.01 GB)
-
-Normalize all peak memory calculations to GB
-
-Runtimes will be stored in two formats: DDd:HHh:MMm:SSs.   Zero padding will be applied to single-digit values for consistency.
-
-
-
-
-## 3.3 report_pprtl2.summary.md
-**Description:** This file contains a summary of the execution rollup for all partitions, including overall success/failure status and key metrics.
-
-**Format:** Markdown output with the below format
-
-```txt
-Command Line: <command used to invoke the report generation including the python3 interpreter and any arguments>
-Workarea: <workarea>
-REF_MODEL:  Path to reference GK release model. The value is a symlink located at $WORKAREA/power/pprtl2/REF_MODEL. For example, if /nfs/site/disks/corimhoks_rtl_h2b_011/mroha/corhub_oks-a0-pprtl2-partitions-2/power/pprtl2/REF_MODEL exists, the value of this entry should be /nfs/site/disks/corhub_fe_mod_0000/corhub_oks/corhub_oks-a0-corhub_oks-26ww29m .   NA if it does not exist.
-SDC_ARCHIVE: Path to SDC release area.  Path to the symlink pointed to by $WORKAREA/power/pprtl2/SDC_ARCHIVE. For example, if /nfs/site/disks/corimhoks_rtl_h2b_011/mroha/corhub_oks-a0-pprtl2-partitions-2/power/pprtl2/SDC_ARCHIVE exists, the value of this entry should be /nfs/site/disks/corimh.arc.proj_archive/arc .   NA if it does not exist.
-DUT: DUT name from --dut
-total partitions from S19 ("total partitions" line; S20's list is the pre-flight-pass
-subset, not the full denominator)
-total partitions pass pre-flight from S19 <count>  <XX%>   where XX% is preflight pass divided by total partitions
-total partitions with at least one grdlbuild log: <count>  <XX%>   where XX% is the number of partitions with grdlbuild logs divided by total partitions. A partition could have either complete or partial grdlbuild logs.
-total partitions with at least one stage flow.log file: <count>  <XX%>   where XX% is the number of partitions with at least one stage flow.log file divided by total partitions.
-
-vectorless:
-total partitions pass elab: <count>  <YY%>   where YY%  elab pass divided by total partitions
-total partitions pass vectorless power: <count>  <ZZ%>   where ZZ% is power pass divided by total partitions
-
-timebased:
-total partitions pass elab: <count>  <YY%>   where YY%  elab pass divided by total partitions
-total partitions pass timebased power: <count>  <ZZ%>   where ZZ% is power pass divided by total partitions
-total partitions that executed greater than one testname: <count>
-
-Partitions that executed greater than one test in timebased run:
-<partition1>
-<partition2>
+```csv
+module,power_mode,test_name,instance,metric,<m1>,…,<mN>,<baseline comparisons…>,<chained comparisons…>
 ```
 
-**Note: If no partitions executed greater than one test in the timebased run, then write "No Partitions Executed Greater Than One Test" in the corresponding section.**
+The comparison columns are described in §3.7; `compare_pprtl2.qor.csv` and
+`compare_pprtl2.compute.csv` express them as `% diff`, `compare_pprtl2.status.csv`
+as `change` (§3.6).
 
+- One row per **(compare key × metric)**.
+- **Key coverage = union** of the compare keys across all models. A key present in
+  only one model still gets rows; the other models' cells are blank.
+- **Metric set = union**, in first-seen header order, of each model's CSV columns
+  after removing the four key columns and the per-file exclusion list (§3.2, §3.3).
+  Derived dynamically so that new `report_pprtl2` columns appear automatically
+  (§6 Q8); a column missing from one model's CSV simply yields blank cells there.
+  `compare_pprtl2.status.csv` is the exception: it uses a fixed **inclusion** list
+  (§3.6), because its columns are deliberately the ones the other two exclude.
+- **Row order:** sorted by `module`, `power_mode`, `test_name`, `instance`, then by
+  metric in the derived metric order (i.e. all metrics of one key are adjacent).
+- **Value cells** hold the source CSV value **verbatim** (including human-formatted
+  strings like `00d:00h:32m:14s` and `12.63 GB`) — except where §3.5 replaces them
+  with a run status.
+- **`% diff` cells** are computed from the *numeric backing value* of the metric
+  (§3.4), as `round((value − reference) / reference × 100, 2)`, where the reference
+  is the baseline or the chain neighbour depending on the column (§3.7).
+- A `% diff` cell is **blank** when any of the following hold:
+  - the reference model has no row for this key, or a blank/non-numeric value;
+  - the reference numeric backing value is `0` (no division by zero — §6 Q5);
+  - the compared model has no row for this key, or a blank/non-numeric value;
+  - either side is showing a run status instead of a number (§3.5).
+- Negative values are emitted with a leading `-`; no `+` prefix on positives.
+- The header is always written, even if there are zero data rows.
 
-## 3.4 report_pprtl2.compute.csv
+## 3.2 compare_pprtl2.qor.csv
 
-**Description:** This file contains machine-readable data for each pprtl2 target stage, including cell count, runtime, and memory usage.
+Excluded source columns (never become metric rows):
 
-**Format:** CSV with the following columns:
-
-```csv fields
-module
-power_mode  # vectorless or timebased
-test_name   # example:  d2d_opt_i2c_high_3R1W_C2M_MCR_HIGH_25ww20a_525g01
-instance    # RTL instance path component under the test (e.g. "d2d_1_d2d1");
-            # blank for vectorless. Real timebased runs key their reports/logs
-            # by <test_name>/<instance>, and a test_name can have >1 instance,
-            # so this is needed for row uniqueness -- not redundant with test_name.
-elab_run_status   # Pass,  Fail=3, Running, Not Ran
-fsdb_run_status   # Pass,  Fail=-314, Running, Not Ran, Not Required
-power_run_status  # Pass,  Fail=2, Running, Not Ran
-cell_count   # Total number of cells in the design
-elab_runtime
-elab_runtime_seconds
-fsdb_runtime
-fsdb_runtime_seconds
-power_runtime
-power_runtime_seconds
-total_runtime
-total_runtime_seconds
-elab_peak_memory
-fsdb_peak_memory
-power_peak_memory
+```
+elab_run_status, fsdb_run_status, power_run_status          # non-numeric status
+VCS_VERSION, VERDI_VERSION, PPRTL_VERSION                   # non-numeric tool versions
 ```
 
-## 3.5 report_pprtl2.qor.csv
-**Description:** This file contains machine-readable quality of results (QoR) data for each power run.
+Resulting metric rows, in header order (**18** as of 2026-08-14):
 
-**Format:** CSV with the following columns:
-
-```csv fields
-module
-power_mode  (vectorless or timebased)
-test_name  (example:  d2d_opt_i2c_high_3R1W_C2M_MCR_HIGH_25ww20a_525g01)
-instance   (see 3.4 -- blank for vectorless, needed for timebased row uniqueness)
-elab_run_status   # Pass,  Fail=3, Running, Not Ran
-fsdb_run_status   # Pass,  Fail=-314, Running, Not Ran
-power_run_status  # Pass,  Fail=2, Running, Not Ran
-cell_count        # comes from stat2.rpt or cells.rpt
-register_cell_count     # comes from stat2.rpt or power_groups.rpt
-sequential_cell_count   # comes from stat2.rpt or power_groups.rpt
-register_bit_count      # come from cge.hier.rpt
-untraced_sequentials    # % Round to 2 decimal places.
-CGR                     # % Round to 2 decimal places.
-CGE                     # % Round to 2 decimal places.
-DACGE                   # % Round to 2 decimal places.
+```
+untraced_sequentials_percentage, annotation_primary_io, annotation_bb, annotation_seq,
+CGR, CGE, DACGE,
+cell_count, combinational_cell_count, unclocked_sequential_cell_count,
+register_cell_count, register_bit_count, flop_cell_count, mbflop_cell_count, eqfb,
+latch_cell_count, mblatch_cell_count, eqlb
 ```
 
+All of these are plain numerics; the value cell *is* the numeric backing value.
 
-**Finding register_bit_count, CGR, CGE, DACGE**
-- **register_bit_count:** comes from cge.hier.rpt.  It will be row containing just the module name in the "Name" field.  Register bit count is extracted from this row.
-- **CGR:** comes from cge.hier.rpt.  It will be row containing just the module name in the "Name" field.  CGR (%) is extracted from this row.
-- **CGE:** comes from cge.hier.rpt.  It will be row containing just the module name in the "Name" field.  CGE (%)  is extracted from this row.
-- **DACGE:** comes from cge.hier.rpt.  It will be row containing just the module name in the "Name" field.   DACGE (%) is extracted from this row.
+This list is *the current expected result*, not a contract — it is derived from the
+header at run time (§6 Q8), which is exactly why the 2026-08-14 `report_pprtl2`
+rename and the new `combinational_cell_count` needed **no code change** (§6 Q14).
 
+Example:
 
-**Calculating untraced_sequentual %**
-- First option is to take directly from stat2.rpt, where it is reported as a percentage.  Round to 2 decimal places.
-- Second option is to calculate it manually: `(sequential_cell_count / (register_cell_count+sequential_cell_count)) * 100`.  Round to 2 decimal places.
-
-
-## 3.6 report_pprtl2.fail.details
-
-**Description:** This file contains detailed information about failed partitions, including the reason for failure and any relevant logs.
-
-**Format:** Plain text with the following structure:
-
-```txt
-Partition: <partition_name>
-Test: <test_name>
-Failure reason: <reason>
-Grep results:
-Log: <path_to_gradle_log>
-Results of grep <pattern>
-
-Log: <path to flow.log>
-Results of grep <pattern>
-
-Log: <path to wattson.log>
-Results of grep <pattern>
-
-Log: <path to vcs.log>
-Results of grep <pattern>
-
-Log: <path to read_sdc.log>       # S21 -- elab/pprtl_work/sdc/read_sdc.log
-Results of grep <pattern>
+```csv
+module,power_mode,test_name,instance,metric,26ww27a,26ww32d,26ww32d vs 26ww27a % diff
+paraccchassis,timebased,active_idle,paraccchassis_paraccchassis,CGR,97.35,96.10,-1.28
+paraccchassis,timebased,active_idle,paraccchassis_paraccchassis,CGE,81.42,81.42,0.00
+paraccchassis,vectorless,default,,CGR,97.35,,
 ```
 
-- Grep pattern is: /(Error:)|(Error\-)|(\[ERROR\])/    # /<regex here>/
-- Include 1 line before and 3 lines after each match. Merge overlapping/adjacent
-  windows into one block; separate windows within the same log are joined with
-  a bare `...` line.
-- If no results return from grep,  then indicate "No matches found" under the corresponding log section.
-- For gradle and flow.log sections,  create a .log entry for each target.  Example:  elab flow.log,  fsdb flow.log, power flow.log.  For power you could have vectorless and timebased,  and for timebased you could have one or more tests.
-- Only partitions with at least one Fail=<n>/Fail status (elab, fsdb, or power) get
-  an entry; Not Ran/Running/Pass-only partitions are omitted entirely.
+## 3.3 compare_pprtl2.compute.csv
 
+Excluded source columns:
 
-## 3.7 report_pprtl2.terminology.md
+```
+elab_run_status, fsdb_run_status, power_run_status          # non-numeric status
+elab_runtime_seconds, fsdb_runtime_seconds,
+power_runtime_seconds, total_runtime_seconds                # backing values only
+```
 
-**Description:** This file contains definitions and explanations of key terms used throughout the pprtl2 reports.
-Write direct output,  no processing.
+Resulting metric rows, in header order:
 
+```
+cell_count
+elab_runtime, fsdb_runtime, power_runtime, total_runtime
+elab_peak_memory, fsdb_peak_memory, power_peak_memory
+```
 
-| Metric | PPRTL1 | PPRTL2 |
-| % clock gated registers (static) | Static Clock Gating Efficiency (SCGE) | Clock Gating Ratio (CGR) |
-| % gated clock cycles; lacks correlation with data activity | Dynamic Clock Gating Efficiency (DCGE) | Clock Gating Efficiency (CGE) |
-| CGE +  [data toggle cycles / root clock cycles] | Data Aware Clock Gating Efficiency (DACGE) | Data Aware Clock Gating Efficiency (DACGE) |
-| % untraced sequentials | - | Untraced Sequentials (%) |
+The `*_runtime` rows display the human-readable duration and compute their `% diff`
+from the corresponding `*_runtime_seconds` column (§3.4). The `*_peak_memory` rows
+display the human-readable size and compute their `% diff` from the unit-normalized
+value (§3.4).
 
-**Notes:**
-- Static CGE is your upper bounds
-- DACGE will be the same or higher than CGE/DCGE by nature of the arithmetic.
+Example:
+
+```csv
+module,power_mode,test_name,instance,metric,26ww27a,26ww32d,26ww32d vs 26ww27a % diff
+paraccasf,timebased,active_idle,paraccasf_paraccasf,cell_count,95549,96000,0.47
+paraccasf,timebased,active_idle,paraccasf_paraccasf,elab_runtime,00d:00h:32m:14s,00d:00h:35m:00s,8.58
+paraccasf,timebased,active_idle,paraccasf_paraccasf,elab_peak_memory,12.63 GB,13.10 GB,3.72
+```
+
+## 3.4 Numeric backing values (display vs. compute)
+
+| Metric shape | Displayed | Used for `% diff` |
+|---|---|---|
+| Plain numeric (`cell_count`, `CGR`, …) | source value | `float(value)` |
+| `<x>_runtime` (`00d:02h:35m:56s`) | source value | the sibling `<x>_runtime_seconds` column (`9356.0`) |
+| `*_peak_memory` (`12.63 GB`) | source value | unit-normalized float (below) |
+
+Memory normalization: parse `^\s*([0-9.]+)\s*([KMGT]?B)\s*$` case-insensitively and
+scale to a common unit using **decimal (1000-based)** factors — `KB=1e3`, `MB=1e6`,
+`GB=1e9`, `TB=1e12`, matching `report_pprtl2`'s own `mem_gb = mem_mb / 1000`
+convention. Unparseable ⇒ treated as non-numeric ⇒ blank `% diff`.
+(Verified 2026-08-12: every memory value in both workareas is `GB`; the other units
+are supported defensively per §6 Q3.)
+
+Any value that fails `float()` (or the shape-specific parse above) is
+**non-numeric**: it is still displayed, but its `% diff` is blank.
+
+---
+
+## 3.5 Non-passing power runs report their status
+
+When a power run does not pass, `report_pprtl2` leaves the metric columns blank
+**or**, worse, emits bogus numbers from a partially-written report (real example:
+`CGR=0`, `flop_cell_count=0`, `register_cell_count=0`). Both are misleading in a
+trend report — a bogus `0` against a healthy baseline renders as `-100.00%`.
+
+Rule: for a given (key, model), if that model's **`power_run_status` is not
+`Pass`**, every metric **value column** for that key/model shows the status string
+instead of the source value, and **no `% diff` is computed** for any pair
+involving it (the diff cell is blank).
+
+- **Only `power_run_status` is consulted.** `elab_run_status` and
+  `fsdb_run_status` are ignored entirely (Q11).
+- **The exit code is stripped**: `Fail=2` ⇒ `Fail`. Other statuses appear
+  verbatim: `Not Started`, `Running`.
+- **All metrics for that key/model are replaced**, including stages that really
+  did run (e.g. `elab_runtime`, `elab_peak_memory`). Trading that detail away is
+  deliberate: the row is about a failed power result and must not invite
+  comparison (Q11).
+- **The trigger is the status column only, never the value.** Legitimate zeros on
+  passing runs are preserved — verified: `bb_annotation=0` on 32 passing modules,
+  plus `CGR`/`mbflop_cell_count`/`latch_cell_count`/`eqlb` zeros on passing rows.
+- `Not Required` never appears in `power_run_status` (it is an fsdb-only state),
+  so `!= Pass` is the whole rule.
+- Only the failing model's column changes; sibling models keep their real values.
+- A key absent from a model still yields a blank value, not a status.
+
+---
+
+## 3.6 compare_pprtl2.status.csv (run status & tool versions)
+
+The other two files deliberately exclude the status and version columns because a
+`% diff` of `Pass` or `X-2025.06-SP2-3` is meaningless. This file is where they
+are compared instead, using the same row/column model (§3.1) with `same`/`changed`
+in place of `% diff`.
+
+**Source: `report_pprtl2.qor.csv` only.** Verified 2026-08-13: the three status
+columns are byte-identical between the compute and qor CSVs for **all 296 keys in
+both workareas**, and the three version columns exist **only** in qor. So one file
+supplies everything and no cross-file merge is needed.
+
+**Items (a fixed inclusion list, in this order):**
+
+```
+elab_run_status, fsdb_run_status, power_run_status
+VCS_VERSION, VERDI_VERSION, PPRTL_VERSION
+```
+
+This is an *inclusion* list, the mirror image of §3.2's exclusion list, so the two
+stay in sync by construction. An item missing from every model's header is
+dropped rather than emitted as an all-blank row.
+
+**Comparison cells** (one per comparison column of §3.7):
+
+| Condition | Cell |
+|---|---|
+| Both models have the key and the values match after stripping | `same` |
+| Both models have the key and the values differ | `changed` |
+| Either model lacks the key | *blank* |
+
+Notes:
+
+- **Statuses appear verbatim here, including the exit code** (`Fail=2`), unlike
+  §3.5's value substitution which strips it. This file is the detail view, so the
+  code is worth keeping; the metric files only need "don't trust this number".
+- **§3.5 does not apply to this file.** A failed power run must still show its real
+  status and its real tool versions here, otherwise the report would hide exactly
+  what it exists to show.
+- Versions are per-workarea constants in practice (one value across all 296 rows,
+  identical in both current workareas), but they are still emitted **per key** so
+  the file stays uniform and would reveal a workarea built with mixed tool
+  versions (§6 Q12).
+- Every key is listed, not only the changed ones (§6 Q12), so the file can be
+  diffed and joined like the other two.
+
+Row count: `|union keys| × 6`. For the current workareas: `296 × 6 = 1776`.
+
+---
+
+## 3.7 Comparison columns: baseline block, then chained block
+
+Model order in the models file (S1) is significant twice over: `m1` is the
+baseline, and the listed order is also the **chain order**.
+
+For `N` models the comparison columns are, in order:
+
+1. **Baseline block** — `m2 vs m1`, `m3 vs m1`, … `mN vs m1`.
+2. **Chained block** — `m3 vs m2`, `m4 vs m3`, … `mN vs m(N−1)`.
+
+The chain's first link (`m2 vs m1`) *is* the first baseline comparison, so it is
+**not repeated** (§6 Q13). Consequences:
+
+- `N = 2` → one column, exactly as before this enhancement. Two-model runs are
+  completely unchanged.
+- `N = 3` → `m2 vs m1`, `m3 vs m1`, `m3 vs m2` — chaining adds one column.
+- Column count is `2N − 3` for `N ≥ 2`.
+
+Both blocks use the same suffix per file: `% diff` for the metric files, `change`
+for the status file. Example 4-model qor header tail:
+
+```csv
+…,metric,m1,m2,m3,m4,m2 vs m1 % diff,m3 vs m1 % diff,m4 vs m1 % diff,m3 vs m2 % diff,m4 vs m3 % diff
+```
+
+Chained cells follow exactly the same blanking rules as baseline cells (§3.1),
+with the neighbour as the reference instead of the baseline.
 
 ---
 
 ## 4. Per-item derivation rules
 
-**Reports** (write these every run, overwriting prior copies):
+Per run, in order:
+
+1. Parse S1; establish model order, the baseline **and the chain order** (§3.7).
+2. Pre-flight (§2.1).
+3. For each model, load S3 and S4 into `{key: {column: value}}` maps.
+4. Build the union key set and the derived metric list per output file (§3.1).
+5. Emit all three CSVs, overwriting any prior copy.
+
+**Reports** (write these every run, overwriting prior copies): all three files in
+§3. There is no incremental/append mode.
 
 ---
 
 ## 5. CLI
 
 ```
-<tool>.py \
-  --dut         <dut>
-  --workarea    <path>        # default: $WORKAREA if set
+compare_pprtl2.py \
+  --models-for-compare <model-workarea md file>   # required
+  [--outdir <path>]                               # default: CWD; must already exist
   [--dry-run] [--force] [--verbose]
 ```
 
 Conventions (recommended for all automation):
-- `--dry-run` — print the plan (every planned path/action), write nothing.
+- `--dry-run` — print the plan (every planned output path, the resolved model
+  order, key/metric counts), write nothing.
 - `--force` — for TREE-GENERATING tools (e.g. prep_pprtl2): overwrite existing
   outputs; default **skips** existing (idempotent). For a pure REPORT-generating
-  tool like this one, all 5 output files are always regenerated/overwritten every
+  tool like this one, all output files are always regenerated/overwritten every
   run (per §4) since they're cheap to rebuild and must reflect current state --
   `--force` is accepted for CLI parity but is a no-op here.
-- `--verbose` — log each file written.
+- `--verbose` — log each file written and each per-model CSV loaded (with row counts).
+- Exit codes: `0` success, `2` pre-flight/usage error.
 - Validate all inputs before writing any output (fail fast).
 
 ---
 
 ## 6. Decisions log (resolved questions & notes)
 
-Keep this section append-only. It is what lets the spec be re-ingested reliably.
+Verified-on-disk corrections to this doc's original draft (2026-08-12):
 
-**Verified on disk (2026-07-25/26), against 3 real workareas** --
-`corhub_oks-a0-pprtl2-partitions-2` (vectorless, bulk/flat layout),
-`corhub_oks-a0-pprtl2-partitions-3` (partition-style layout, 3 modules only),
-`dmrhub2-a0-pprtl-statecount` (timebased, no grdlbuild -- `nb_logs/` instead):
-- Partition-style path is `output/<dut>/partition/<module>/pprtl2/<pass>/` (pprtl2,
-  not "pprtl"). Both layouts can be valid for the SAME workarea at once, one style
-  per module (bulk DUT-level run = flat; single-block rerun = partition-style,
-  config.log BLOCK=<module>/TOP_IP_NAME=<module> instead of BLOCK=empty/TOP_IP_NAME=<dut>).
-- flow_inputs/config.log is an ASCII box-drawing table (`| Config | Value | Source |`),
-  not key=value. TOP_MODULE_NAME is the only reliable module identity (pass-dir names
-  don't consistently start with the module name, e.g. `hamvf_pass01` vs
-  `d2d1_state_pprtl2_X-2025.06-SP3-20260214_pass01`).
-- fsdb sources are nested per test+instance (mirrors power/timebased/):
-  `fsdb/<test_name>/<instance>/{fsdb.PASS,log/flow.log}`.
-- Each pass-dir directly contains `elab/, flow_inputs/, flow_outputs/, power/`
-  (+`fsdb/` if timebased) -- no extra module-name nesting under the flat layout.
-- `power/vectorless/default/{log,reports}/` (single "default" dir);
-  `power/timebased/<test_name>/<instance>/{log,reports}/`.
-- `*.cells.rpt`: `Key: value` lines (`Total_cells`, `Register_cells`,
-  `Sequential_cells`, ..., note upstream typo `Clock_newtwork_cells`).
-- `*.power_groups.rpt`: fixed-width table, rows clock_network/register/
-  combinational/sequential/memory/io_pad/black_box with comma-formatted Size.
-- `*.cge.hier.rpt`: fixed-width table; the row whose bare Name == module name
-  (no "/") is the top-level one (columns: Register Bit Count, Gated Register Bit
-  Count, CGR (%), CGE (%), DACGE (%), Name).
-- `*.stat2.rpt` (timebased only): plain `Key: value` lines, not a table. Fields
-  "Total cell count"/"Register Count"/"Sequential cells count" match cells.rpt/
-  power_groups.rpt for the same run (may differ slightly -- stat2 wins per the
-  §2 precedence rule). "SCGE"/"DCGE"/"DACGE" here equal CGR/CGE/DACGE from the
-  module's cge.hier.rpt row numerically. "Untraced Sequential ratio" is a 0-1
-  fraction (not already a %) -- multiply by 100.
-- grdlbuild netbatch footer (`output/grdlbuild_power/logs/power.<module>.pprtl2_<stage>.log`,
-  only present when grdlbuild was used): `Exit Status`, `WC <fmt>` (format varies:
-  `3h:00m:37s` with no days, or `1d:14h:47m:11s` with days -- parse flexibly), and
-  `Rusage Stats ... Mem:<n>` where **n is in MEGABYTES** (user-confirmed; convert
-  to GB via `n / 1000`, decimal not binary).
-- `elab/log/flow.log` (and the fsdb/vectorless/timebased equivalents) ALWAYS carry
-  `Maximum memory usage for this session: ... KB (X.XX GB)` and
-  `Elapsed time for this session: N seconds` near the end when the stage finished,
-  regardless of grdlbuild use (grdlbuild just wraps `make elab/power`). Also a
-  `"<stage> stage passed successfully.."` / `"<stage> stage failed"` line.
-- `prep_pprtl2_report.summary` (S19) is plain text (`total partitions : N`,
-  `ran : N (P%)`), not a table. `prep_pprtl2_partition.list` (S20) has exactly the
-  "ran" count of bare module names, one per line -- it's the pre-flight-PASS
-  subset, not the full target set (S19's "total partitions" is the full set).
-- REF_MODEL/SDC_ARCHIVE under `power/pprtl2/` are designer-made symlinks; the
-  summary.md must print the resolved TARGET path (`Path.resolve()`), not the
-  symlink's own path.
-- `elab/pprtl_work/sdc/read_sdc.log` (S21) exists at that exact path for every
-  module that reached elab, regardless of power mode.
-- `output/grdlbuild_power/logs/tasks_summary.log` (S22) exists when grdlbuild was
-  used and gives clean per-module-per-stage `Task Path: :power:<module>:pprtl2_<stage>`,
-  `Task Status: Success/Failed/Skipped`, `Exit Status`, `Run Time` -- considered as
-  a simpler alternative status/runtime source but NOT adopted (see Q7 below); not
-  yet consumed by this tool at all (see §9 Non-goals).
+- **V1 — the assumed compare key was wrong.** The draft's
+  `module+power_mode+test_name` is **not** unique on real data: 4 keys in *each* of
+  the two sample workareas have two `instance` values (e.g. `parscfllcsftype3` /
+  `timebased` / `active_idle` × `parllcsf_a_parscfllcsftype3` and
+  `parllcsf_a_parscfllcsftype4`). §2.1's uniqueness pre-flight would have failed on
+  every real run. Key widened to include `instance`, which is unique (0 duplicates
+  in both files).
+- **V2 — the source CSVs contain no `#` comments.** The draft said pound signs are
+  used for comments; zero comment lines exist in either file today. Support is kept
+  as defensive tolerance only, not a documented input format.
+- **V3 — memory values are all `GB`** in both workareas (441 and 444 occurrences
+  respectively, no `MB`/`KB`), but unit handling is still required (Q3).
+- **V4 — blank `test_name` occurs on `timebased` rows, not vectorless.** Both
+  workareas contain exactly two such rows (`parmiopcie6trcore_uio_0` and `_1`, both
+  `timebased,,` with `fsdb_run_status=Running`) — these are `report_pprtl2`'s
+  "no test directory yet" fallback rows. See Q10.
 
-- **Q1** Should module identity/grouping use path segments or config.log? --
-  Use `TOP_MODULE_NAME` from S1; group all discovered pass-dirs by it and pick the
-  newest (by directory mtime) per module.
-- **Q2** How to parse config.log? -- As the ASCII table it actually is (see above),
-  not key=value.
-- **Q3** Flat vs. nested fsdb paths? -- Nested per test+instance (see above).
-- **Q4** Is grdlbuild's `tasks_summary.log`/`failure_tasks_summary.log` (S22) a
-  better primary source for per-module-per-stage status/runtime than raw log
-  parsing? -- Investigated and offered; user declined, chose to strictly follow
-  the original S2 netbatch-footer + flow.log approach. Kept as a documented,
-  not-yet-implemented option (§9).
-- **Q5** Netbatch Rusage "Mem" field unit? -- Megabytes (user-confirmed from a
-  real example: `Mem:183730` == "183.730 GB" after `/1000`).
-- **Q6** Is the `partition/<module>/pprtl2/<pass>/` layout still needed? -- Yes,
-  confirmed with a real example (`corhub_oks-a0-pprtl2-partitions-3`).
-- **Q7** Should `report_pprtl2.compute.csv`/`.qor.csv` cover every S20 partition,
-  even ones that never reached elab or power? -- Yes (found via a real discrepancy:
-  184 S19 total / 181 S20 pre-flight-pass vs. only 170 CSV rows in a real workarea;
-  12 modules had elab `Fail=2` and no `power/` dir at all and were silently
-  dropped). Fixed by iterating `set(S20) | set(discovered)` and emitting a
-  fallback row (`Not Ran` for stages never reached) for every target module.
-- **Q8** Keep the spec's original "Skipped" status? -- No, removed entirely
-  (2026-07-26 decision, reversing an earlier plan to detect it via
-  `SKIP_STAGES`). Only Pass/Fail=&lt;n&gt;/Fail/Running/Not Ran/Not Required are used;
-  disambiguating *why* something is `Not Ran` is deferred.
-- **Q9** Should REF_MODEL/SDC_ARCHIVE show the symlink path or its target? --
-  The resolved target (see above).
-- **Q10** Should the `TOP_IP_NAME` line stay in summary.md? -- No, removed
-  (2026-07-26); replaced by two coverage stat lines (grdlbuild-log coverage,
-  flow.log coverage) that turned out to be more broadly useful.
+Clarifying Q&A (2026-08-12):
+
+- **Q1 — Compare key.** *Add `instance`?* → **Yes.** Key is
+  `module+power_mode+test_name+instance`, and `instance` becomes a 4th key column
+  in both output CSVs.
+- **Q2 — Non-numeric columns.** *How handled?* → **Omit them** from the two metric
+  files. *(Superseded in part by Q12: they are no longer dropped outright — they
+  moved to `compare_pprtl2.status.csv`, which compares them as `same`/`changed`.)*
+  - qor: drop `elab_run_status`, `fsdb_run_status`, `power_run_status`,
+    `VCS_VERSION`, `VERDI_VERSION`, `PPRTL_VERSION`.
+  - compute: drop the three `*_run_status` columns and the `*_runtime_seconds`
+    columns; keep the human-readable `*_runtime` values as the displayed value but
+    still compute a real `% diff` for them from the seconds columns.
+    `total_runtime_seconds` is likewise available as a backing value (compute only).
+- **Q3 — Memory.** *Parse or treat as string?* → **Numeric, with the `KB`/`MB`/`GB`
+  suffix as the scale qualifier.** Display the original string; normalize for math.
+- **Q4 — Output location.** → **CWD by default, `--outdir <path>` to override.**
+  (Not the baseline workarea, and not `$WORKAREA` — a comparison spans N workareas,
+  so no single workarea is the natural owner. This supersedes the draft's
+  "`<workarea>/power/pprtl2`" output root.)
+- **Q5 — Coverage & division by zero.** → **Union of all keys across all models**;
+  a row is emitted even when the baseline lacks it. `% diff` is blank whenever the
+  baseline value is missing, blank, non-numeric, or zero.
+- **Q6 — Header naming / N models.** → Exactly as §3.1. Every non-baseline model
+  gets exactly one `<model> vs <baseline> % diff` column. *(Superseded by Q13:
+  those baseline columns are still all present and unchanged, but a chained block
+  is now appended after them — see §3.7.)*
+- **Q7 — Extra outputs.** *Threshold-filtered report? summary.md?* → **No.** Both
+  remain non-goals (§9). *(The status/version file added by Q12 is a third CSV, not
+  a summary: it lists every key and applies no threshold.)*
+- **Q8 — Metric list hardcoded or derived?** → **Derived** from the CSV header
+  minus the key columns minus an explicit exclusion list, so new `report_pprtl2`
+  columns flow through without a code change. The §3.2/§3.3 metric lists are
+  therefore *the current expected result*, not a hardcoded contract.
+- **Q9 — `--outdir` creation.** → **Do not create it.** A missing `--outdir` is a
+  pre-flight error. (The CWD default always exists.)
+- **Q10 — Blank `test_name`.** The draft said to read a blank `test_name` as
+  `default`. Scoped to **vectorless rows only**: the current `report_pprtl2` already
+  writes `default` for vectorless, so this only matters for older CSVs. Timebased
+  rows with a blank `test_name` are the real "no test directory yet" fallback rows
+  (V4) and must keep the blank — renaming them `default` would merge them with
+  unrelated keys.
+- **Q11 — Non-passing power runs (enhancement, 2026-08-12).** Failed/incomplete
+  power runs were surfacing as blanks *or* bogus `0`s, and a bogus `0` against a
+  healthy baseline renders as a scary, meaningless `-100.00%`. Resolved: show the
+  **`power_run_status`** string in the value columns and suppress the `% diff`
+  (§3.5). Three sub-decisions, all confirmed with the user:
+  - *Scope*: **all** metrics of that key/model, not just the power-derived ones —
+    even though `elab_runtime`/`elab_peak_memory`/`total_runtime` are verified to
+    hold **real** values on failing rows (100% populated, 0 blanks). The row is
+    about a failed power result and should not invite comparison.
+  - *Which status*: **`power_run_status` only**; `elab_run_status` and
+    `fsdb_run_status` are ignored. This also makes `Not Required` irrelevant, as
+    it only ever appears in `fsdb_run_status` (146/296 rows, the normal vectorless
+    state), so the rule reduces to `!= Pass`.
+  - *Format*: strip the exit code — `Fail=2` ⇒ `Fail`; `Not Started` / `Running`
+    verbatim.
+- **Q12 — Status/version report (enhancement, 2026-08-13).** Added as a third file
+  rather than as columns in the existing two, because its comparison cells are
+  `same`/`changed` rather than numeric. Decisions: name it
+  `compare_pprtl2.status.csv`; one row **per key** for versions too (not once per
+  run) so the layout is uniform and mixed-version workareas would be visible;
+  **all** keys listed, not just changed ones; `same`/`changed` indicator columns
+  rather than transition text like `Pass -> Fail=2`.
+- **Q13 — Chained deltas (enhancement, 2026-08-13).** Models-file order is the
+  chain order. The chained columns are appended **after** the full baseline block,
+  and the duplicate first link (`m2 vs m1`, which is both the first chain link and
+  the first baseline comparison) is **omitted** rather than emitted twice. Always
+  on — no CLI flag — since a 2-model run produces no chained columns at all and is
+  therefore bit-identical to the pre-enhancement output.
+- **Q14 — Upstream qor column rename (2026-08-14).** `report_pprtl2` renamed five
+  qor columns and added one; `compare_pprtl2` needed **no code change** and ran
+  clean (exit 0) on the regenerated workareas, which is the payoff for deriving
+  the metric list rather than hardcoding it (Q8).
+
+  | Was | Now |
+  |---|---|
+  | `untraced_sequentials` | `untraced_sequentials_percentage` |
+  | `primary_io_annotation` | `annotation_primary_io` |
+  | `bb_annotation` | `annotation_bb` |
+  | `seq_annotation` | `annotation_seq` |
+  | `sequential_cell_count` | `unclocked_sequential_cell_count` |
+  | *(new)* | `combinational_cell_count` |
+
+  qor metrics went 17 → 18, so the qor report went 5032 → 5328 rows. The compute
+  header was unchanged. Only the **fixtures and this document** needed updating.
+
+  **Caveat — mixed-vintage comparisons.** Because the metric set is a *union*
+  (§3.1), comparing a pre-rename workarea against a post-rename one is not an
+  error and loses no data, but it emits **both** spellings as separate,
+  half-populated metrics. Measured on a reconstructed old-format workarea:
+  23 metrics instead of 18, of which 10 are blank on one side. Re-run
+  `report_pprtl2` on every workarea in the models file before comparing across
+  this boundary. This is inherent to the union rule and is deliberately not
+  "fixed" with a rename map — an alias table would silently equate columns whose
+  definitions may also have changed.
 
 ---
 
 ## 7. Test plan
 
-Implemented in `scripts/pprtl2/test_report_pprtl2.py` (54 tests, table-driven,
-zero live-tool/disk dependency beyond `tempfile.TemporaryDirectory`):
+`scripts/pprtl2/test_compare_pprtl2.py`, run via
+`python3 -m unittest test_compare_pprtl2 -v` from `scripts/pprtl2/`. No live tools,
+no real workareas — every test builds its CSVs from fixtures in a
+`tempfile.TemporaryDirectory`.
 
-1. **Unit -- input/report-file parsing:** `TestConfigTableParsing`,
-   `TestReportParsers`, `TestNetbatchAndFlowLogFooters`, `TestGrepContextBlocks`,
-   `TestSymlinkTarget`, `TestReadPartitionList` -- each pure parser gets fixture
-   text (copied verbatim from real files) and asserts the extracted fields,
-   including precedence/edge cases (first-key-wins, missing file, no matches,
-   adjacent vs. distant grep windows).
-2. **Unit -- per-stage status logic:** `TestEvaluateStage` -- Pass (marker file),
-   Fail (grdlbuild exit code, preferred over flow.log), Running (log present, no
-   "Elapsed time" line yet), Not Ran (no logs at all).
-3. **Unit -- QoR precedence:** `TestQorExtraction` -- vectorless (cells.rpt +
-   cge.hier.rpt) vs. timebased (stat2.rpt wins per §2's precedence rule).
-4. **Integration -- discovery + row assembly:** `TestBuildRows` -- builds a fake
-   on-disk tree (both output layouts, vectorless and timebased-with-2-tests,
-   newest-pass-dir selection, elab-only/no-power-dir fallback rows, never-
-   discovered ghost modules) and asserts the resulting `Row` list end-to-end.
-5. **Integration -- CLI/pre-flight/main():** `TestPreflightAndCli` -- every
-   `preflight()` failure mode, `resolve_config()`'s `$WORKAREA` fallback and
-   missing-workarea error, and `main()`'s exit codes (2 for pre-flight failure,
-   2 for zero discovered rows, 0 for `--dry-run` writing nothing, 0 for a full
-   run writing all 5 files).
-6. **Integration -- report writers:** `TestCsvAndReportWriters`,
-   `TestRenderSummaryMd`, `TestGenerateReports` -- CSV headers/rows, summary.md's
-   command-line/count+percent lines and the no-multi-test fallback note,
-   fail.details' per-module grouping and log-block grep windows, and
-   `generate_reports()`'s all-5-files-written contract.
-7. **Smoke (manual, not automated):** run against the 3 real workareas above and
-   diff key facts against hand-verified ground truth (see the Decisions log).
-   Re-run after every spec change to catch regressions before they reach users.
+1. **`TestReadModelsFile`** — comment/blank-line skipping; the exact
+   `<model> = <workarea>` pattern incl. surrounding whitespace and ignored trailing
+   text; order preservation; malformed line ⇒ error; `<2` pairs ⇒ error; duplicate
+   model name ⇒ error; comma in a model name ⇒ error.
+2. **`TestPreflight`** — every failure mode from §2.1 exercised individually:
+   missing models file, missing workarea, missing compute/qor CSV, header missing a
+   key column, duplicate compare key within one CSV, missing `--outdir`.
+3. **`TestMetricDerivation`** — key columns and the per-file exclusion lists are
+   removed; header order preserved; a column present in only one model's CSV still
+   becomes a metric (union) and is blank for the others; the §3.2/§3.3 lists are
+   reproduced exactly from the real headers of §2.3.
+4. **`TestNumericBacking`** — plain numerics; `<x>_runtime` uses
+   `<x>_runtime_seconds`; memory unit scaling across `KB`/`MB`/`GB`/`TB` with the
+   1000-based factors; unparseable memory ⇒ non-numeric; empty string ⇒ non-numeric.
+5. **`TestPercentDiff`** — positive/negative/zero change rounded to 2 decimals;
+   blank on missing baseline row, blank baseline value, non-numeric baseline,
+   baseline `0`, and missing/blank/non-numeric compared value.
+6. **`TestBuildRows`** — union key coverage (a key present only in the non-baseline
+   model still produces rows); sort order; vectorless blank `test_name` → `default`
+   while timebased blank stays blank (Q10/V4); a 3-model case proving every `% diff`
+   column is computed against the baseline, not the previous model.
+7. **`TestGenerateReportsAndCli`** — every file written with the §3.1 header; header
+   emitted even with zero data rows; `--dry-run` writes nothing and still exits 0;
+   `--force` changes nothing; exit codes 0 and 2; re-running produces
+   byte-identical output (idempotence).
+8. **`TestStatusLabel` / `TestFailedRunSubstitution`** — §3.5: `Pass`, blank and
+   missing rows produce no label; `Fail=2` ⇒ `Fail`; `Not Started`/`Running`
+   verbatim; failing model shows the status with a blank `% diff`; bogus `0`s *and*
+   blanks from a failed run are both replaced; a legitimate `0` on a passing run is
+   preserved; a failing **baseline** suppresses the diff for a passing model; every
+   metric of a failed key is replaced incl. real elab data; a failed
+   `elab_run_status`/`fsdb_run_status` changes nothing; in a 3-model run only the
+   failing model's column is affected.
+9. **`TestComparisonPairs`** — §3.7: 2 models ⇒ the baseline pair only; chained
+   pairs start at the third model; across 2–7 models the pair list has no
+   duplicates and its length is exactly `2N − 3`. Plus, in `TestBuildTable`: the
+   3-model header shows the baseline block then the chained block, a 2-model run
+   gains no chained column, chained cells compare against the neighbour
+   (`100,200,400` ⇒ `100.00,300.00,100.00`), and a 4-model run proves the chain
+   follows models-file order.
+10. **`TestStatusReport` / `TestStatusTable`** — §3.6: the kind reads qor and writes
+    `compare_pprtl2.status.csv`; `match_indicator` returns `same`/`changed`,
+    ignores surrounding whitespace, and is blank when either row is missing; the
+    item list is the 3 statuses then the 3 versions; the header uses `change`
+    columns; identical runs are all `same`; a status change shows **verbatim with
+    its exit code** (`Pass`, `Fail=2`, `changed`); a failed power run does **not**
+    blank the version columns (§3.5 must not apply here); a tool upgrade shows
+    `changed`; a key missing from one model gives a blank value and blank
+    indicator; chained `change` columns track the neighbour.
+
+**Smoke test (manual, not in CI):** run against the two real workareas via the
+user's `compare_pprtl2.models.md`; spot-check that identical metrics yield `0.00`,
+that the 4 multi-instance keys produce distinct rows, and that the row count equals
+`|union keys| × |metrics|` for each file.
 
 ---
 
-## 8. Implementation plan (phased)
+## 8. Delivery phases
 
-- **Phase 0 (this spec):** ✅ **DONE** -- scope approved via iterative clarifying
-  Q&A (see §6) rather than a single upfront sign-off; the spec was re-ingested
-  and corrected after every verified-on-disk discovery.
-- **Phase 1:** ✅ **DONE** -- CLI (`--dut`/`--workarea`/`--dry-run`/`--force`/
-  `--verbose`), pre-flight validation, S1 config.log table parsing, dual-layout
-  pass-dir discovery, `--dry-run` plan.
-- **Phase 2:** ✅ **DONE** -- static output (`report_pprtl2.terminology.md`,
-  direct verbatim write, no processing).
-- **Phase 3:** ✅ **DONE** -- all 4 generated reports (summary.md, compute.csv,
-  qor.csv, fail.details) wired to real parsers; no subprocess helpers needed
-  (this is a pure report-over-existing-artifacts tool, unlike prep_pprtl2).
-- **Phase 4:** ✅ **DONE** -- smoke-tested against 3 real workareas covering
-  vectorless/timebased/grdlbuild/non-grdlbuild/dual-layout combinations; a real
-  data-driven bug (missing partitions, §6 Q7) was found and fixed this way.
+- **Phase 1** — S1 parsing + pre-flight + CLI skeleton (`--dry-run` prints the
+  resolved plan). Tests 1–2. Status: **DONE** (2026-08-12, 25 unit tests pass).
+  CSV reading (`read_report_csv`) and key normalization (`row_key`) landed here
+  rather than in phase 2, because pre-flight's header/duplicate-key checks need
+  them. `read_report_csv` also tolerates ragged rows (short rows yield `None`,
+  long rows a `list`, from `csv.DictReader`). Non-`--dry-run` runs currently
+  print "report generation is not implemented yet" and exit 2.
+  Smoke-tested against the two real workareas via the user's
+  `compare_pprtl2.models.md`: pre-flight passes, which independently confirms V1
+  (the `instance`-widened key is duplicate-free in all four real CSVs).
+- **Phase 2** — metric derivation, numeric backing, `% diff`, row building.
+  Tests 3–6. Status: **DONE** (2026-08-12, 49 unit tests pass). `ReportKind`
+  (QOR/COMPUTE) carries each file's source/output name and exclusion list;
+  `build_table()` returns a `CompareTable` (kind, header, metrics, keys, rows).
+  `--dry-run` now reports the key/metric/row counts per §5.
+  Verified against the two real workareas: 296 union keys, **17** qor metrics and
+  **8** compute metrics — exactly the §3.2/§3.3 lists, derived not hardcoded.
+  Spot-checked real diffs, e.g. `paraccchassis` `elab_runtime`
+  `00d:00h:43m:10s` (2590s) → `00d:00h:38m:55s` (2335s) = `-9.85`, and
+  `elab_peak_memory` `10.50 GB` → `10.45 GB` = `-0.48`.
+- **Phase 3** — report writing, `--verbose`, idempotence; smoke test against the two
+  real workareas. Test 7. Status: **DONE** (2026-08-12, 56 unit tests pass).
+  New `write_table()`/`generate_reports()`; `main()` writes both CSVs and
+  `--verbose` logs each path with its row count.
+  Smoke test (`/tmp/cmp_smoke`, both real workareas): wrote
+  `compare_pprtl2.qor.csv` (5032 rows + header) and `compare_pprtl2.compute.csv`
+  (2368 rows + header); a second run was **byte-identical** (md5 verified).
+  All three edge cases behaved as specified on real data:
+  - the 4 multi-instance keys produced distinct rows
+    (`parscfllcsftype3` × `parllcsf_a_parscfllcsftype3` and `...type4`, both
+    `cell_count` `275081` → `275033` = `-0.02`);
+  - `bb_annotation` `0.0` → `0.0` emitted a **blank** `% diff` (zero baseline);
+  - the timebased blank-`test_name` key (`parmiopcie6trcore_uio_0,timebased,,`)
+    survived as its own key, with a blank `cell_count` row but a real
+    `elab_runtime` diff (`00d:16h:16m:32s` → `00d:14h:21m:27s` = `-11.78`).
+- **Enhancement E1** — non-passing power runs report their status (§3.5, Q11).
+  Test 8. Status: **DONE** (2026-08-12, 69 unit tests pass). Added
+  `status_label()`; `build_table()` substitutes the label into the value columns
+  and forces the backing value to `None` so no `% diff` is produced.
+  Verified on the two real workareas: qor gained 272 `Fail`, 459 `Not Started`
+  and 68 `Running` cells, compute 128/216/32, with **zero** rows carrying a status
+  label alongside a non-blank `% diff`. Example asymmetric key
+  (`parpsf0npktam,timebased,active_idle,parpsf0npktam_parpsf0npktam`): baseline
+  `Not Started` across all 8 compute metrics while `26ww32d` shows its real
+  numbers (`683245`, `00d:01h:13m:20s`, `24.54 GB`, …) and every diff is blank.
+- **Enhancement E2** — status/tool-version report (§3.6, Q12). Test 10.
+  Status: **DONE** (2026-08-13, 86 unit tests pass). `ReportKind` gained an
+  `included` list and a `comparison` mode (`percent` | `match`); `STATUS` is a
+  third kind reading qor and writing `compare_pprtl2.status.csv`.
+  Verified on the two real workareas: `296 × 6 = 1776` rows; versions all `same`
+  (both workareas ran identical tool versions); real status changes surfaced, e.g.
+  `parmiofblprxfcrarbmux` `power_run_status` `Not Started` → `Pass` ⇒ `changed`.
+- **Enhancement E3** — chained deltas (§3.7, Q13). Test 9.
+  Status: **DONE** (2026-08-13, 86 unit tests pass). `comparison_pairs()` returns
+  the baseline pairs then the chained pairs; `build_output_header()` and
+  `build_table()` both drive off it, so the two blocks cannot drift apart.
+  `--dry-run` now prints `Chain order: m1 -> m2 -> m3` for 3+ models.
+  Verified with a 3-model run (third model deliberately pointed at the baseline's
+  workarea): header ends
+  `26ww32d vs 26ww27a % diff, 26ww35x vs 26ww27a % diff, 26ww35x vs 26ww32d % diff`,
+  and `paraccchassis` `cell_count` `207916 / 253010 / 207916` yields
+  `21.69 / 0.00 / -17.82` — the round trip is arithmetically consistent.
+  All three files re-ran byte-identical (md5 verified), and a 2-model run still
+  produces exactly one comparison column per file.
 
 ---
 
 ## 9. Non-goals
 
-- **Orchestrating pprtl2 runs.** This tool only reads an existing run area; it
-  never invokes `pprtl`, `grdlbuild`, `make elab/power`, etc. (see §1's
-  non-destructive-to-sources guarantee).
-- **S22 (`tasks_summary.log`) consumption.** Identified as a source and
-  considered as a simpler status/runtime alternative (§6 Q4), but not adopted or
-  implemented -- the per-row grdlbuild-footer/flow.log approach remains the sole
-  source. Revisit if per-module log parsing ever proves unreliable in practice.
-- **Disambiguating *why* a stage is `Not Ran`** (never attempted vs. blocked by a
-  failed dependency vs. intentionally skipped). Deferred per §6 Q8.
-- **Legacy `pprtl` (v1, not pprtl2) output layouts.** Out of scope entirely.
-- **Modifying or pruning stale reports** from a previous run whose target set
-  has since shrunk -- reports are fully regenerated every run from the current
-  S20 list, so stale per-module data simply won't appear; there is no tree to
-  prune (unlike prep_pprtl2's generated collateral tree).
+- **Re-deriving metrics from the raw run area.** This tool reads only
+  `report_pprtl2`'s CSVs. Missing/incorrect metrics are a `report_pprtl2` issue.
+- **Running `report_pprtl2`.** Each workarea's CSVs must already exist; the tool
+  will not orchestrate or refresh them.
+- **`report_pprtl2.fail.details` / `summary.md` comparison.** Only the two source
+  CSVs are consumed.
+- **Threshold-filtered "changed rows only" output** and an
+  **improved/regressed/status-flipped summary** (Q7) — explicitly deferred.
+- **Plots, charts, or HTML output.**
 
 ---
 
 ## Appendix A — Reusable engineering checklist
 
-Patterns that repeatedly paid off (from the prep_pprtl2 build):
+Patterns that repeatedly paid off (from the prep_pprtl2 / report_pprtl2 builds):
 
 - [ ] **Deterministic + idempotent**: same inputs → same tree; safe to re-run.
 - [ ] **Fail-fast pre-flight**: validate every input before writing anything.
@@ -539,6 +765,8 @@ Patterns that repeatedly paid off (from the prep_pprtl2 build):
       `.nfs*` artifacts + partially-deleted trees).
 - [ ] **Pure path-derivation functions** (no disk access) → trivially unit-testable.
 - [ ] **Verify against real data early**; record verified facts in the Decisions log.
+      *(This spec's V1 is the canonical example: the assumed compare key was
+      disproved by 4 real rows before a line of code was written.)*
 - [ ] **Phased delivery** with tests per phase; keep Status current.
 - [ ] **Note caveats honestly**: e.g. `--force` overwrites regenerated files but does
       not prune stale outputs from items that flipped to skipped/failed.

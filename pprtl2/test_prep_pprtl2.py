@@ -147,7 +147,14 @@ class TestPathDerivation(unittest.TestCase):
 
         out = Path("/wa/power/pprtl2/partition/paracccpc")
         self.assertEqual(p.part_out_dir, out)
-        self.assertEqual(p.flow_cfg, Path("/wa/power/pprtl2/partition/paracccpc.flow.cfg"))
+        self.assertEqual(
+            p.vectorless_flow_cfg,
+            Path("/wa/power/pprtl2/partition/paracccpc.vectorless.flow.cfg"),
+        )
+        self.assertEqual(
+            p.timebased_flow_cfg,
+            Path("/wa/power/pprtl2/partition/paracccpc.timebased.flow.cfg"),
+        )
         self.assertEqual(p.hip_minimized, out / "hip.ldb.list.minimized")
         self.assertEqual(p.clocks_fixclocks, out / "paracccpc_clocks.tcl.fixclocks")
         self.assertEqual(p.elab_pre_tcl, out / "elab.pre.tcl")
@@ -187,13 +194,16 @@ class TestPathDerivation(unittest.TestCase):
 class TestExecuteStaticOutputs(unittest.TestCase):
     """Spec test 3 (static copy) + test 4 (mocked generated collateral & report)."""
 
-    def _setup(self, tmp: Path) -> pp.RunPlan:
+    def _setup(self, tmp: Path, mtl_file: Path | None = None) -> pp.RunPlan:
         templates = tmp / "cor"
         templates.mkdir()
         (templates / "Makefile").write_text("MK\n", encoding="utf-8")
         (templates / "imh").mkdir()
         (templates / "imh" / "stdcell.ldb.list").write_text("STD-imh\n", encoding="utf-8")
-        (templates / "imh" / "partition.flow.cfg").write_text("FLOW\n", encoding="utf-8")
+        (templates / "imh" / "vectorless.flow.cfg").write_text("VEC\n", encoding="utf-8")
+        (templates / "imh" / "timebased.flow.cfg").write_text(
+            "MTL_INST_TO_RUN = %TOP_INSTANCE_NAME%\n", encoding="utf-8"
+        )
         (templates / "tool.cth").write_text("CTH\n", encoding="utf-8")
         (templates / "activity_dir.map").write_text("ACT\n", encoding="utf-8")
         (templates / "elab.pre.tcl").write_text("ELAB\n", encoding="utf-8")
@@ -213,6 +223,7 @@ class TestExecuteStaticOutputs(unittest.TestCase):
             templates=templates,
             profile=pp.DIE_PROFILES["imh"],
             partitions=None,
+            mtl_file_override=mtl_file,
         )
         elig = pp.derive_partition_paths(cfg, "paracccpc", "REL", "trial")
         skip = pp.derive_partition_paths(cfg, "memtile", None, "trial")
@@ -253,12 +264,14 @@ class TestExecuteStaticOutputs(unittest.TestCase):
                 "GRDL\n",
             )
 
-            # eligible partition gets flow.cfg + elab.pre.tcl; skipped one does not
+            # eligible partition gets vectorless.flow.cfg + elab.pre.tcl; skipped one does not
             part = cfg.out_root / "partition"
-            self.assertEqual((part / "paracccpc.flow.cfg").read_text(), "FLOW\n")
+            self.assertEqual((part / "paracccpc.vectorless.flow.cfg").read_text(), "VEC\n")
             self.assertEqual((part / "paracccpc" / "elab.pre.tcl").read_text(), "ELAB\n")
-            self.assertFalse((part / "memtile.flow.cfg").exists())
-            # Makefile, stdcell, tool.cth, activity_dir.map, grdlbuild, flow.cfg, elab.pre.tcl
+            self.assertFalse((part / "memtile.vectorless.flow.cfg").exists())
+            # no MTL => no timebased.flow.cfg
+            self.assertFalse((part / "paracccpc.timebased.flow.cfg").exists())
+            # Makefile, stdcell, tool.cth, activity_dir.map, grdlbuild, vectorless.flow.cfg, elab
             self.assertEqual(len(report.outcome.created), 7)
 
     def test_generated_collateral_and_report(self) -> None:
@@ -296,11 +309,19 @@ class TestExecuteStaticOutputs(unittest.TestCase):
             self.assertEqual(by_name["memtile"][4], "N/A")
             self.assertEqual(by_name["memtile"][5:8], ["no", "no", "no"])
             self.assertEqual(by_name["memtile"][fidx], "N/A")
+            vidx = rows[0].index("created_vectorless_flow_cfg")
+            tidx = rows[0].index("created_timebased_flow_cfg")
+            self.assertEqual(by_name["paracccpc"][vidx], "yes")
+            self.assertEqual(by_name["paracccpc"][tidx], "no")  # no MTL
+            self.assertEqual(by_name["memtile"][vidx], "N/A")
+            self.assertEqual(by_name["memtile"][tidx], "N/A")
 
             summary = cfg.report_summary.read_text()
             self.assertRegex(summary, r"total partitions\s*:\s*2")
-            self.assertRegex(summary, r"ran\s+:\s*1 \(50\.0%\)")
+            self.assertRegex(summary, r"vectorless setup generated\s+:\s*1 \(50\.0%\)")
             self.assertRegex(summary, r"fail minimizehip\s+:\s*0")
+            self.assertRegex(summary, r"timebased setup generated\s+:\s*0.*MTL_FILE not present")
+            self.assertFalse(report.mtl_present)
 
             # prep_pprtl2_partition.list: only non-skipped partitions, one per line
             self.assertEqual(cfg.partition_list.name, "prep_pprtl2_partition.list")
@@ -327,7 +348,7 @@ class TestExecuteStaticOutputs(unittest.TestCase):
             self.assertEqual(cfg.partition_list.read_text(), "")
 
             summary = cfg.report_summary.read_text()
-            self.assertRegex(summary, r"ran\s+:\s*0 \(0\.0%\)")
+            self.assertRegex(summary, r"vectorless setup generated\s+:\s*0 \(0\.0%\)")
             self.assertRegex(summary, r"fail minimizehip\s+:\s*1")
             self.assertRegex(summary, r"\[fail minimizehip\] \(1\)\n  paracccpc")
 
@@ -337,6 +358,105 @@ class TestExecuteStaticOutputs(unittest.TestCase):
             by_name = {r[0]: r for r in rows[1:]}
             self.assertEqual(by_name["paracccpc"][fidx], "yes")
             self.assertEqual(by_name["memtile"][fidx], "N/A")
+
+    @staticmethod
+    def _mtl_row(inst: str, template: str, fsdb: str) -> str:
+        # 11 colon fields: INST=1, FSDB_PTR=6, TEMPLATE=last
+        return f"{inst}:/rtl/{inst}:{inst}:{template}:active_idle:{fsdb}:clock:1:97us:99us:{template}\n"
+
+    def test_timebased_created_with_expansion(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            fsdb = tmp / "novas.fsdb.gz"
+            fsdb.write_text("x", encoding="utf-8")
+            mtl = tmp / "mtl.txt"
+            mtl.write_text(self._mtl_row("paracccpc_left", "paracccpc", str(fsdb)), encoding="utf-8")
+            plan = self._setup(tmp, mtl_file=mtl)
+            cfg = plan.cfg
+            report = self._run(plan)
+
+            tb = cfg.out_root / "partition" / "paracccpc.timebased.flow.cfg"
+            self.assertEqual(tb.read_text(), "MTL_INST_TO_RUN = paracccpc_left\n")
+            # MTL materialized as <DUT>.mtl
+            self.assertEqual(cfg.mtl_output, cfg.out_root / "imh.mtl")
+            self.assertEqual((cfg.out_root / "imh.mtl").read_text(), mtl.read_text())
+            elig = next(r for r in report.results if r.partition == "paracccpc")
+            self.assertTrue(elig.created_timebased_flow_cfg)
+            self.assertEqual(elig.timebased_reason, "created")
+            self.assertTrue(report.mtl_present)
+            self.assertEqual(cfg.timebased_partition_list.read_text(), "paracccpc\n")
+
+            with cfg.report_csv.open(newline="") as fh:
+                rows = list(csv.reader(fh))
+            tidx = rows[0].index("created_timebased_flow_cfg")
+            by_name = {r[0]: r for r in rows[1:]}
+            self.assertEqual(by_name["paracccpc"][tidx], "yes")
+            self.assertRegex(cfg.report_summary.read_text(), r"timebased setup generated\s+:\s*1 \(50\.0%\)")
+
+    def test_timebased_skips_not_in_mtl_and_fsdb_missing(self) -> None:
+        # not_in_mtl: MTL has a different template
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            fsdb = tmp / "f.gz"
+            fsdb.write_text("x", encoding="utf-8")
+            mtl = tmp / "mtl.txt"
+            mtl.write_text(self._mtl_row("other_left", "otherpart", str(fsdb)), encoding="utf-8")
+            plan = self._setup(tmp, mtl_file=mtl)
+            report = self._run(plan)
+            elig = next(r for r in report.results if r.partition == "paracccpc")
+            self.assertEqual(elig.timebased_reason, "not_in_mtl")
+            self.assertFalse(elig.created_timebased_flow_cfg)
+            self.assertRegex(
+                plan.cfg.report_summary.read_text(),
+                r"\[timebased not in mtl\] \(1\)\n  paracccpc",
+            )
+        # fsdb_missing: MTL points at a nonexistent fsdb
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            mtl = tmp / "mtl.txt"
+            mtl.write_text(
+                self._mtl_row("paracccpc_left", "paracccpc", str(tmp / "nope.gz")), encoding="utf-8"
+            )
+            plan = self._setup(tmp, mtl_file=mtl)
+            report = self._run(plan)
+            elig = next(r for r in report.results if r.partition == "paracccpc")
+            self.assertEqual(elig.timebased_reason, "fsdb_missing")
+            self.assertFalse(elig.created_timebased_flow_cfg)
+            self.assertRegex(
+                plan.cfg.report_summary.read_text(),
+                r"\[timebased fsdb missing\] \(1\)\n  paracccpc",
+            )
+
+    def test_timebased_strip_path_bad(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            fsdb = tmp / "f.gz"
+            fsdb.write_text("x", encoding="utf-8")
+            mtl = tmp / "mtl.txt"
+            # RTL_PATH (field 2) has two whitespace-separated paths => bad strip path
+            mtl.write_text(
+                f"paracccpc_left:/p/a /p/b:paracccpc:paracccpc:active_idle:{fsdb}"
+                f":clock:1:97us:99us:paracccpc\n",
+                encoding="utf-8",
+            )
+            plan = self._setup(tmp, mtl_file=mtl)
+            cfg = plan.cfg
+            report = self._run(plan)
+            elig = next(r for r in report.results if r.partition == "paracccpc")
+            self.assertEqual(elig.timebased_reason, "strip_path_bad")
+            self.assertFalse(elig.created_timebased_flow_cfg)
+            self.assertTrue(elig.created_vectorless_flow_cfg)  # vectorless unaffected
+            self.assertFalse((cfg.out_root / "partition" / "paracccpc.timebased.flow.cfg").exists())
+
+            with cfg.report_csv.open(newline="") as fh:
+                rows = list(csv.reader(fh))
+            sidx = rows[0].index("timebased_strip_path_bad")
+            by_name = {r[0]: r for r in rows[1:]}
+            self.assertEqual(by_name["paracccpc"][sidx], "yes")
+            self.assertRegex(
+                cfg.report_summary.read_text(),
+                r"\[timebased strip path bad\] \(1\)\n  paracccpc",
+            )
 
     def test_idempotent_skip_without_force(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -366,6 +486,23 @@ class TestExecuteStaticOutputs(unittest.TestCase):
             # copied exactly, with no dut stamp injected
             self.assertEqual(gp.read_text(), "outputDir=x\nblock = true\n")
             self.assertNotIn("dut=", gp.read_text())
+
+
+class TestParseMtl(unittest.TestCase):
+    def test_maps_template_to_inst_and_fsdb_first_wins(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            mtl = Path(tmp) / "m.mtl"
+            mtl.write_text(
+                "# comment\n"
+                "\n"
+                "parX_left:/rtl:parX_left:parX:t:/a/x.fsdb.gz:clock:1:97us:99us:parX\n"
+                "parX_right:/rtl:parX_right:parX:t:/a/y.fsdb.gz:clock:1:97us:99us:parX\n"
+                "short:line:only\n",
+                encoding="utf-8",
+            )
+            m = pp.parse_mtl(mtl)
+            self.assertEqual(m["parX"], ("parX_left", "/a/x.fsdb.gz", "/rtl"))  # first row wins
+            self.assertEqual(len(m), 1)
 
 
 if __name__ == "__main__":

@@ -29,47 +29,35 @@ CONFIG_TABLE_FIXTURE = """\
 +-----------------------------+-----------------------+--------------+
 """
 
-CELLS_RPT_FIXTURE = """\
-Memory_cells: 0
-Combinational_cells: 2593697
-Sequential_cells: 47
-Register_cells: 85560
-BBox_cells: 0
-Clock_newtwork_cells: 19325
-Total_cells: 2750050
-"""
+def rtl_metrics_hier_csv(module: str, **overrides: str) -> str:
+    """Minimal ``<module>.rtl_metrics.hier.csv`` fixture (S25): header + the
+    module's own top-of-hierarchy row (``Hierarchy Level`` == "0"). Only
+    includes the columns report_pprtl2 actually reads -- the real file has
+    100+ power/toggle-rate columns we never look at.
+    """
+    values = {
+        "All Cell Count": "2750050",
+        "Combinational Cell Count": "2593697",
+        "Sequential Cell Count": "47",
+        "Register Cell Count": "85560",
+        "Register Bit Count": "245556",
+        "CGR (%)": "97.16",
+        "CGE (%)": "64.78",
+        "DACGE (%)": "75.45",
+        "Flop Cell Count": "1349",
+        "MBFlop Cell Count": "794",
+        "EQFB": "6765",
+        "Latch Cell Count": "17",
+        "MBLatch Cell Count": "204",
+        "EQLB": "833",
+        "Hierarchy Level": "0",
+        "Module Name": module,
+    }
+    values.update(overrides)
+    header = ",".join(values.keys())
+    row = ",".join(values.values())
+    return header + "\n" + row + "\n"
 
-POWER_GROUPS_RPT_FIXTURE = """\
-****************************************
-Report : report_power_groups
-Design : hamvf
-****************************************
-
-Power Group                   Size     Attribute       
----------------------------------------------------
-clock_network               19,325     Default         
-register                    85,560     Default         
-combinational            2,585,183     Default         
-sequential                      47     Default         
-memory                           0     Default         
-io_pad                           0     Default         
-black_box                        0     Default         
----------------------------------------------------
-0
-"""
-
-CGE_HIER_RPT_FIXTURE = """\
-****************************************
-Report : report_rtl_metrics
-****************************************
-
-------------------------------------------------------------------
-Register       Gated Register                                Instance
-Bit Count      Bit Count        CGR (%)        CGE (%)        DACGE (%)      Name
-------------------------------------------------------------------
-245556         238584            97.16          64.78          75.45         hamvf
-153443         149332            97.32          63.98          74.46         hamvf/mvfpar
-"""
 
 STAT2_RPT_FIXTURE = """\
 ##########################################################################
@@ -81,10 +69,27 @@ Total cell count: 2106891
 Register Count: 116488
 Sequential cells count: 2882
 Untraced Sequential ratio: 0.024143419619669933
+Primary I/P annotation: 146(100%)
+Black Box annotation: 16(72.73%)
+Sequential annotation: 17,816(99.70%)
 Maximum memory usage for this session: 9349076
 Elapsed time for this session: 2047.17
 ##########################################################################
 """
+
+VCS_LOG_FIXTURE = """\
+                         Chronologic VCS (TM)
+      Version X-2025.06-SP2-3_Full64 -- Tue Aug 11 21:23:30 2026
+
+"""
+
+ELAB_VERSION_LINES_FIXTURE = (
+    "[21:21:41 2026-08-11] [INFO ] Info: VERDI_HOME = "
+    "/p/hdk/rtl/cad/x86-64_linux26/synopsys/verdi3/X-2025.06-SP2\n"
+    "[21:21:43 2026-08-11] [INFO ] PrimePower RTL [Wattson Inside] (R)\n"
+    "[21:21:43 2026-08-11] [INFO ] \n"
+    "[21:21:43 2026-08-11] [INFO ] Version: X-2025.06-SP3-20260214 for linux64 - Feb 14, 2026\n"
+)
 
 GRDLBUILD_FOOTER_FIXTURE = """\
 [20:23:57 2026-07-23] [INFO ] elab stage passed successfully..
@@ -119,6 +124,16 @@ FLOW_LOG_RUNNING_FIXTURE = """\
 [20:23:54 2026-07-23] [INFO ] Info: Start time = Thu Jul 23 20:23:54 2026
 """
 
+GRDLBUILD_RUNNING_FIXTURE = """\
++-----------------------------------------------------------------------------+
+| Logfile        : power.paraccasf.pprtl2_elab.log                            |
+| Job id         : 1627979645                 Class: SLES15SP4&&384G&&4C      |
+| Starting time  : Mon Aug 10 21:16:05 2026                                   |
++-----------------------------------------------------------------------------+
+-GRADLE- Logfile: /some/path/power.paraccasf.pprtl2_elab.log
+-GRADLE- The task full command: /usr/intel/bin/tcsh -fc "make elab"
+"""
+
 
 class TestConfigTableParsing(unittest.TestCase):
     """§7 test plan item 1 — S1 config.log table parsing."""
@@ -137,30 +152,51 @@ class TestConfigTableParsing(unittest.TestCase):
 
 
 class TestReportParsers(unittest.TestCase):
-    """§7 test plan item 1 — report-file parsing (cells/power_groups/cge.hier/stat2)."""
+    """§7 test plan item 1 — report-file parsing (rtl_metrics.hier.csv/stat2)."""
 
-    def test_cells_rpt(self) -> None:
-        kv = rp.parse_keyvalue_report(CELLS_RPT_FIXTURE)
-        self.assertEqual(kv["Total_cells"], "2750050")
-        self.assertEqual(kv["Register_cells"], "85560")
-        self.assertEqual(kv["Sequential_cells"], "47")
+    def test_rtl_metrics_hier_csv(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "hamvf.rtl_metrics.hier.csv"
+            path.write_text(rtl_metrics_hier_csv("hamvf"), encoding="utf-8")
+            row = rp.parse_rtl_metrics_hier_csv(path, "hamvf")
+            self.assertEqual(row["cell_count"], 2750050)
+            self.assertEqual(row["combinational_cell_count"], 2593697)
+            self.assertEqual(row["unclocked_sequential_cell_count"], 47)
+            self.assertEqual(row["register_cell_count"], 85560)
+            self.assertEqual(row["register_bit_count"], 245556)
+            self.assertEqual(row["CGR"], 97.16)
+            self.assertEqual(row["CGE"], 64.78)
+            self.assertEqual(row["DACGE"], 75.45)
+            self.assertEqual(row["flop_cell_count"], 1349)
+            self.assertEqual(row["mbflop_cell_count"], 794)
+            self.assertEqual(row["eqfb"], 6765)
+            self.assertEqual(row["latch_cell_count"], 17)
+            self.assertEqual(row["mblatch_cell_count"], 204)
+            self.assertEqual(row["eqlb"], 833)
 
-    def test_power_groups_rpt(self) -> None:
-        groups = rp.parse_power_groups(POWER_GROUPS_RPT_FIXTURE)
-        self.assertEqual(groups["register"], 85560)
-        self.assertEqual(groups["sequential"], 47)
-        self.assertEqual(groups["clock_network"], 19325)
-        self.assertEqual(groups["combinational"], 2585183)
+    def test_rtl_metrics_hier_csv_module_not_found(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "hamvf.rtl_metrics.hier.csv"
+            path.write_text(rtl_metrics_hier_csv("hamvf"), encoding="utf-8")
+            self.assertIsNone(rp.parse_rtl_metrics_hier_csv(path, "nope"))
 
-    def test_cge_hier_module_row(self) -> None:
-        row = rp.parse_cge_hier_module_row(CGE_HIER_RPT_FIXTURE, "hamvf")
-        self.assertEqual(row["register_bit_count"], 245556)
-        self.assertEqual(row["CGR"], 97.16)
-        self.assertEqual(row["CGE"], 64.78)
-        self.assertEqual(row["DACGE"], 75.45)
+    def test_rtl_metrics_hier_csv_missing_file(self) -> None:
+        self.assertIsNone(rp.parse_rtl_metrics_hier_csv(Path("/no/such/file.csv"), "hamvf"))
 
-    def test_cge_hier_module_row_not_found(self) -> None:
-        self.assertIsNone(rp.parse_cge_hier_module_row(CGE_HIER_RPT_FIXTURE, "nope"))
+    def test_rtl_metrics_hier_csv_stops_at_first_matching_row(self) -> None:
+        """The module's own row is always first on real data, but the parser
+        must match on Hierarchy Level 0 and stop there -- not be fooled by a
+        later row that happens to repeat the same values."""
+        text = (
+            "All Cell Count,Hierarchy Level,Module Name\n"
+            "111,0,hamvf\n"
+            "999,0,hamvf\n"
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "hamvf.rtl_metrics.hier.csv"
+            path.write_text(text, encoding="utf-8")
+            row = rp.parse_rtl_metrics_hier_csv(path, "hamvf")
+            self.assertEqual(row["cell_count"], 111)
 
     def test_stat2_rpt(self) -> None:
         kv = rp.parse_keyvalue_report(STAT2_RPT_FIXTURE)
@@ -169,6 +205,46 @@ class TestReportParsers(unittest.TestCase):
         self.assertEqual(kv["Sequential cells count"], "2882")
         self.assertEqual(kv["SCGE"], "99.26")
         self.assertEqual(kv["Untraced Sequential ratio"], "0.024143419619669933")
+        self.assertEqual(kv["Primary I/P annotation"], "146(100%)")
+        self.assertEqual(kv["Black Box annotation"], "16(72.73%)")
+        self.assertEqual(kv["Sequential annotation"], "17,816(99.70%)")
+
+
+class TestVersionInfo(unittest.TestCase):
+    """§7 test plan item 1 — VCS_VERSION/VERDI_VERSION/PPRTL_VERSION extraction."""
+
+    def test_extracts_all_three_versions(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            vcs_log = tmp_path / "vcs.log"
+            vcs_log.write_text(VCS_LOG_FIXTURE, encoding="utf-8")
+            elab_log = tmp_path / "elab.log"
+            elab_log.write_text(ELAB_VERSION_LINES_FIXTURE + GRDLBUILD_FOOTER_FIXTURE, encoding="utf-8")
+
+            info = rp.extract_version_info(vcs_log, elab_log)
+            self.assertEqual(info["VCS_VERSION"], "X-2025.06-SP2-3")  # trailing _Full64 trimmed
+            self.assertEqual(info["VERDI_VERSION"], "X-2025.06-SP2")
+            self.assertEqual(info["PPRTL_VERSION"], "X-2025.06-SP3-20260214")
+
+    def test_blank_when_logs_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            info = rp.extract_version_info(tmp_path / "nope.log", tmp_path / "nope2.log")
+            self.assertIsNone(info["VCS_VERSION"])
+            self.assertIsNone(info["VERDI_VERSION"])
+            self.assertIsNone(info["PPRTL_VERSION"])
+
+    def test_vcs_version_without_full64_suffix_is_unchanged(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            vcs_log = tmp_path / "vcs.log"
+            vcs_log.write_text(
+                "                         Chronologic VCS (TM)\n"
+                "      Version X-2025.06-SP2 -- Tue Aug 11 21:23:30 2026\n",
+                encoding="utf-8",
+            )
+            info = rp.extract_version_info(vcs_log, tmp_path / "nope.log")
+            self.assertEqual(info["VCS_VERSION"], "X-2025.06-SP2")
 
 
 class TestNetbatchAndFlowLogFooters(unittest.TestCase):
@@ -202,93 +278,119 @@ class TestNetbatchAndFlowLogFooters(unittest.TestCase):
 
 
 class TestEvaluateStage(unittest.TestCase):
-    """§7 test plan item 2 — per-stage Pass/Fail/Running/Not-Ran determination (no Skipped)."""
+    """§7 test plan item 2 — grdlbuild-only Pass/Fail/Running/Not-Started determination."""
 
-    def _write(self, path: Path, text: str) -> None:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(text, encoding="utf-8")
-
-    def test_pass_via_marker_file(self) -> None:
+    def test_pass_via_grdlbuild_footer(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            tmp_path = Path(tmp)
-            marker = tmp_path / "elab.PASS"
-            marker.write_text("", encoding="utf-8")
-            flow_log = tmp_path / "log" / "flow.log"
-            self._write(flow_log, FLOW_LOG_FIXTURE)
-            result = rp.evaluate_stage(pass_marker=marker, flow_log=flow_log, grdlbuild_log=None)
+            grdl_log = Path(tmp) / "grdl.log"
+            grdl_log.write_text(GRDLBUILD_FOOTER_FIXTURE, encoding="utf-8")
+            result = rp.evaluate_stage(grdlbuild_log=grdl_log)
             self.assertEqual(result.status, "Pass")
-            self.assertEqual(result.runtime_seconds, 10824.7)
+            self.assertEqual(result.runtime_seconds, 3 * 3600 + 37)
 
-    def test_fail_via_grdlbuild_exit_code_prefers_over_flow_log(self) -> None:
+    def test_fail_via_grdlbuild_exit_code(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            tmp_path = Path(tmp)
-            marker = tmp_path / "power.PASS"  # absent
-            flow_log = tmp_path / "log" / "flow.log"
-            self._write(flow_log, FLOW_LOG_FIXTURE)
-            grdl_log = tmp_path / "grdl.log"
-            self._write(grdl_log, GRDLBUILD_FAIL_FOOTER_FIXTURE)
-            result = rp.evaluate_stage(pass_marker=marker, flow_log=flow_log, grdlbuild_log=grdl_log)
+            grdl_log = Path(tmp) / "grdl.log"
+            grdl_log.write_text(GRDLBUILD_FAIL_FOOTER_FIXTURE, encoding="utf-8")
+            result = rp.evaluate_stage(grdlbuild_log=grdl_log)
             self.assertEqual(result.status, "Fail=2")
 
-    def test_running_when_no_elapsed_line(self) -> None:
+    def test_running_when_log_exists_but_no_exit_status_footer(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            tmp_path = Path(tmp)
-            marker = tmp_path / "elab.PASS"  # absent
-            flow_log = tmp_path / "log" / "flow.log"
-            self._write(flow_log, FLOW_LOG_RUNNING_FIXTURE)
-            result = rp.evaluate_stage(pass_marker=marker, flow_log=flow_log, grdlbuild_log=None)
+            grdl_log = Path(tmp) / "grdl.log"
+            grdl_log.write_text(GRDLBUILD_RUNNING_FIXTURE, encoding="utf-8")
+            result = rp.evaluate_stage(grdlbuild_log=grdl_log)
             self.assertEqual(result.status, "Running")
 
-    def test_not_ran_when_no_logs(self) -> None:
+    def test_not_started_when_grdlbuild_log_missing(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            tmp_path = Path(tmp)
-            result = rp.evaluate_stage(
-                pass_marker=tmp_path / "elab.PASS", flow_log=tmp_path / "log" / "flow.log",
-                grdlbuild_log=None,
-            )
-            self.assertEqual(result.status, "Not Ran")
+            result = rp.evaluate_stage(grdlbuild_log=Path(tmp) / "nope.log")
+            self.assertEqual(result.status, "Not Started")
+
+    def test_flow_log_fills_in_missing_runtime_and_memory(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            grdl_log = Path(tmp) / "grdl.log"
+            grdl_log.write_text("| Exit Status    : 0 |\n", encoding="utf-8")  # no WC/Mem in footer
+            flow_log = Path(tmp) / "flow.log"
+            flow_log.write_text(FLOW_LOG_FIXTURE, encoding="utf-8")
+            result = rp.evaluate_stage(grdlbuild_log=grdl_log, flow_log=flow_log)
+            self.assertEqual(result.status, "Pass")
+            self.assertEqual(result.runtime_seconds, 10824.7)
+            self.assertAlmostEqual(result.memory_gb, 131.08)
 
 
 class TestQorExtraction(unittest.TestCase):
-    """§7 test plan item 3 — QoR precedence rules (S10-S18, stat2 precedence for timebased)."""
+    """§7 test plan item 3 — QoR precedence rules (S25 primary, stat2 annotations-only)."""
 
-    def _write_reports(self, tmp: Path, module: str) -> Path:
+    def _write_rtl_metrics(self, tmp: Path, module: str, **overrides: str) -> Path:
         reports_dir = tmp / "reports"
-        reports_dir.mkdir(parents=True)
-        (reports_dir / f"{module}.cells.rpt").write_text(CELLS_RPT_FIXTURE, encoding="utf-8")
-        (reports_dir / f"{module}.power_groups.rpt").write_text(POWER_GROUPS_RPT_FIXTURE, encoding="utf-8")
-        (reports_dir / f"{module}.cge.hier.rpt").write_text(CGE_HIER_RPT_FIXTURE, encoding="utf-8")
+        reports_dir.mkdir(parents=True, exist_ok=True)
+        (reports_dir / f"{module}.rtl_metrics.hier.csv").write_text(
+            rtl_metrics_hier_csv(module, **overrides), encoding="utf-8",
+        )
         return reports_dir
 
-    def test_vectorless_uses_cells_and_cge_hier(self) -> None:
+    def test_vectorless_uses_rtl_metrics_hier_csv(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            reports_dir = self._write_reports(Path(tmp), "hamvf")
+            reports_dir = self._write_rtl_metrics(Path(tmp), "hamvf")
             qor = rp.extract_qor_fields(reports_dir, "hamvf", "vectorless", None)
             self.assertEqual(qor["cell_count"], 2750050)
+            self.assertEqual(qor["combinational_cell_count"], 2593697)
             self.assertEqual(qor["register_cell_count"], 85560)
-            self.assertEqual(qor["sequential_cell_count"], 47)
+            self.assertEqual(qor["unclocked_sequential_cell_count"], 47)
             self.assertEqual(qor["register_bit_count"], 245556)
             self.assertEqual(qor["CGR"], 97.16)
             self.assertEqual(qor["CGE"], 64.78)
             self.assertEqual(qor["DACGE"], 75.45)
+            self.assertEqual(qor["flop_cell_count"], 1349)
+            self.assertEqual(qor["mbflop_cell_count"], 794)
+            self.assertEqual(qor["eqfb"], 6765)
+            self.assertEqual(qor["latch_cell_count"], 17)
+            self.assertEqual(qor["mblatch_cell_count"], 204)
+            self.assertEqual(qor["eqlb"], 833)
             # untraced = 47/(85560+47)*100
-            self.assertAlmostEqual(qor["untraced_sequentials"], 0.05, places=2)
+            self.assertAlmostEqual(qor["untraced_sequentials_percentage"], 0.05, places=2)
+            # vectorless mode never reads stat2 -- annotations stay blank
+            self.assertIsNone(qor["annotation_primary_io"])
 
-    def test_timebased_stat2_takes_precedence(self) -> None:
+    def test_rtl_metrics_wins_over_stat2_for_timebased(self) -> None:
+        """rtl_metrics.hier.csv is now primary even for timebased mode -- a
+        stat2.rpt with DIFFERENT overlapping values must NOT override it."""
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
-            reports_dir = self._write_reports(tmp_path, "d2d1")
+            reports_dir = self._write_rtl_metrics(tmp_path, "d2d1")
+            stat2_path = reports_dir / "d2d1.stat2.rpt"
+            stat2_path.write_text(STAT2_RPT_FIXTURE, encoding="utf-8")  # distinct cell counts
+            qor = rp.extract_qor_fields(reports_dir, "d2d1", "timebased", stat2_path)
+            self.assertEqual(qor["cell_count"], 2750050)  # from rtl_metrics, not stat2's 2106891
+            self.assertEqual(qor["register_cell_count"], 85560)
+            self.assertEqual(qor["CGR"], 97.16)  # not stat2's SCGE (99.26)
+
+    def test_stat2_supplies_annotations_for_timebased_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            reports_dir = self._write_rtl_metrics(tmp_path, "d2d1")
             stat2_path = reports_dir / "d2d1.stat2.rpt"
             stat2_path.write_text(STAT2_RPT_FIXTURE, encoding="utf-8")
             qor = rp.extract_qor_fields(reports_dir, "d2d1", "timebased", stat2_path)
-            # stat2 values win over cells.rpt/cge.hier.rpt for timebased mode
-            self.assertEqual(qor["cell_count"], 2106891)
-            self.assertEqual(qor["register_cell_count"], 116488)
-            self.assertEqual(qor["sequential_cell_count"], 2882)
-            self.assertEqual(qor["CGR"], 99.26)
-            self.assertEqual(qor["CGE"], 80.47)
-            self.assertEqual(qor["DACGE"], 88.87)
-            self.assertAlmostEqual(qor["untraced_sequentials"], 2.41, places=2)
+            self.assertEqual(qor["annotation_primary_io"], 100.0)
+            self.assertEqual(qor["annotation_bb"], 72.73)
+            self.assertEqual(qor["annotation_seq"], 99.70)
+
+    def test_missing_rtl_metrics_csv_yields_blank_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            reports_dir = Path(tmp) / "reports"
+            reports_dir.mkdir(parents=True)
+            qor = rp.extract_qor_fields(reports_dir, "hamvf", "vectorless", None)
+            self.assertIsNone(qor["cell_count"])
+            self.assertIsNone(qor["CGR"])
+            self.assertIsNone(qor["untraced_sequentials_percentage"])
+
+    def test_annotation_fields_keep_percentage_only(self) -> None:
+        self.assertEqual(rp._extract_annotation_pct("4,075(96.75%)"), 96.75)
+        self.assertEqual(rp._extract_annotation_pct("146(100%)"), 100.0)
+        self.assertIsNone(rp._extract_annotation_pct(None))
+        self.assertIsNone(rp._extract_annotation_pct("no percentage here"))
 
 
 class TestBuildRows(unittest.TestCase):
@@ -307,43 +409,57 @@ class TestBuildRows(unittest.TestCase):
             f"| TOP_IP_NAME | {top_ip} | Env/Cmd-line |\n"
             f"| TOP_MODULE_NAME | {module} | Env/Cmd-line |\n"
             f"| PASS | {pass_name} | User-cfg |\n"
-            "| SKIP_STAGES |  | Default |\n"
             "+------+------+------+\n"
         )
         (flow_inputs / "config.log").write_text(config_text, encoding="utf-8")
         return pass_dir
 
+    def _write_grdlbuild(self, root: Path, module: str, activity: str, text: str) -> None:
+        path = rp.grdlbuild_log_path(root, module, activity)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+
+    def _write_partition_list(self, root: Path, modules: list[str]) -> None:
+        out_root = root / "power" / "pprtl2"
+        out_root.mkdir(parents=True, exist_ok=True)
+        (out_root / "prep_pprtl2_partition.list").write_text("\n".join(modules) + "\n", encoding="utf-8")
+
     def test_vectorless_module_produces_one_row(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             pass_dir = self._make_pass_dir(root, "imh", "hamvf", "hamvf_pass01")
-
-            elab_dir = pass_dir / "elab"
-            (elab_dir).mkdir()
-            (elab_dir / "elab.PASS").write_text("", encoding="utf-8")
-            (elab_dir / "log").mkdir()
-            (elab_dir / "log" / "flow.log").write_text(FLOW_LOG_FIXTURE, encoding="utf-8")
+            self._write_partition_list(root, ["hamvf"])
+            self._write_grdlbuild(root, "hamvf", "elab", ELAB_VERSION_LINES_FIXTURE + GRDLBUILD_FOOTER_FIXTURE)
+            self._write_grdlbuild(root, "hamvf", "power_vectorless", GRDLBUILD_FOOTER_FIXTURE)
 
             reports_dir = pass_dir / "power" / "vectorless" / "default" / "reports"
             reports_dir.mkdir(parents=True)
-            (reports_dir / "hamvf.cells.rpt").write_text(CELLS_RPT_FIXTURE, encoding="utf-8")
-            (reports_dir / "hamvf.cge.hier.rpt").write_text(CGE_HIER_RPT_FIXTURE, encoding="utf-8")
-            power_default = pass_dir / "power" / "vectorless" / "default"
-            (power_default / "vectorless.PASS").write_text("", encoding="utf-8")
-            (power_default / "log").mkdir()
-            (power_default / "log" / "vectorless.flow.log").write_text(FLOW_LOG_FIXTURE, encoding="utf-8")
+            (reports_dir / "hamvf.rtl_metrics.hier.csv").write_text(
+                rtl_metrics_hier_csv("hamvf"), encoding="utf-8",
+            )
+            vcs_log = pass_dir / "elab" / "pprtl_work" / "vcs" / "vcs.log"
+            vcs_log.parent.mkdir(parents=True)
+            vcs_log.write_text(VCS_LOG_FIXTURE, encoding="utf-8")
 
             cfg = rp.Config(dut="imh", workarea=root)
-            rows, chosen = rp.build_rows(cfg)
+            rows, chosen, module_status = rp.build_rows(cfg)
 
             self.assertEqual(len(rows), 1)
             self.assertIn("hamvf", chosen)
             row = rows[0]
             self.assertEqual(row.power_mode, "vectorless")
+            self.assertEqual(row.test_name, "default")
             self.assertEqual(row.elab.status, "Pass")
             self.assertEqual(row.power.status, "Pass")
             self.assertEqual(row.fsdb.status, "Not Required")
             self.assertEqual(row.qor["cell_count"], 2750050)
+            self.assertEqual(row.qor["VCS_VERSION"], "X-2025.06-SP2-3")  # trailing _Full64 trimmed
+            self.assertEqual(row.qor["VERDI_VERSION"], "X-2025.06-SP2")
+            self.assertEqual(row.qor["PPRTL_VERSION"], "X-2025.06-SP3-20260214")
+            self.assertEqual(module_status["hamvf"].elab.status, "Pass")
+            self.assertEqual(module_status["hamvf"].vectorless_power.status, "Pass")
+            self.assertIsNone(module_status["hamvf"].fsdb)
+            self.assertIsNone(module_status["hamvf"].timebased_power)
 
     def test_newest_pass_dir_selected_per_module(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -382,117 +498,97 @@ class TestBuildRows(unittest.TestCase):
 
     def test_all_partitions_in_partition_list_are_accounted_for(self) -> None:
         """Every module in S20 (partition.list) must produce >=1 row, even if it
-        never reached the power stage or was never discovered at all."""
+        never reached the power stage or was never discovered/started at all."""
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._make_pass_dir(root, "imh", "hamvf", "hamvf_pass01")
-            elab_dir = root / "output" / "imh" / "pprtl2" / "hamvf_pass01" / "elab"
-            elab_dir.mkdir()
-            (elab_dir / "elab.PASS").write_text("", encoding="utf-8")
-            (elab_dir / "log").mkdir()
-            (elab_dir / "log" / "flow.log").write_text(FLOW_LOG_FIXTURE, encoding="utf-8")
-            power_default = root / "output" / "imh" / "pprtl2" / "hamvf_pass01" / "power" / "vectorless" / "default"
-            power_default.mkdir(parents=True)
-            (power_default / "vectorless.PASS").write_text("", encoding="utf-8")
-            (power_default / "log").mkdir()
-            (power_default / "log" / "vectorless.flow.log").write_text(FLOW_LOG_FIXTURE, encoding="utf-8")
-
-            out_root = root / "power" / "pprtl2"
-            out_root.mkdir(parents=True)
-            (out_root / "prep_pprtl2_partition.list").write_text(
-                "hamvf\nghost_module\n", encoding="utf-8",
-            )
+            self._write_partition_list(root, ["hamvf", "ghost_module"])
+            self._write_grdlbuild(root, "hamvf", "elab", GRDLBUILD_FOOTER_FIXTURE)
+            self._write_grdlbuild(root, "hamvf", "power_vectorless", GRDLBUILD_FOOTER_FIXTURE)
 
             cfg = rp.Config(dut="imh", workarea=root)
-            rows, chosen = rp.build_rows(cfg)
+            rows, chosen, module_status = rp.build_rows(cfg)
 
             modules = {r.module for r in rows}
             self.assertEqual(modules, {"hamvf", "ghost_module"})
             self.assertNotIn("ghost_module", chosen)
 
             ghost_row = next(r for r in rows if r.module == "ghost_module")
-            self.assertEqual(ghost_row.elab.status, "Not Ran")
-            self.assertEqual(ghost_row.fsdb.status, "Not Ran")
-            self.assertEqual(ghost_row.power.status, "Not Ran")
-            self.assertEqual(ghost_row.power_mode, "")
+            self.assertEqual(ghost_row.elab.status, "Not Started")
+            self.assertEqual(ghost_row.power.status, "Not Started")
+            self.assertEqual(module_status["ghost_module"].elab.status, "Not Started")
+            self.assertEqual(module_status["ghost_module"].vectorless_power.status, "Not Started")
 
     def test_elab_only_module_with_no_power_dir_yet_produces_fallback_row(self) -> None:
-        """A module whose elab passed but whose power stage never started must
-        still get a row (power_mode recovered from config.log), not zero rows."""
+        """A module whose elab passed but whose power stage never started (no
+        grdlbuild power_vectorless log yet) must still get one row."""
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._make_pass_dir(root, "imh", "hamvf", "hamvf_pass01")
-            elab_dir = root / "output" / "imh" / "pprtl2" / "hamvf_pass01" / "elab"
-            elab_dir.mkdir()
-            (elab_dir / "elab.PASS").write_text("", encoding="utf-8")
-            (elab_dir / "log").mkdir()
-            (elab_dir / "log" / "flow.log").write_text(FLOW_LOG_FIXTURE, encoding="utf-8")
-            # NB: no power/ dir at all -- power stage never started.
+            self._write_partition_list(root, ["hamvf"])
+            self._write_grdlbuild(root, "hamvf", "elab", GRDLBUILD_FOOTER_FIXTURE)
+            # NB: no power_vectorless grdlbuild log and no power/ dir at all.
 
             cfg = rp.Config(dut="imh", workarea=root)
-            rows, chosen = rp.build_rows(cfg)
+            rows, chosen, module_status = rp.build_rows(cfg)
 
             self.assertEqual(len(rows), 1)
             row = rows[0]
             self.assertEqual(row.module, "hamvf")
+            self.assertEqual(row.power_mode, "vectorless")
+            self.assertEqual(row.test_name, "default")
             self.assertEqual(row.elab.status, "Pass")
-            self.assertEqual(row.fsdb.status, "Not Ran")
-            self.assertEqual(row.power.status, "Not Ran")
+            self.assertEqual(row.fsdb.status, "Not Required")
+            self.assertEqual(row.power.status, "Not Started")
 
-    def test_elab_failed_module_with_no_power_dir_reports_fail_status(self) -> None:
+    def test_elab_failed_module_reports_fail_status(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._make_pass_dir(root, "imh", "parmiocxlrx_pcu", "parmiocxlrx_pcu_pass01")
-            elab_dir = root / "output" / "imh" / "pprtl2" / "parmiocxlrx_pcu_pass01" / "elab"
-            elab_dir.mkdir()
-            # NB: no elab.PASS -- elab failed.
-            (elab_dir / "log").mkdir()
-            (elab_dir / "log" / "flow.log").write_text(FLOW_LOG_FIXTURE.replace(
-                "elab stage passed successfully..", "elab stage failed",
-            ), encoding="utf-8")
+            self._write_partition_list(root, ["parmiocxlrx_pcu"])
+            self._write_grdlbuild(root, "parmiocxlrx_pcu", "elab", GRDLBUILD_FAIL_FOOTER_FIXTURE)
 
             cfg = rp.Config(dut="imh", workarea=root)
-            rows, chosen = rp.build_rows(cfg)
+            rows, chosen, module_status = rp.build_rows(cfg)
 
             self.assertEqual(len(rows), 1)
             row = rows[0]
-            self.assertTrue(row.elab.status.startswith("Fail"))
-            self.assertEqual(row.fsdb.status, "Not Ran")
-            self.assertEqual(row.power.status, "Not Ran")
+            self.assertEqual(row.elab.status, "Fail=2")
+            self.assertEqual(row.power.status, "Not Started")
 
-    def test_timebased_module_with_two_tests_produces_two_rows(self) -> None:
-        """End-to-end (not just extract_qor_fields) coverage of the timebased
-        test_name/instance discovery path, including fsdb evaluation."""
+    def test_elab_running_when_grdlbuild_log_has_no_footer_yet(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_pass_dir(root, "imh", "hamvf", "hamvf_pass01")
+            self._write_partition_list(root, ["hamvf"])
+            self._write_grdlbuild(root, "hamvf", "elab", GRDLBUILD_RUNNING_FIXTURE)
+
+            cfg = rp.Config(dut="imh", workarea=root)
+            rows, chosen, module_status = rp.build_rows(cfg)
+
+            self.assertEqual(rows[0].elab.status, "Running")
+
+    def test_timebased_module_with_two_tests_shares_module_level_fsdb_power_status(self) -> None:
+        """fsdb/timebased-power are ONE grdlbuild task per module (not per test)
+        -- both test rows must share the exact same fsdb/power StageResult."""
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             pass_dir = self._make_pass_dir(root, "imh", "d2d1", "d2d1_pass01")
-
-            elab_dir = pass_dir / "elab"
-            elab_dir.mkdir()
-            (elab_dir / "elab.PASS").write_text("", encoding="utf-8")
-            (elab_dir / "log").mkdir()
-            (elab_dir / "log" / "flow.log").write_text(FLOW_LOG_FIXTURE, encoding="utf-8")
+            self._write_grdlbuild(root, "d2d1", "elab", GRDLBUILD_FOOTER_FIXTURE)
+            self._write_grdlbuild(root, "d2d1", "fsdb", GRDLBUILD_FOOTER_FIXTURE)
+            self._write_grdlbuild(root, "d2d1", "power_timebased", GRDLBUILD_FAIL_FOOTER_FIXTURE)
 
             for test_name in ("test_a", "test_b"):
                 inst_dir = pass_dir / "power" / "timebased" / test_name / "d2d_1_d2d1"
                 reports_dir = inst_dir / "reports"
                 reports_dir.mkdir(parents=True)
                 (reports_dir / "d2d1.stat2.rpt").write_text(STAT2_RPT_FIXTURE, encoding="utf-8")
-                (reports_dir / "d2d1.cge.hier.rpt").write_text(
-                    CGE_HIER_RPT_FIXTURE.replace("hamvf", "d2d1"), encoding="utf-8",
+                (reports_dir / "d2d1.rtl_metrics.hier.csv").write_text(
+                    rtl_metrics_hier_csv("d2d1"), encoding="utf-8",
                 )
-                (inst_dir / "power.PASS").write_text("", encoding="utf-8")
-                (inst_dir / "log").mkdir()
-                (inst_dir / "log" / "timebased.flow.log").write_text(FLOW_LOG_FIXTURE, encoding="utf-8")
-
-                fsdb_dir = pass_dir / "fsdb" / test_name / "d2d_1_d2d1"
-                fsdb_dir.mkdir(parents=True)
-                (fsdb_dir / "fsdb.PASS").write_text("", encoding="utf-8")
-                (fsdb_dir / "log").mkdir()
-                (fsdb_dir / "log" / "flow.log").write_text(FLOW_LOG_FIXTURE, encoding="utf-8")
 
             cfg = rp.Config(dut="imh", workarea=root)
-            rows, chosen = rp.build_rows(cfg)
+            rows, chosen, module_status = rp.build_rows(cfg)
 
             self.assertEqual(len(rows), 2)
             self.assertEqual({r.test_name for r in rows}, {"test_a", "test_b"})
@@ -501,8 +597,31 @@ class TestBuildRows(unittest.TestCase):
                 self.assertEqual(r.instance, "d2d_1_d2d1")
                 self.assertEqual(r.elab.status, "Pass")
                 self.assertEqual(r.fsdb.status, "Pass")
-                self.assertEqual(r.power.status, "Pass")
-                self.assertEqual(r.qor["cell_count"], 2106891)  # from stat2.rpt (precedence)
+                self.assertEqual(r.power.status, "Fail=2")  # shared module-level status
+                self.assertEqual(r.qor["cell_count"], 2750050)  # from rtl_metrics.hier.csv (precedence)
+                self.assertEqual(r.qor["annotation_primary_io"], 100.0)  # from stat2, pct-only
+            self.assertEqual(module_status["d2d1"].fsdb.status, "Pass")
+            self.assertEqual(module_status["d2d1"].timebased_power.status, "Fail=2")
+
+    def test_timebased_target_with_no_test_dirs_yet_produces_one_not_started_row(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_pass_dir(root, "imh", "d2d1", "d2d1_pass01")
+            out_root = root / "power" / "pprtl2"
+            out_root.mkdir(parents=True)
+            (out_root / "prep_pprtl2_timebased_partition.list").write_text("d2d1\n", encoding="utf-8")
+            self._write_grdlbuild(root, "d2d1", "elab", GRDLBUILD_FOOTER_FIXTURE)
+            # NB: no fsdb/power_timebased grdlbuild logs, no power/timebased dir on disk.
+
+            cfg = rp.Config(dut="imh", workarea=root)
+            rows, chosen, module_status = rp.build_rows(cfg)
+
+            self.assertEqual(len(rows), 1)
+            row = rows[0]
+            self.assertEqual(row.power_mode, "timebased")
+            self.assertEqual(row.test_name, "")
+            self.assertEqual(row.fsdb.status, "Not Started")
+            self.assertEqual(row.power.status, "Not Started")
 
 
 class TestReadPartitionList(unittest.TestCase):
@@ -608,7 +727,7 @@ class TestPreflightAndCli(unittest.TestCase):
             cfg = rp.Config(dut="imh", workarea=root)
             rc = rp.main(["--dut", "imh", "--workarea", str(root), "--dry-run"])
             self.assertEqual(rc, 0)
-            self.assertFalse(cfg.summary_md.exists())
+            self.assertFalse(cfg.summary.exists())
             self.assertFalse(cfg.compute_csv.exists())
 
     def test_main_full_run_writes_all_five_reports(self) -> None:
@@ -621,7 +740,7 @@ class TestPreflightAndCli(unittest.TestCase):
             cfg = rp.Config(dut="imh", workarea=root)
             rc = rp.main(["--dut", "imh", "--workarea", str(root)])
             self.assertEqual(rc, 0)
-            for p in (cfg.summary_md, cfg.compute_csv, cfg.qor_csv, cfg.fail_details, cfg.terminology_md):
+            for p in (cfg.summary, cfg.compute_csv, cfg.qor_csv, cfg.fail_details, cfg.readme):
                 self.assertTrue(p.exists(), f"{p} was not written")
             self.assertIn("ghost_module", cfg.compute_csv.read_text(encoding="utf-8"))
 
@@ -638,11 +757,11 @@ class TestGenerateReports(unittest.TestCase):
                 "ghost_module\n", encoding="utf-8",
             )
             cfg = rp.Config(dut="imh", workarea=root)
-            rows, chosen = rp.generate_reports(cfg, "report_pprtl2.py --dut imh")
+            rows, chosen, module_status = rp.generate_reports(cfg, "report_pprtl2.py --dut imh")
 
             self.assertEqual(len(rows), 1)
-            self.assertIn("Command Line: report_pprtl2.py --dut imh", cfg.summary_md.read_text(encoding="utf-8"))
-            for p in (cfg.summary_md, cfg.compute_csv, cfg.qor_csv, cfg.fail_details, cfg.terminology_md):
+            self.assertIn("Command Line: report_pprtl2.py --dut imh", cfg.summary.read_text(encoding="utf-8"))
+            for p in (cfg.summary, cfg.compute_csv, cfg.qor_csv, cfg.fail_details, cfg.readme):
                 self.assertTrue(p.exists())
 
 
@@ -662,9 +781,15 @@ class TestCsvAndReportWriters(unittest.TestCase):
                 fsdb=rp.StageResult("Not Required", None, None),
                 power=rp.StageResult("Pass", 50.0, 2.0),
                 qor={
-                    "cell_count": 100, "register_cell_count": 10, "sequential_cell_count": 2,
-                    "register_bit_count": 20, "untraced_sequentials": 16.67,
+                    "cell_count": 100, "combinational_cell_count": 60,
+                    "register_cell_count": 10, "unclocked_sequential_cell_count": 2,
+                    "register_bit_count": 20, "untraced_sequentials_percentage": 16.67,
                     "CGR": 90.0, "CGE": 80.0, "DACGE": 85.0,
+                    "flop_cell_count": 5, "mbflop_cell_count": 1, "eqfb": 30,
+                    "latch_cell_count": 0, "mblatch_cell_count": 0, "eqlb": 0,
+                    "VCS_VERSION": "X-2025.06-SP2-3_Full64",
+                    "VERDI_VERSION": "X-2025.06-SP2",
+                    "PPRTL_VERSION": "X-2025.06-SP3-20260214",
                 },
             )
             rp.write_compute_csv(cfg, [row])
@@ -675,11 +800,21 @@ class TestCsvAndReportWriters(unittest.TestCase):
             self.assertIn("hamvf,vectorless,,,Pass,Not Required,Pass,100", compute_text)
 
             qor_text = cfg.qor_csv.read_text(encoding="utf-8")
-            self.assertIn("register_bit_count,untraced_sequentials,CGR,CGE,DACGE", qor_text.splitlines()[0])
+            self.assertIn(
+                "untraced_sequentials_percentage,annotation_primary_io,annotation_bb,annotation_seq,CGR,CGE,DACGE",
+                qor_text.splitlines()[0],
+            )
+            self.assertIn("combinational_cell_count,unclocked_sequential_cell_count", qor_text.splitlines()[0])
+            self.assertIn("VCS_VERSION,VERDI_VERSION,PPRTL_VERSION", qor_text.splitlines()[0])
+            self.assertIn("X-2025.06-SP2-3_Full64,X-2025.06-SP2,X-2025.06-SP3-20260214", qor_text)
 
-    def test_terminology_md_is_static(self) -> None:
-        self.assertIn("Clock Gating Ratio (CGR)", rp.TERMINOLOGY_MD)
-        self.assertIn("DACGE", rp.TERMINOLOGY_MD)
+    def test_readme_md_is_static(self) -> None:
+        self.assertTrue(rp.README_MD.startswith("# report_pprtl2.README\n"))
+        self.assertIn("Clock Gating Ratio (CGR)", rp.README_MD)
+        self.assertIn("DACGE", rp.README_MD)
+        self.assertIn("report_rtl_metrics -list_attributes -view", rp.README_MD)
+        self.assertIn("EQFB", rp.README_MD)
+        self.assertIn("EQLB", rp.README_MD)
 
     def test_fail_details_no_matches_found(self) -> None:
         row = rp.Row(
@@ -771,19 +906,19 @@ class TestSymlinkTarget(unittest.TestCase):
 
 
 class TestRenderSummaryMd(unittest.TestCase):
-    """§7 test plan item 6 / spec section 3.3 — command line, count+percent pairs, no-multi-test note."""
+    """§7 test plan item 6 / spec section 3.3 — new elab:/vectorless:/timebased:
+    pass/fail/running/not-started structure, MTL_FILE, count+percent pairs."""
 
     def _cfg(self, tmp: Path) -> rp.Config:
         (tmp / "power" / "pprtl2").mkdir(parents=True)
         return rp.Config(dut="imh", workarea=tmp)
 
-    def test_command_line_and_counts_with_percentages(self) -> None:
+    def test_command_line_and_new_status_sections(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
             cfg = self._cfg(tmp_path)
-            cfg.report_summary.write_text(
-                "total partitions : 184\nran              : 181 (98.4%)\n", encoding="utf-8",
-            )
+            cfg.report_summary.write_text("total partitions : 2\n", encoding="utf-8")
+
             rows = [
                 rp.Row(
                     module="hamvf", power_mode="vectorless", test_name="", instance="",
@@ -791,18 +926,73 @@ class TestRenderSummaryMd(unittest.TestCase):
                     fsdb=rp.StageResult("Not Required", None, None),
                     power=rp.StageResult("Pass", None, None),
                 ),
+                rp.Row(
+                    module="parx", power_mode="vectorless", test_name="", instance="",
+                    elab=rp.StageResult("Fail=2", None, None),
+                    fsdb=rp.StageResult("Not Required", None, None),
+                    power=rp.StageResult("Not Started", None, None),
+                ),
             ]
-            chosen = {"hamvf": rp.PassCandidate(module="hamvf", pass_dir=tmp_path, mtime=0.0, config={"TOP_IP_NAME": "imh"})}
-            text = rp.render_summary_md(cfg, rows, chosen, "report_pprtl2.py --dut imh --workarea /wa")
+            module_status = {
+                "hamvf": rp.ModuleStatus(
+                    elab=rp.StageResult("Pass", None, None),
+                    vectorless_power=rp.StageResult("Pass", None, None),
+                    fsdb=None, timebased_power=None,
+                ),
+                "parx": rp.ModuleStatus(
+                    elab=rp.StageResult("Fail=2", None, None),
+                    vectorless_power=rp.StageResult("Not Started", None, None),
+                    fsdb=None, timebased_power=None,
+                ),
+            }
+            text = rp.render_summary_md(
+                cfg, rows, {}, module_status, "report_pprtl2.py --dut imh --workarea /wa",
+            )
 
             self.assertEqual(text.splitlines()[0], "Command Line: report_pprtl2.py --dut imh --workarea /wa")
-            self.assertIn("total partitions 184", text)
-            self.assertIn("total partitions pass pre-flight 181  98.4%", text)
-            self.assertIn("total partitions pass elab: 1  0.5%", text)
-            self.assertIn("total partitions pass vectorless power: 1  0.5%", text)
-            self.assertIn("total partitions pass elab: 0  0.0%", text)
+            self.assertIn("MTL_FILE: NA", text)
+            self.assertIn("total partitions 2", text)
+            self.assertNotIn("pre-flight", text)
+
+            self.assertIn("elab:", text)
+            self.assertIn("total partitions pass elab: 1  50.0%", text)
+            self.assertIn("total partitions fail elab:  1  50.0%", text)
+            self.assertIn("total partitions still running elab:  0  0.0%", text)
+            self.assertIn("total partitions not started elab:  0  0.0%", text)
+
+            self.assertIn("vectorless:", text)
+            self.assertIn("total partitions pass vectorless power: 1  50.0%", text)
+            self.assertIn("total partitions not started vectorless power:  1  50.0%", text)
+
+            self.assertIn("timebased:", text)
             self.assertIn("total partitions that executed greater than one testname: 0", text)
             self.assertIn("No Partitions Executed Greater Than One Test", text)
+
+    def test_fsdb_and_timebased_power_use_timebased_denominator(self) -> None:
+        """fsdb/timebased power sections must use the timebased-target count
+        (e.g. 143) as denominator, not the full vectorless/elab count (146)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = self._cfg(Path(tmp))
+            module_status = {
+                "vec_only": rp.ModuleStatus(
+                    elab=rp.StageResult("Pass", None, None),
+                    vectorless_power=rp.StageResult("Pass", None, None),
+                    fsdb=None, timebased_power=None,
+                ),
+                "both": rp.ModuleStatus(
+                    elab=rp.StageResult("Pass", None, None),
+                    vectorless_power=rp.StageResult("Pass", None, None),
+                    fsdb=rp.StageResult("Pass", None, None),
+                    timebased_power=rp.StageResult("Pass", None, None),
+                ),
+            }
+            text = rp.render_summary_md(cfg, [], {}, module_status, "")
+            # fsdb/timebased power denominator is 1 (only "both" is a timebased target)
+            self.assertIn("total partitions pass fsdb: 1  100.0%", text)
+            self.assertIn("total partitions pass timebased power: 1  100.0%", text)
+            # elab/vectorless denominator is 2 (both modules)
+            self.assertIn("total partitions pass elab: 2  100.0%", text)
+            self.assertIn("total partitions pass vectorless power: 2  100.0%", text)
 
     def test_multi_test_partitions_listed_when_present(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -820,15 +1010,127 @@ class TestRenderSummaryMd(unittest.TestCase):
                     power=rp.StageResult("Pass", None, None),
                 ),
             ]
-            text = rp.render_summary_md(cfg, rows, {}, "")
+            module_status = {
+                "d2d1": rp.ModuleStatus(
+                    elab=rp.StageResult("Pass", None, None), vectorless_power=None,
+                    fsdb=rp.StageResult("Pass", None, None),
+                    timebased_power=rp.StageResult("Pass", None, None),
+                ),
+            }
+            text = rp.render_summary_md(cfg, rows, {}, module_status, "")
             self.assertIn("total partitions that executed greater than one testname: 1", text)
             self.assertIn("d2d1", text.splitlines()[-1])
             self.assertNotIn("No Partitions Executed Greater Than One Test", text)
 
+    def test_runtime_stats_no_passing_runs(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = self._cfg(Path(tmp))
+            rows = [
+                rp.Row(
+                    module="hamvf", power_mode="vectorless", test_name="default", instance="",
+                    elab=rp.StageResult("Pass", None, None),
+                    fsdb=rp.StageResult("Not Required", None, None),
+                    power=rp.StageResult("Fail=2", None, None),
+                ),
+            ]
+            text = rp.render_summary_md(cfg, rows, {}, {}, "")
+            self.assertIn("No runtime datapoints for timebased power (no passing runs)", text)
+            self.assertIn("No runtime datapoints for vectorless power (no passing runs)", text)
+
+    def test_runtime_stats_count_mean_and_fastest_slowest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = self._cfg(Path(tmp))
+            # 6 vectorless partitions, runtimes 10..60 seconds -- exercises top-5/bottom-5 truncation.
+            rows = [
+                rp.Row(
+                    module=f"par{i}", power_mode="vectorless", test_name="default", instance="",
+                    elab=rp.StageResult("Pass", 10.0 * i, None),
+                    fsdb=rp.StageResult("Not Required", None, None),
+                    power=rp.StageResult("Pass", 0.0, None),
+                )
+                for i in range(1, 7)
+            ]
+            # d2d1: two timebased test rows sharing the same module-level runtime -- must be deduped.
+            rows += [
+                rp.Row(
+                    module="d2d1", power_mode="timebased", test_name=t, instance="i1",
+                    elab=rp.StageResult("Pass", 5.0, None),
+                    fsdb=rp.StageResult("Pass", 3.0, None),
+                    power=rp.StageResult("Pass", 2.0, None),
+                )
+                for t in ("test_a", "test_b")
+            ]
+            text = rp.render_summary_md(cfg, rows, {}, {}, "")
+
+            self.assertIn("number of partitions passing timebased power: 1", text)
+            self.assertIn("mean total runtime all partitions passing timebased power: 00d:00h:00m:10s", text)
+            self.assertIn("number of partitions passing vectorless power: 6", text)
+            # mean of 10+20+...+60 = 35 seconds
+            self.assertIn("mean total runtime all partitions passing vectorless power: 00d:00h:00m:35s", text)
+
+            fastest_idx = text.index("Top 5 fastest partitions with passing vectorless power runs:")
+            slowest_idx = text.index("Bottom 5 slowest partitions with passing vectorless power runs:")
+            fastest_block = text[fastest_idx:slowest_idx]
+            self.assertIn("00d:00h:00m:10s  par1", fastest_block)
+            self.assertIn("00d:00h:00m:50s  par5", fastest_block)  # 5th fastest of 6
+            self.assertNotIn("par6", fastest_block)
+
+            slowest_block = text[slowest_idx:]
+            self.assertIn("00d:00h:01m:00s  par6", slowest_block)
+            self.assertIn("00d:00h:00m:20s  par2", slowest_block)  # 5th slowest of 6
+            self.assertNotIn("par1\n", slowest_block)
+            # ascending order within the bottom-5 block too (par2 before par6)
+            self.assertLess(slowest_block.index("par2"), slowest_block.index("par6"))
+
+    def test_mtl_file_shows_resolved_symlink_target(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            cfg = self._cfg(tmp_path)
+            real_target = tmp_path / "mtl_target.mtl"
+            real_target.write_text("mtl", encoding="utf-8")
+            cfg.mtl_file.symlink_to(real_target)
+            text = rp.render_summary_md(cfg, [], {}, {}, "")
+            self.assertIn(f"MTL_FILE: {real_target.resolve()}", text)
+
+    def test_action_required_lists_named_partitions_with_log_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            cfg = self._cfg(tmp_path)
+            module_status = {
+                "good": rp.ModuleStatus(
+                    elab=rp.StageResult("Pass", None, None),
+                    vectorless_power=rp.StageResult("Pass", None, None),
+                    fsdb=None, timebased_power=None,
+                ),
+                "broken": rp.ModuleStatus(
+                    elab=rp.StageResult("Fail=2", None, None),
+                    vectorless_power=rp.StageResult("Not Started", None, None),
+                    fsdb=None, timebased_power=None,
+                ),
+                "inflight": rp.ModuleStatus(
+                    elab=rp.StageResult("Running", None, None),
+                    vectorless_power=None, fsdb=None, timebased_power=None,
+                ),
+            }
+            text = rp.render_summary_md(cfg, [], {}, module_status, "")
+
+            expected_log = rp.grdlbuild_log_path(tmp_path, "broken", "elab")
+            self.assertIn("Partitions that fail elab:", text)
+            self.assertIn(f"broken  {expected_log}", text)
+            self.assertIn("Partitions that are still running elab:", text)
+            self.assertIn("inflight", text)
+            self.assertIn("Partitions that have not started elab:", text)
+            self.assertIn("No partitions have not started elab", text)
+            self.assertIn("Partitions that fail vectorless power:", text)
+            self.assertIn("No partitions failed vectorless power", text)
+            self.assertIn("Partitions that have not started vectorless power:", text)
+            self.assertIn("broken", text)
+
+
     def test_no_top_ip_name_line(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             cfg = self._cfg(Path(tmp))
-            text = rp.render_summary_md(cfg, [], {}, "")
+            text = rp.render_summary_md(cfg, [], {}, {}, "")
             self.assertNotIn("TOP_IP_NAME", text)
 
     def test_grdlbuild_and_flow_log_coverage_lines(self) -> None:
@@ -856,14 +1158,26 @@ class TestRenderSummaryMd(unittest.TestCase):
                     elab_flow_log=elab_flow_log,
                 ),
                 rp.Row(
-                    module="parx", power_mode="", test_name="", instance="",
+                    module="parx", power_mode="vectorless", test_name="", instance="",
                     elab=rp.StageResult("Fail=2", None, None),
-                    fsdb=rp.StageResult("Not Ran", None, None),
-                    power=rp.StageResult("Not Ran", None, None),
+                    fsdb=rp.StageResult("Not Required", None, None),
+                    power=rp.StageResult("Not Started", None, None),
                     elab_grdl_log=grdl_log,
                 ),
             ]
-            text = rp.render_summary_md(cfg, rows, {}, "")
+            module_status = {
+                "hamvf": rp.ModuleStatus(
+                    elab=rp.StageResult("Pass", None, None),
+                    vectorless_power=rp.StageResult("Pass", None, None),
+                    fsdb=None, timebased_power=None,
+                ),
+                "parx": rp.ModuleStatus(
+                    elab=rp.StageResult("Fail=2", None, None),
+                    vectorless_power=rp.StageResult("Not Started", None, None),
+                    fsdb=None, timebased_power=None,
+                ),
+            }
+            text = rp.render_summary_md(cfg, rows, {}, module_status, "")
             self.assertIn("total partitions with at least one grdlbuild log: 1  50.0%", text)
             self.assertIn("total partitions with at least one stage flow.log file: 1  50.0%", text)
 

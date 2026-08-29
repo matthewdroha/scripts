@@ -72,10 +72,23 @@ class Config:
     profile: DieProfile
     partitions: list[str] | None  # None => derive from blocks.cfg
     blocks_cfg_override: Path | None = None
+    mtl_file_override: Path | None = None
 
     @property
     def out_root(self) -> Path:
         return self.workarea / "power" / "pprtl2"
+
+    @property
+    def mtl_file(self) -> Path:
+        """Optional MTL master-test-list symlink (may not exist)."""
+        if self.mtl_file_override is not None:
+            return self.mtl_file_override
+        return self.out_root / "MTL_FILE"
+
+    @property
+    def mtl_output(self) -> Path:
+        """Materialized copy of the MTL (referenced by timebased.flow.cfg)."""
+        return self.out_root / f"{self.dut}.mtl"
 
     @property
     def blocks_cfg(self) -> Path:
@@ -94,6 +107,10 @@ class Config:
     @property
     def partition_list(self) -> Path:
         return self.out_root / "prep_pprtl2_partition.list"
+
+    @property
+    def timebased_partition_list(self) -> Path:
+        return self.out_root / "prep_pprtl2_timebased_partition.list"
 
 
 # --------------------------------------------------------------------------- #
@@ -120,7 +137,8 @@ class PartitionPaths:
 
     # outputs
     part_out_dir: Path
-    flow_cfg: Path
+    vectorless_flow_cfg: Path
+    timebased_flow_cfg: Path
     hip_minimized: Path
     clocks_fixclocks: Path
     elab_pre_tcl: Path
@@ -167,7 +185,8 @@ def derive_partition_paths(
         clock_release_dir=clock_release_dir,
         clock_tcl=clock_tcl,
         part_out_dir=part_out_dir,
-        flow_cfg=cfg.out_root / "partition" / f"{partition}.flow.cfg",
+        vectorless_flow_cfg=cfg.out_root / "partition" / f"{partition}.vectorless.flow.cfg",
+        timebased_flow_cfg=cfg.out_root / "partition" / f"{partition}.timebased.flow.cfg",
         hip_minimized=part_out_dir / "hip.ldb.list.minimized",
         clocks_fixclocks=part_out_dir / f"{partition}_clocks.tcl.fixclocks",
         elab_pre_tcl=part_out_dir / "elab.pre.tcl",
@@ -232,6 +251,32 @@ def parse_partitions(blocks_cfg: Path) -> list[str]:
     # Fallback (no hier_type field, e.g. ioh/cbb0): block_type == partition and
     # a name starting with "par".
     return [n for n in names if block_type.get(n) == "partition" and n.startswith("par")]
+
+
+# --------------------------------------------------------------------------- #
+# MTL (master test list) parsing
+# --------------------------------------------------------------------------- #
+def parse_mtl(mtl_file: Path) -> dict[str, tuple[str, str, str]]:
+    """Map ``TEMPLATE`` -> ``(INST, FSDB_PTR, RTL_PATH)`` from a colon-separated MTL.
+
+    Fields (1-indexed): INST=1, RTL_PATH=2, FSDB_PTR=6, TEMPLATE=last. Comment/
+    blank lines are ignored. First row wins for a given TEMPLATE.
+    """
+    mapping: dict[str, tuple[str, str, str]] = {}
+    for line in mtl_file.read_text(encoding="utf-8", errors="replace").splitlines():
+        s = line.strip()
+        if not s or s.startswith("#"):
+            continue
+        fields = s.split(":")
+        if len(fields) < 6:
+            continue
+        inst = fields[0].strip()
+        rtl_path = fields[1].strip()
+        fsdb = fields[5].strip()
+        template = fields[-1].strip()
+        if template and template not in mapping:
+            mapping[template] = (inst, fsdb, rtl_path)
+    return mapping
 
 
 # --------------------------------------------------------------------------- #
@@ -307,6 +352,11 @@ def validate_models(cfg: Config) -> list[str]:
             errors.append(
                 f"SDC_ARCHIVE has no '<partition>/clock_collateral/' subdir: {sdc}"
             )
+
+    # MTL_FILE is optional; but if the symlink is present it must be readable.
+    mtl = cfg.mtl_file
+    if (mtl.is_symlink() or mtl.exists()) and not (mtl.is_file() and os.access(mtl, os.R_OK)):
+        errors.append(f"MTL_FILE is present but not a readable file: {mtl}")
 
     return errors
 
@@ -497,6 +547,9 @@ class PartitionResult:
     created_hip_minimized: bool = False
     created_clocks_fixclocks: bool = False
     created_elab_pre_tcl: bool = False
+    created_vectorless_flow_cfg: bool = False
+    created_timebased_flow_cfg: bool = False
+    timebased_reason: str = ""  # created | no_mtl | not_in_mtl | strip_path_bad | fsdb_missing | ("")
     minimizehip_fail: bool = False
     hips_missing_ldb_count: int | None = None
     errors: list[str] = field(default_factory=list)
@@ -516,6 +569,7 @@ class PartitionResult:
 class ExecReport:
     outcome: "WriteOutcome"
     results: list[PartitionResult] = field(default_factory=list)
+    mtl_present: bool = False
 
 
 MinimizeFn = Callable[[Path, Path | None, Path], subprocess.CompletedProcess]
@@ -564,8 +618,16 @@ def execute_plan(
     )
     _copy_tree(cfg.templates / "grdlbuild", cfg.out_root / "grdlbuild", force, outcome, verbose)
 
-    flow_tmpl = cfg.templates / cfg.dut / "partition.flow.cfg"
+    vectorless_tmpl = cfg.templates / cfg.dut / "vectorless.flow.cfg"
+    timebased_tmpl = cfg.templates / cfg.dut / "timebased.flow.cfg"
     elab_tmpl = cfg.templates / "elab.pre.tcl"
+
+    # MTL is optional; parse once. None => no timebased outputs.
+    mtl_present = cfg.mtl_file.is_file()
+    mtl_map = parse_mtl(cfg.mtl_file) if mtl_present else None
+    if mtl_present:
+        # Materialize the MTL as <DUT>.mtl (timebased.flow.cfg's MASTER_TEST_LIST).
+        _copy_template(cfg.mtl_file, cfg.mtl_output, force, outcome, verbose)
 
     results: list[PartitionResult] = []
     for pplan in plan.partitions:
@@ -594,7 +656,8 @@ def execute_plan(
             res.minimizehip_fail = bool(res.hips_missing_ldb_count)
             if not res.minimizehip_fail:
                 # Fully generate: per-partition static copies + clock collateral.
-                _copy_template(flow_tmpl, paths.flow_cfg, force, outcome, verbose)
+                _copy_template(vectorless_tmpl, paths.vectorless_flow_cfg, force, outcome, verbose)
+                res.created_vectorless_flow_cfg = paths.vectorless_flow_cfg.is_file()
                 _copy_template(elab_tmpl, paths.elab_pre_tcl, force, outcome, verbose)
                 res.created_elab_pre_tcl = paths.elab_pre_tcl.is_file()
                 res.created_clocks_fixclocks = _generate(
@@ -607,9 +670,10 @@ def execute_plan(
                         scripts, p.partition, p.clock_release_dir, p.part_out_dir
                     ),
                 )
+                _maybe_timebased(paths, mtl_map, timebased_tmpl, force, outcome, verbose, res)
         results.append(res)
 
-    report = ExecReport(outcome=outcome, results=results)
+    report = ExecReport(outcome=outcome, results=results, mtl_present=mtl_present)
     _write_reports(cfg, report)
     return report
 
@@ -679,6 +743,57 @@ def _parse_missing_ldb_count(minimized: Path) -> int | None:
     return None
 
 
+def _write_output(dst: Path, content: str, force: bool, outcome: WriteOutcome, verbose: bool) -> None:
+    """Write ``content`` to ``dst``, honoring ``force`` for existing files."""
+    if dst.exists():
+        if not force:
+            outcome.skipped_exist.append(dst)
+            if verbose:
+                print(f"-I- exists, skipped (use --force to overwrite): {dst}")
+            return
+        outcome.overwritten.append(dst)
+    else:
+        outcome.created.append(dst)
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    dst.write_text(content, encoding="utf-8")
+    if verbose:
+        print(f"-I- wrote {dst}")
+
+
+def _maybe_timebased(
+    paths: PartitionPaths,
+    mtl_map: dict[str, tuple[str, str, str]] | None,
+    timebased_tmpl: Path,
+    force: bool,
+    outcome: WriteOutcome,
+    verbose: bool,
+    res: PartitionResult,
+) -> None:
+    """Generate <partition>.timebased.flow.cfg when MTL conditions are met.
+
+    Requires: MTL present, partition (TEMPLATE) in MTL, its RTL_PATH is a single
+    path, and its FSDB readable. Expands ``%TOP_INSTANCE_NAME%`` to the INST.
+    """
+    if mtl_map is None:
+        res.timebased_reason = "no_mtl"
+        return
+    entry = mtl_map.get(paths.partition)
+    if entry is None:
+        res.timebased_reason = "not_in_mtl"
+        return
+    inst, fsdb, rtl_path = entry
+    if len(rtl_path.split()) > 1:  # RTL_PATH must be a single (whitespace-free) path
+        res.timebased_reason = "strip_path_bad"
+        return
+    if not (Path(fsdb).is_file() and os.access(fsdb, os.R_OK)):
+        res.timebased_reason = "fsdb_missing"
+        return
+    content = timebased_tmpl.read_text(encoding="utf-8").replace("%TOP_INSTANCE_NAME%", inst)
+    _write_output(paths.timebased_flow_cfg, content, force, outcome, verbose)
+    res.created_timebased_flow_cfg = paths.timebased_flow_cfg.is_file()
+    res.timebased_reason = "created"
+
+
 REPORT_COLUMNS = [
     "partition",
     "2stage_filelist_exists",
@@ -689,6 +804,9 @@ REPORT_COLUMNS = [
     "created_clocks_tcl_fixclocks",
     "created_elab_pre_tcl",
     "minimizehip_fail",
+    "created_vectorless_flow_cfg",
+    "created_timebased_flow_cfg",
+    "timebased_strip_path_bad",
 ]
 
 
@@ -713,35 +831,56 @@ def _write_reports(cfg: Config, report: "ExecReport") -> None:
                     _yn(r.created_clocks_fixclocks),
                     _yn(r.created_elab_pre_tcl),
                     ("yes" if r.minimizehip_fail else "no") if r.eligible else "N/A",
+                    _yn(r.created_vectorless_flow_cfg) if r.ran_clean else "N/A",
+                    ("yes" if r.created_timebased_flow_cfg else "no") if r.ran_clean else "N/A",
+                    ("yes" if r.timebased_reason == "strip_path_bad" else "no")
+                    if r.ran_clean
+                    else "N/A",
                 ]
             )
 
     total = len(report.results)
-    ran = sum(1 for r in report.results if r.ran_clean)
-    skipped = sum(1 for r in report.results if not r.eligible)
+    vectorless = sum(1 for r in report.results if r.ran_clean)
+    vectorless_skipped = total - vectorless
     miss_2stage = [r.partition for r in report.results if not r.has_2stage]
     miss_hiplist = [r.partition for r in report.results if not r.has_hip]
     miss_clocks = [r.partition for r in report.results if not r.has_clocks]
     fail_min = [r.partition for r in report.results if r.minimizehip_fail]
+    tb_created = [r.partition for r in report.results if r.created_timebased_flow_cfg]
+    tb_not_in_mtl = [r.partition for r in report.results if r.timebased_reason == "not_in_mtl"]
+    tb_strip_bad = [r.partition for r in report.results if r.timebased_reason == "strip_path_bad"]
+    tb_fsdb_missing = [r.partition for r in report.results if r.timebased_reason == "fsdb_missing"]
+    timebased_skipped = vectorless - len(tb_created)
+
+    w = 26  # label column width for aligned summary
 
     def stat(label: str, count: int) -> str:
-        return f"{label:<16} : {count} ({_pct(count, total)})"
+        return f"{label:<{w}} : {count} ({_pct(count, total)})"
 
+    mtl_note = "" if report.mtl_present else "  [MTL_FILE not present]"
     lines = [
         f"prep_pprtl2 report summary (dut={cfg.dut})",
-        f"{'total partitions':<16} : {total}",
-        stat("ran", ran),
-        stat("skipped", skipped),
+        f"{'total partitions':<{w}} : {total}",
+        stat("vectorless setup generated", vectorless),
+        stat("timebased setup generated", len(tb_created)) + mtl_note,
+        stat("vectorless skipped", vectorless_skipped),
+        stat("timebased skipped", timebased_skipped),
         stat("missing 2stage", len(miss_2stage)),
         stat("missing hiplist", len(miss_hiplist)),
         stat("missing clocks", len(miss_clocks)),
         stat("fail minimizehip", len(fail_min)),
+        stat("timebased not in mtl", len(tb_not_in_mtl)),
+        stat("timebased strip path bad", len(tb_strip_bad)),
+        stat("timebased fsdb missing", len(tb_fsdb_missing)),
     ]
     for title, names in (
         ("missing 2stage", miss_2stage),
         ("missing hiplist", miss_hiplist),
         ("missing clocks", miss_clocks),
         ("fail minimizehip", fail_min),
+        ("timebased not in mtl", tb_not_in_mtl),
+        ("timebased strip path bad", tb_strip_bad),
+        ("timebased fsdb missing", tb_fsdb_missing),
     ):
         lines.append("")
         lines.append(f"[{title}] ({len(names)})")
@@ -754,34 +893,37 @@ def _write_reports(cfg: Config, report: "ExecReport") -> None:
         "".join(f"{name}\n" for name in eligible), encoding="utf-8"
     )
 
+    # prep_pprtl2_timebased_partition.list: partitions that got a timebased.flow.cfg.
+    cfg.timebased_partition_list.write_text(
+        "".join(f"{name}\n" for name in tb_created), encoding="utf-8"
+    )
+
 
 def render_execution(plan: RunPlan, report: "ExecReport") -> str:
     outcome = report.outcome
     total = len(report.results)
-    ran = sum(1 for r in report.results if r.ran_clean)
-    skipped = sum(1 for r in report.results if not r.eligible)
-    fail_min = sum(1 for r in report.results if r.minimizehip_fail)
-    hip_ok = sum(1 for r in report.results if r.created_hip_minimized)
-    clk_ok = sum(1 for r in report.results if r.created_clocks_fixclocks)
-    elab_ok = sum(1 for r in report.results if r.created_elab_pre_tcl)
+    vec = sum(1 for r in report.results if r.ran_clean)
+    tb = sum(1 for r in report.results if r.created_timebased_flow_cfg)
+    vec_skipped = total - vec
+    tb_skipped = vec - tb
     errored = [r for r in report.results if r.errors]
     lines = [
         f"prep_pprtl2 (dut={plan.cfg.dut})  out_root: {plan.cfg.out_root}",
         f"  static/flow/elab files : created={len(outcome.created)} "
         f"overwritten={len(outcome.overwritten)} skipped={len(outcome.skipped_exist)}",
-        f"  partitions             : {total} total, {ran} ran ({_pct(ran, total)}), "
-        f"{skipped} skipped, {fail_min} fail minimizehip",
-        f"  hip.ldb.list.minimized : {hip_ok}",
-        f"  *_clocks.tcl.fixclocks : {clk_ok}/{ran}",
-        f"  elab.pre.tcl           : {elab_ok}/{ran}",
-        f"  partitions with errors : {len(errored)}",
-        f"  partition.list : {plan.cfg.partition_list}",
-        f"  report  : {plan.cfg.report_csv}",
-        f"  summary : {plan.cfg.report_summary}",
+        f"  partitions             : {total} total, {vec} vectorless ({_pct(vec, total)}), "
+        f"{tb} timebased ({_pct(tb, total)}), {vec_skipped} vectorless skipped, "
+        f"{tb_skipped} timebased skipped",
+        f"  partition.list           : {plan.cfg.partition_list}",
+        f"  timebased_partition.list : {plan.cfg.timebased_partition_list}",
+        f"  report                   : {plan.cfg.report_csv}",
+        f"  summary                  : {plan.cfg.report_summary}",
     ]
-    for r in errored[:10]:
-        for e in r.errors:
-            lines.append(f"    -E- {r.partition}: {e}")
+    if errored:
+        lines.append(f"  partitions with errors   : {len(errored)}")
+        for r in errored[:10]:
+            for e in r.errors:
+                lines.append(f"    -E- {r.partition}: {e}")
     return "\n".join(lines)
 
 
@@ -817,6 +959,13 @@ def build_arg_parser() -> argparse.ArgumentParser:
         type=Path,
         default=None,
         help="Clock SDC archive (default: <workarea>/power/pprtl2/SDC_ARCHIVE).",
+    )
+    parser.add_argument(
+        "--mtl-file",
+        type=Path,
+        default=None,
+        help="Master test list for timebased runs "
+        "(default: <workarea>/power/pprtl2/MTL_FILE; optional).",
     )
     parser.add_argument(
         "--partitions",
@@ -884,6 +1033,7 @@ def resolve_config(args: argparse.Namespace) -> Config:
         profile=profile,
         partitions=partitions,
         blocks_cfg_override=blocks_cfg_override,
+        mtl_file_override=args.mtl_file,
     )
 
 
