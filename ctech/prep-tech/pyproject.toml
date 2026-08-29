@@ -1,14 +1,26 @@
-[tool.poetry]
+[project]
 name = "prep-tech"
 version = "0.1.0"
-description = "Cheetah process technology list files preparation for ctech and synthesis."
-authors = ["mroha <your_email@example.com>"]
-license = "MIT"
+description = "Prepare Cheetah process technology list files for ctech and synthesis."
+readme = "README.md"
+authors = [
+    { name = "matthewdroha", email = "matthew.d.roha@intel.com" }
+]
+requires-python = ">=3.13"
+dependencies = []
 
-[tool.poetry.dependencies]
-python = "^3.8"
-pytest = "^6.2"
+[project.scripts]
+prep_tech = "prep_tech:main"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

@@ -1,1 +1,7 @@
-prep_tech
+# Generated output tree (see spec section 3) -- anchored so src/prep_tech survives.
+/prep_tech/
+
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/

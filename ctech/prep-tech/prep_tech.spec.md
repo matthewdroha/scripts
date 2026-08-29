@@ -1,6 +1,6 @@
 # Spec: `prep_tech` — Cheetah process technology list files prep for ctech and synthesis
 
-Status: **COMPLETE** — generation + 52 hermetic tests green. Configuration files are absolute paths (no backend area); supports multi-library configs (compound `LIB_NAME` and no-`LIB_NAME` auto-detect), `//`-delimited REGEX filters, contour resolution, first-config precedence, and fatal duplicate detection (2026-07-22).  
+Status: **COMPLETE** — generation + hermetic pytest suite green. Configuration files are absolute paths (no backend area); supports multi-library configs (compound `LIB_NAME` and no-`LIB_NAME` auto-detect), raw-string `REGEX=r"..."` filters, contour resolution, first-config precedence, and fatal duplicate detection (2026-08-28).  
 Owner: mroha  
 Language: **Python 3** (driver)  
 Test framework: **pytest**  
@@ -62,9 +62,16 @@ But it is also possible that direct paths are provided,  for example:
 - The `prep_tech.input.md` file remains **Markdown**, but its content is **machine-readable**.
 - Sections are markdown headings:
   - `## <NAME> DIE` — one section per die. The die's output directory name is `<NAME>` lowercased (e.g. `CORIMH DIE` → `corimh`).
+  - `## <NAME> IP` — one section per IP. The IP's output directory name is `<NAME>` lowercased with `_ip` appended (e.g. `SBE IP` → `sbe_ip`).
 - Within each die section:
   - One or more lines which contains a full path to a text file. A die may list **one or many** of these Cheetah configuration files; **all listed are required** (e.g. CORIMH needs both `g1i` and `g1m` to elaborate the reference stdcell instances inside the ctech verilog cells). The list of files is mutually exclusive,  i.e. a definition of a standard cell needs to be unique per Cheetah configuration file.  If the same standard cell is defined more than once,  then this is a fatal condition and will results in an error during processing.  However,  if `--allow-duplicates` is specified, multiple definitions are permitted, with the first configuration file taking precedence.  A duplicate summary report will be generated in either case.  The file may or may not have a `.cth` suffix,  you can't count on it.
-  - Such a configuration line may carry an optional `REGEX=/<pattern>/` suffix on the **same line**, e.g. `/p/hdk/etc/Projects/refcth2/2026.06.plus/76p5_g1i_opt8.cth  REGEX=/tttt\S+850v\S+100c/`. The pattern is delimited by `/.../` (perl-style); the inner text is compiled as a standard Python regex. Per die, all `REGEX=` patterns are collected as a **union** and used to build the optional `*.list.ctech.regex` outputs (see 3.0). Omit it when no filtering is needed.
+  - Such a configuration line may carry an optional `REGEX=` suffix on the **same line**. The pattern is written as a **Python raw string literal** — `r"..."` or `r'...'` — and the text between the quotes is passed verbatim to `re.search`:
+
+    ```
+    /p/hdk/etc/Projects/refcth2/2026.06.plus/76p5_g1i_opt8.cth  REGEX=r"tttt\S+850v\S+100c"
+    ```
+
+    Because it is a raw string, backslash escapes such as `\S` are taken literally and need no doubling. The older slash-delimited form `REGEX=/.../` is **no longer accepted** and is a fatal input-format error, as is any `REGEX=` value that is not a raw string literal. Per die, all `REGEX=` patterns are collected as a **union** and used to build the optional `*.list.ctech.regex` outputs (see 3.0). Omit it when no filtering is needed.
   - All other non-empty content lines are **ctech structural release areas** (directory vanity paths), matched **exactly** as written.
 - **Comment-only lines** beginning with `#` (pound sign, not a markdown heading) are permitted and ignored.
 - Blank lines are ignored.
@@ -136,7 +143,7 @@ The resolved path is treated as a **vanity path** (NOT symlink-resolved); the sy
 Confirm:
 - All ctech directories exist and contain SystemVerilog files (`.sv`). ctech verilog files start with `ctech_lib`.
 - All specified configuration files exist and there is at least one per die
-- All `REGEX=` patterns compile as valid Python regular expressions.
+- All `REGEX=` suffixes are well-formed raw string literals and their patterns compile as valid Python regular expressions.
 - If check if target output area is writable, regardless if $WORKAREA is set or not.
 
 Validation raises on the first missing path. Two non-writing modes are provided:
@@ -297,24 +304,29 @@ Data flows as plain Python **dicts** between modules (no dataclass layer is requ
 prep-tech/
 ├── src/
 │   └── prep_tech/
-│       ├── __init__.py
-│       ├── main.py       # CLI entrypoint (argparse; --check, --dry-run); orchestration
+│       ├── __init__.py   # re-exports main() for [project.scripts]
+│       ├── __main__.py   # python -m prep_tech
+│       ├── cli.py        # build_parser() + main(argv) -> int; orchestration only
 │       ├── config.py     # parse prep_tech.input.md -> dict (custom regex parser; no 3rd-party deps)
 │       ├── discover.py   # configuration file/.sv/bmod parsing, DesignPackage resolution, bundle enumeration, PVT+nldm selection
 │       ├── validate.py   # pre-flight validation (raises on first missing path)
 │       └── generate.py   # per-die plan build + output rendering/writing
 ├── tests/
+│   ├── conftest.py       # hermetic fixtures (lib trees, configs, ctech sources)
+│   ├── test_cli.py
+│   ├── test_config.py
 │   ├── test_discover.py
 │   ├── test_validate.py
 │   └── test_generate.py
 ├── prep_tech.input.md
 ├── prep_tech.spec.md
-├── pyproject.toml
+├── pyproject.toml        # uv_build backend, [project.scripts], pytest config
+├── uv.lock
 └── README.md
 ```
 
 Key data contracts:
-- `config.parse_input(path) -> {"dies": {<die>: {"config_files": [<abs paths>], "ctech_dirs": [<abs dirs>], "regexes": [<inner REGEX patterns>]}}}`. Lines are classified by filesystem type (directory -> ctech area; file -> configuration file). No backend prefix.
+- `config.parse_input(path) -> {"dies": {<die>: {"config_files": [<abs paths>], "ctech_dirs": [<abs dirs>], "regexes": [<raw REGEX patterns>], "missing": [<paths that are neither>]}}}`. Lines are classified by filesystem type (directory -> ctech area; file -> configuration file). A malformed `REGEX=` suffix raises `config.InputFormatError`. No backend prefix.
 - `discover.lib_keys(params)` — library keys for a configuration: split `LIB_NAME` on `_`, or (no `LIB_NAME`) auto-detect fields whose value contains `/lib<digits>_<key>_`.
 - `discover.resolve_lib_roots(params) -> [<lib root>, ...]` — resolve each key via its explicit field (direct path / designpackage tokens) or contour discovery; a config may yield multiple roots. `resolve_lib_root(params)` returns the first.
 - `discover.enumerate_bundles(lib_root) -> {<bundle>: {root, bmod, cells, lib, ldb, ndm}}` (only dirs with a `verilog/*bmod.v`).
@@ -325,28 +337,34 @@ Output root resolution: `$WORKAREA/prep_tech/` if `WORKAREA` is set, else `./pre
 
 ## 6. CLI / usage
 
-Run from the project root. If the package is not installed, put `src` on the path:
+The project is a **uv** project (`uv_build` backend, src layout, console script `prep_tech`). Run from the project root:
 
 ```bash
 # Validate inputs only (no plan, no write)
-PYTHONPATH=src python3 -m prep_tech.main prep_tech.input.md --check
+uv run prep_tech prep_tech.input.md --check
 
 # Plan + print planned outputs, write nothing
-PYTHONPATH=src python3 -m prep_tech.main prep_tech.input.md --dry-run
+uv run prep_tech prep_tech.input.md --dry-run
 
 # Full generation (writes $WORKAREA/prep_tech or ./prep_tech)
-PYTHONPATH=src python3 -m prep_tech.main prep_tech.input.md
+uv run prep_tech prep_tech.input.md
+
+# From elsewhere
+uv --project /path/to/prep-tech run prep_tech /path/to/prep_tech.input.md
 ```
+
+Exit codes: `0` success, `1` duplicates found without `--allow-duplicates`, `2` pre-flight failure.
 
 ## 7. Testing
 
-Tests are **hermetic** (pytest `tmp_path` fixtures build absolute config files + a lib tree + a ctech dir); they do not depend on real `/p/hdk` release areas.
+Tests are **hermetic** (pytest `tmp_path` fixtures in `tests/conftest.py` build absolute config files + a lib tree + a ctech dir); they do not depend on real `/p/hdk` release areas.
 
 ```bash
-PYTHONPATH=src python3 -m pytest -q
+uv sync
+uv run pytest
 ```
 
-Coverage: configuration parsing (filesystem-type classification, `//` REGEX), DesignPackage resolution (token deref, direct paths, compound `LIB_NAME`, no-`LIB_NAME` auto-detect, contour discovery), ctech `.sv` instance parsing, bundle enumeration, PVT/nldm selection, pre-flight validation (missing files/dirs, output writability), duplicate detection (fatal vs `--allow-duplicates`), and end-to-end `generate_all` (tree + report + duplicates CSV + CSV).
+Coverage: configuration parsing (filesystem-type classification, raw-string `REGEX=r"..."` including rejection of the legacy `/.../` form), DesignPackage resolution (token deref, direct paths, compound `LIB_NAME`, no-`LIB_NAME` auto-detect, contour discovery), ctech `.sv` instance parsing, bundle enumeration, PVT/nldm selection, pre-flight validation (missing files/dirs, output writability), duplicate detection (fatal vs `--allow-duplicates`), and end-to-end `generate_all` (tree + report + duplicates CSV + CSV).
 
 ---
 
@@ -384,6 +402,9 @@ Coverage: configuration parsing (filesystem-type classification, `//` REGEX), De
 **Q10.** REGEX filtering semantics (`*.list.ctech.regex`).  
 > **Resolved:** For each ctech-referenced bundle, keep the bundle's **nldm** `lib/` collateral whose basename matches **any** die `REGEX` (union, `re.search`), routed to lib vs ldb/db. Independent PVT selection (not a filter of `*.list.ctech`); may exceed one file per bundle. Emitted only when a `REGEX` is present. Invalid patterns fail validation early (see 2.1 / 2.4).
 
+**Q12.** REGEX literal syntax.  
+> **Resolved:** A **Python raw string literal** (`REGEX=r"..."` or `REGEX=r'...'`), so the input file spells the pattern exactly as it would be written in Python source for `re.search`. This removes the escaping ambiguity of the old `/.../` delimiters (a pattern containing `/` needed no escape, but the form looked like Perl while the semantics were Python). The `/.../` form is now rejected outright rather than silently reinterpreted.
+
 **Q11.** Re-run hygiene / stale outputs.  
 > **Resolved:** Generation writes in place (`os.makedirs(exist_ok=True)`; no `rmtree`, so it is NFS-safe). It does **not** prune stale files when an input contracts (e.g. a die drops a bundle, or a `REGEX` is removed so `*.list.ctech.regex` should no longer exist). Remove the die/output directory manually if the input set shrinks.
 
@@ -394,7 +415,7 @@ Coverage: configuration parsing (filesystem-type classification, `//` REGEX), De
 Use this section as the skeleton for a new generative/idempotent automation. Keep each section's **contract**; replace the domain content.
 
 1. **Purpose** — one paragraph: what it generates, that it is idempotent, and what it must *not* do (e.g. not run downstream flows, not modify sources).
-2. **Inputs (sources of truth)** — table of inputs; define a **machine-readable** input format (headings, required vs optional lines, comment/blank handling). Classify ambiguous lines robustly (here: by **filesystem type** — directory vs file). Allow optional per-line modifiers (here: `REGEX=/.../` on a configuration line) and state how repeats combine (union). State **precedence** when the same logical item is defined by multiple sources (here: the first-listed configuration file wins).
+2. **Inputs (sources of truth)** — table of inputs; define a **machine-readable** input format (headings, required vs optional lines, comment/blank handling). Classify ambiguous lines robustly (here: by **filesystem type** — directory vs file). Allow optional per-line modifiers (here: `REGEX=r"..."` on a configuration line — borrow the host language's own literal syntax so the value needs no re-escaping) and state how repeats combine (union). Reject malformed modifiers loudly instead of guessing. State **precedence** when the same logical item is defined by multiple sources (here: the first-listed configuration file wins).
 3. **Path & resolution handling** — state vanity-path vs symlink-resolution policy; describe any **indirection/token resolution** (here: DesignPackage key-deref + recursive `designpackage(...)` substitution) with a worked example, and cover **multiple input styles / fallbacks** for the same logical value (here: explicit library field, direct paths, compound keys that resolve to several targets, and contour discovery / auto-detection when the explicit form is absent).
 4. **Validation & non-writing modes** — enumerate pre-flight checks; provide `--check` (validate only) and `--dry-run` (plan only, no writes).
 5. **Outputs (generated tree + file formats)** — show the exact tree; specify each file's content, ordering (sorted/deterministic), and comment conventions. Mark **optional** outputs and their trigger conditions (here: `*.list.ctech.regex` only when a `REGEX` is given). Give the human report a **header** (tool name + run timestamp) and a **top summary** printed identically to STDOUT; surface anomalies as **report-only** entries (don't fail the run).

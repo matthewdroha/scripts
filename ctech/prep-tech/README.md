@@ -1,92 +1,105 @@
-# prep-tech
+# prep_tech
 
-## Overview
+Prepare the Cheetah process technology list files that ctech and synthesis consume.
 
-`prep-tech` is a Python-based project designed to prepare Cheetah process technology list files for ctech and synthesis. It implements a generative and idempotent workflow, ensuring that re-running the process produces the same output from the same inputs without modifying any source files.
-
-## Features
-
-- **Generative Workflow**: Generates output files based on specified inputs.
-- **Idempotent**: Re-running the process yields the same results.
-- **Validation**: Pre-flight checks to ensure all required files and directories exist.
-- **Dry Run Mode**: Allows users to validate inputs and see planned outputs without writing any files.
-
-## Project Structure
-
-```
-prep-tech/
-├── src/
-│   └── prep_tech/
-│       ├── __init__.py
-│       ├── main.py          # CLI entrypoint (argparse; --check, --dry-run)
-│       ├── config.py        # Parses prep_tech.input.md
-│       ├── models.py        # Data structures for the project
-│       ├── discover.py      # File parsing and design package resolution
-│       ├── validate.py      # Pre-flight validation checks
-│       └── generate.py      # Output file generation
-├── tests/
-│   ├── __init__.py
-│   ├── test_discover.py     # Unit tests for discover.py
-│   ├── test_validate.py      # Unit tests for validate.py
-│   └── test_generate.py      # Unit tests for generate.py
-├── prep_tech.input.md        # Input specifications for the process
-├── prep_tech.spec.md         # Project specifications
-├── pyproject.toml            # Project configuration
-└── README.md                 # Project documentation
-```
-
-## Installation
-
-No third-party runtime dependencies are required. Run directly from the source
-tree by putting `src` on the Python path (see Usage). Optionally, install the
-package in editable mode (needs `pytest` for the test extra):
-
-```
-python3 -m pip install -e .[dev]
-```
-
-If PyPI is unreachable, skip the install and use `PYTHONPATH=src` as shown below.
+`prep_tech` reads a markdown input file describing each die's ctech structural
+release areas and Cheetah configuration files, resolves every configuration to its
+stdcell library root, works out which stdcells the ctech cells actually instantiate,
+and writes a per-die tree of verilog/lib/ldb/ndm list files. It is generative and
+idempotent: the same inputs always reproduce the same tree. It never runs the
+synthesis flow and never modifies a source file.
 
 ## Usage
 
-Run from the project root with `python3` (not `python`). Put `src` on the path
-so the `prep_tech` package resolves without installing:
-
+```bash
+uv run prep_tech prep_tech.input.md                 # write the tree
+uv run prep_tech prep_tech.input.md --check         # validate inputs only
+uv run prep_tech prep_tech.input.md --dry-run       # print every planned path
+uv run prep_tech prep_tech.input.md --allow-duplicates
 ```
-# Validate inputs only (no plan, no write)
-PYTHONPATH=src python3 -m prep_tech.main prep_tech.input.md --check
 
-# Plan and print planned outputs without writing
-PYTHONPATH=src python3 -m prep_tech.main prep_tech.input.md --dry-run
-
-# Full generation (writes $WORKAREA/prep_tech, or ./prep_tech if WORKAREA unset)
-PYTHONPATH=src python3 -m prep_tech.main prep_tech.input.md
-```
+From another directory: `uv --project /path/to/prep-tech run prep_tech ...`.
 
 ### Options
 
-- `--check`: Parse and validate the input file only; write and plan nothing.
-- `--dry-run`: Validate inputs and print planned outputs without writing any files.
+| Flag | Meaning |
+| ---- | ------- |
+| `--output-root`, `-o` | Where to write. Default `$WORKAREA/prep_tech`, else `./prep_tech`. |
+| `--check` | Parse and validate; print a one-line OK summary; write and plan nothing. |
+| `--dry-run` | Validate and print every path that would be written; write nothing. |
+| `--force` | Accepted for consistency. Every run regenerates the whole tree, so it changes nothing. |
+| `--allow-duplicates` | Continue when several configuration files define the same stdcell (first configuration wins). |
+| `--verbose` | Log library resolution and each file written. |
 
-## Testing
+### Exit codes
 
-Tests are hermetic (they use temporary fixtures and do not touch real release
-areas). Run them from the project root:
+| Code | Meaning |
+| ---- | ------- |
+| 0 | Success. |
+| 1 | Duplicate stdcell definitions found and `--allow-duplicates` was not given. |
+| 2 | Pre-flight failure (missing input path, unwritable output, bad `REGEX`). |
+
+## Inputs
+
+| Input | Description |
+| ----- | ----------- |
+| `prep_tech.input.md` | Markdown. `## <NAME> DIE` / `## <NAME> IP` headings; one absolute path per line underneath. |
+| ctech structural release area | A line that is an existing **directory**. Its `ctech_lib*.sv` files are parsed for instantiated stdcells. |
+| Cheetah configuration file | A line that is an existing **file**. Its `[DESIGNPACKAGE]` section resolves to one or more stdcell library roots. |
+| `REGEX=r"<pattern>"` | Optional suffix on a configuration line, written as a Python raw string (`r"..."` or `r'...'`). All of a die's patterns are unioned to build the optional `*.list.ctech.regex` outputs. |
+
+Lines beginning with `#` (that are not headings) and blank lines are ignored. All
+paths are treated as vanity paths and are never symlink-resolved. A `REGEX=` suffix
+that is not a raw string literal — including the legacy `REGEX=/.../` form — is a
+pre-flight error.
+
+Configuration resolution supports an explicit `<lib_name>` field, direct paths,
+recursive `designpackage(name=<pkg>,<field>)` token substitution, compound
+`LIB_NAME = g1m_g1i`, auto-detection when `LIB_NAME` is absent, and contour-style
+discovery under `path` using the pitch from `lib_height_class`.
+
+## Outputs
 
 ```
-PYTHONPATH=src python3 -m pytest -q
+<output-root>/
+├── <die>/
+│   ├── static_stdcells.f             # +define+functional, then the referenced bundles' *bmod.v
+│   ├── stdcell.lib.list.ctech        # one selected nldm .lib per ctech-referenced bundle
+│   ├── stdcell.ldb.list.ctech        # one selected nldm .ldb/.db per ctech-referenced bundle
+│   ├── stdcell.lib.list.ctech.regex  # only when the die has a REGEX
+│   ├── stdcell.ldb.list.ctech.regex  # only when the die has a REGEX
+│   ├── stdcell.lib.list              # all nldm .lib collateral for the used bundles
+│   ├── stdcell.ldb.list              # all nldm .ldb/.db collateral for the used bundles
+│   └── stdcell.ndm.list              # all ndm collateral for the used bundles
+├── prep_tech.report                  # header, per-die summary, per-die statistics
+├── prep_tech.csv                     # die,ctech_cell,stdcell,bundle,config,bmod,ctech .sv
+└── prep_tech.duplicates.csv          # header always; rows when a stdcell is defined twice
 ```
 
-Run a single test file, e.g.:
+The single file per bundle is the nldm-format corner closest to `tttt` / 0.650 V /
+100 C, ties broken lexically. Collateral is referenced in place; nothing is copied
+or decompressed. Re-running writes in place and does not prune stale files, so remove
+a die directory by hand if its input set shrinks.
 
+## Development
+
+```bash
+uv sync
+uv run pytest
 ```
-PYTHONPATH=src python3 -m pytest tests/test_generate.py -q
-```
 
-## Contributing
+Tests are hermetic: fixtures in [tests/conftest.py](tests/conftest.py) build stdcell
+release trees, configuration files and ctech sources on `tmp_path`, so nothing
+touches a real `/p/hdk` area.
 
-Contributions are welcome! Please open an issue or submit a pull request for any enhancements or bug fixes.
+Source modules under [src/prep_tech](src/prep_tech):
 
-## License
+| Module | Responsibility |
+| ------ | -------------- |
+| `config.py` | Parse `prep_tech.input.md` into a dict. |
+| `discover.py` | Configuration parsing, DesignPackage resolution, bundle enumeration, PVT/nldm selection, REGEX filtering. |
+| `validate.py` | Pre-flight checks. |
+| `generate.py` | Per-die plan building, rendering, writing. |
+| `cli.py` | `build_parser()` and `main(argv) -> int`. |
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+The behaviour contract lives in [prep_tech.spec.md](prep_tech.spec.md).
