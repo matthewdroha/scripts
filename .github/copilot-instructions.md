@@ -1,13 +1,13 @@
 # GitHub Copilot – scripts Repository Instructions
 
-## General directives
-- Preferred tool versions are listed in ~mroha/.itools
-- Builds come along with full tests and test infrastructure. Use agentic TDD.
-- Ask clarifying questions
-- .spec.md specifications need to be kept up to date and remain good templates for future projects.
+All instructions for this repository live in [AGENTS.md](../AGENTS.md) at the repository
+root, so Copilot, Claude Code and other agents read the same file.
 
-## Python
-Use UV plus pytest approach for new Python projects as described in new-uv_tool.prompt.md
+Keeping the same rules in two always-on files is an anti-pattern — they drift. Edit
+`AGENTS.md`, not this file.
 
-## PERL
-For now,  build scripts using the same structure as pprtl2/fixclocks.pl.  For testing use Test::More
+> If this workspace is opened at a folder *above* `scripts/`, neither this file nor
+> `.github/instructions/*.instructions.md` is auto-discovered: `copilot-instructions.md`
+> is only detected in `.github/` at the **workspace folder root**. See
+> `chat.instructionsFilesLocations` and `chat.useNestedAgentsMdFiles` in
+> `../../.vscode/settings.json`.

@@ -1,6 +1,5 @@
 ---
 description: "Use when creating or editing a Python project, package, or command-line tool: uv workspace layout, pytest setup, pyproject.toml, console scripts, and the standard --dry-run/--force/--verbose/--help CLI flags."
-applyTo: ["**/*.py", "**/pyproject.toml"]
 ---
 
 # Python projects: uv + pytest
