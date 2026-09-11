@@ -81,6 +81,17 @@ The single file per bundle is the nldm-format corner closest to `tttt` / 0.650 V
 or decompressed. Re-running writes in place and does not prune stale files, so remove
 a die directory by hand if its input set shrinks.
 
+
+| File | Description | Typical usage within Intel |
+| ---- | ----------- | -------------------------- |
+| `static_stdcells.f` | Filelist containing stdcell verilog (may contain UDP definitions) | Stdcell vc_cdc, vcs (RTL) structural run |
+| `stdcell.lib.list` | List containing paths to stdcell Liberty files | Conformal and other CDNS tools, most .ldb tools can consume .lib also |
+| `stdcell.lib.list.ctech` | Same as above but only the libs required to elaborate ctech | Only where you need to consume RTL but not synthesize |
+| `stdcell.ldb.list` | List containing paths to SNPS compiled liberty files | SNPS activities: Power estimation, rtla (no phy), dc, sta/caliber, vclp, fishtail/TCM |
+| `stdcell.ldb.list.ctech` | Same as above but only the ldb’s required to elaborate ctech | Only where you need to consume RTL but not synthesize |
+| `stdcell.ndm.list` | List containing paths to SNPS .ndm (New Data Model) | Fusion, RTLA (phy aware) |
+
+
 ## Development
 
 ```bash

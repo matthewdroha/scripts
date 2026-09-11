@@ -15,3 +15,7 @@
 ## SBE IP
 /p/hdk/cad/stdcells/lib765_g1m_240h_50pp/pdk091_r0v0p0_fv/ctech/source/lib765/g1m_240h_50pp/lvt
 /p/hdk/etc/Projects/refcth2/2026.06.plus/76p5_g1m_opt8.cth
+
+## UIC IP
+/p/hdk/cad/dp_contour/78p6/v1.1_1.p2/lib786_i0m_180h_50pp_pdk11_r9v0p0_fv/ctech/source/p1278/180h_i0m_50pp/lvt
+/p/hdk/etc/Projects/refcth2/2026.09/78p6_i0m_opt32.cth
