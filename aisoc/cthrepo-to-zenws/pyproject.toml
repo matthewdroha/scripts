@@ -1,0 +1,26 @@
+[project]
+name = "cthrepo-to-zenws"
+version = "0.1.0"
+description = "Plan and replay a graft of Cheetah repo changes into a zen workspace"
+readme = "README.md"
+authors = [
+    { name = "matthewdroha", email = "matthew.d.roha@intel.com" }
+]
+requires-python = ">=3.13"
+dependencies = []
+
+[project.scripts]
+cthrepo-to-zenws = "cthrepo_to_zenws:main"
+
+[build-system]
+requires = ["uv_build>=0.12.7,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
