@@ -60,7 +60,7 @@ discovery under `path` using the pitch from `lib_height_class`.
 
 ## Outputs
 
-```
+```txt
 <output-root>/
 ├── <die>/
 │   ├── static_stdcells.f             # +define+functional, then the referenced bundles' *bmod.v
@@ -81,7 +81,6 @@ The single file per bundle is the nldm-format corner closest to `tttt` / 0.650 V
 or decompressed. Re-running writes in place and does not prune stale files, so remove
 a die directory by hand if its input set shrinks.
 
-
 | File | Description | Typical usage within Intel |
 | ---- | ----------- | -------------------------- |
 | `static_stdcells.f` | Filelist containing stdcell verilog (may contain UDP definitions) | Stdcell vc_cdc, vcs (RTL) structural run |
@@ -90,7 +89,6 @@ a die directory by hand if its input set shrinks.
 | `stdcell.ldb.list` | List containing paths to SNPS compiled liberty files | SNPS activities: Power estimation, rtla (no phy), dc, sta/caliber, vclp, fishtail/TCM |
 | `stdcell.ldb.list.ctech` | Same as above but only the ldb’s required to elaborate ctech | Only where you need to consume RTL but not synthesize |
 | `stdcell.ndm.list` | List containing paths to SNPS .ndm (New Data Model) | Fusion, RTLA (phy aware) |
-
 
 ## Development
 

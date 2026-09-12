@@ -35,7 +35,7 @@ If `uv` is missing: `curl -LsSf https://astral.sh/uv/install.sh | sh`.
 
 Required layout:
 
-```
+```txt
 <tool-name>/
 ├── pyproject.toml          # [project.scripts], uv_build backend, [tool.pytest.ini_options]
 ├── .python-version
@@ -67,6 +67,13 @@ For the full scaffolding workflow run the `/new-uv-tool` prompt.
 
 Build scripts using the same structure as `pprtl2/fixclocks.pl`. For testing use
 `Test::More`.
+
+## Markdown
+
+- Surround heading with at least one blank line above and below.
+- All fenced code blocks should specify the language for syntax highlighting.
+- Trailing spaces should be avoided or be 2 spaces for line breaks.
+
 
 ## Preferences
 
