@@ -17,12 +17,20 @@ class InputFormatError(ValueError):
     """A line in prep_tech.input.md does not follow the documented format."""
 
 
-def _new_die() -> dict:
-    return {"config_files": [], "ctech_dirs": [], "regexes": [], "missing": []}
+def _new_die(kind: str = "die") -> dict:
+    return {
+        "kind": kind,
+        "config_files": [],
+        "ctech_dirs": [],
+        "regexes": [],
+        "regex_pairs": [],
+        "missing": [],
+    }
 
 
 def parse_input(path: str) -> dict:
-    """Return ``{"dies": {<die>: {config_files, ctech_dirs, regexes, missing}}}``.
+    """Return ``{"dies": {<die>: {kind, config_files, ctech_dirs, regexes,
+    regex_pairs, missing}}}``.
 
     Content lines are classified by filesystem type: an existing directory is a
     ctech structural release area, an existing file is a configuration file.
@@ -41,9 +49,11 @@ def parse_input(path: str) -> dict:
             heading = _HEADING.match(line)
             if heading:
                 name = heading.group("name").lower()
+                kind = "die"
                 if heading.group("kind").upper() == "IP":
                     name += "_ip"
-                current = dies.setdefault(name, _new_die())
+                    kind = "ip"
+                current = dies.setdefault(name, _new_die(kind))
                 continue
 
             if line.startswith("#"):
@@ -52,8 +62,10 @@ def parse_input(path: str) -> dict:
                 continue
 
             match = _REGEX_SUFFIX.search(line)
+            pattern = None
             if match:
-                current["regexes"].append(match.group("pattern"))
+                pattern = match.group("pattern")
+                current["regexes"].append(pattern)
                 line = line[: match.start()].strip()
             elif _REGEX_ANY.search(line):
                 raise InputFormatError(
@@ -62,6 +74,9 @@ def parse_input(path: str) -> dict:
                 )
             if not line:
                 continue
+
+            if pattern is not None:
+                current["regex_pairs"].append((line, pattern))
 
             if os.path.isdir(line):
                 current["ctech_dirs"].append(line)

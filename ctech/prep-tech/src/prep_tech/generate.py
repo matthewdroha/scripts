@@ -28,6 +28,50 @@ DUPLICATES_CSV_HEADER = [
     "configuration file list",
 ]
 
+# Report key (spec 3.3). Mirrors the output tree in spec section 3.
+OUTPUT_KEY = [
+    (
+        "static_stdcells.f",
+        "+define+functional, then every *bmod.v of the ctech bundles.",
+        "Stdcell vc_cdc, vcs (RTL) structural runs.",
+    ),
+    (
+        "stdcell.lib.list.ctech",
+        "Ctech bundles, one PVT-selected nldm corner each.",
+        "Elaborating ctech verilog without synthesizing.",
+    ),
+    (
+        "stdcell.lib.list.ctech.all",
+        "Ctech bundles, every nldm corner.",
+        "Conformal and other CDNS tools.",
+    ),
+    (
+        "stdcell.lib.list.ctech.all.regex",
+        "Ctech bundles, only the corners matching the die REGEX.",
+        "Ctech-scoped work at a chosen corner set.",
+    ),
+    (
+        "stdcell.lib.list.all",
+        "Every bundle in the library roots, every nldm corner.",
+        "Complete library reference.",
+    ),
+    (
+        "stdcell.lib.list.all.regex",
+        "Every bundle, only the corners matching the die REGEX.",
+        "Synthesis: the mapper needs the whole library, not every corner.",
+    ),
+    (
+        "stdcell.ldb.list*",
+        "As the stdcell.lib.list* files above, but SNPS compiled liberty.",
+        "Power estimation, rtla, dc, sta/caliber, vclp, fishtail/TCM.",
+    ),
+    (
+        "stdcell.ndm.list",
+        "All ndm collateral for the ctech bundles.",
+        "Fusion, RTLA (phy aware).",
+    ),
+]
+
 
 # ---------------------------------------------------------------------------
 # Plan
@@ -93,6 +137,7 @@ def build_die_plan(die: str, die_info: dict, log=None) -> dict:
 
     return {
         "die": die,
+        "kind": die_info.get("kind", "die"),
         "bundles": bundles,
         "referenced_keys": {ref[2] for ref in refs},
         "refs": refs,
@@ -100,6 +145,7 @@ def build_die_plan(die: str, die_info: dict, log=None) -> dict:
         "unresolved": unresolved,
         "duplicates": duplicates,
         "regexes": list(die_info.get("regexes", [])),
+        "regex_pairs": list(die_info.get("regex_pairs", [])),
     }
 
 
@@ -120,8 +166,10 @@ def render_die_files(plan: dict) -> dict:
 
     bmods, ndm = [], []
     ctech_lib, ctech_ldb = [], []
-    full_lib, full_ldb = [], []
-    regex_lib, regex_ldb = [], []
+    ctech_all_lib, ctech_all_ldb = [], []
+    ctech_regex_lib, ctech_regex_ldb = [], []
+    all_lib, all_ldb = [], []
+    all_regex_lib, all_regex_ldb = [], []
 
     for name in referenced:
         bundle = bundles[name]
@@ -130,8 +178,8 @@ def render_die_files(plan: dict) -> dict:
 
         lib_nldm = discover.nldm_only(bundle["lib"])
         ldb_nldm = discover.nldm_only(bundle["ldb"])
-        full_lib.extend(lib_nldm)
-        full_ldb.extend(ldb_nldm)
+        ctech_all_lib.extend(lib_nldm)
+        ctech_all_ldb.extend(ldb_nldm)
 
         selected_lib = discover.select_nldm(bundle["lib"])
         if selected_lib:
@@ -141,20 +189,36 @@ def render_die_files(plan: dict) -> dict:
             ctech_ldb.append(selected_ldb)
 
         if compiled:
-            regex_lib.extend(discover.regex_filter(lib_nldm, compiled))
-            regex_ldb.extend(discover.regex_filter(ldb_nldm, compiled))
+            ctech_regex_lib.extend(discover.regex_filter(lib_nldm, compiled))
+            ctech_regex_ldb.extend(discover.regex_filter(ldb_nldm, compiled))
+
+    # The `.all` family spans every bundle, not just the ctech-referenced ones:
+    # synthesis maps against the whole library, only at the wanted corners.
+    for name in sorted(bundles):
+        bundle = bundles[name]
+        lib_nldm = discover.nldm_only(bundle["lib"])
+        ldb_nldm = discover.nldm_only(bundle["ldb"])
+        all_lib.extend(lib_nldm)
+        all_ldb.extend(ldb_nldm)
+        if compiled:
+            all_regex_lib.extend(discover.regex_filter(lib_nldm, compiled))
+            all_regex_ldb.extend(discover.regex_filter(ldb_nldm, compiled))
 
     files = {
         "static_stdcells.f": "+define+functional\n" + _list_text(bmods),
         "stdcell.ldb.list.ctech": _list_text(ctech_ldb),
         "stdcell.lib.list.ctech": _list_text(ctech_lib),
-        "stdcell.ldb.list": _list_text(full_ldb),
-        "stdcell.lib.list": _list_text(full_lib),
+        "stdcell.ldb.list.ctech.all": _list_text(ctech_all_ldb),
+        "stdcell.lib.list.ctech.all": _list_text(ctech_all_lib),
+        "stdcell.ldb.list.all": _list_text(all_ldb),
+        "stdcell.lib.list.all": _list_text(all_lib),
         "stdcell.ndm.list": _list_text(ndm),
     }
     if compiled:
-        files["stdcell.ldb.list.ctech.regex"] = _list_text(regex_ldb)
-        files["stdcell.lib.list.ctech.regex"] = _list_text(regex_lib)
+        files["stdcell.ldb.list.ctech.all.regex"] = _list_text(ctech_regex_ldb)
+        files["stdcell.lib.list.ctech.all.regex"] = _list_text(ctech_regex_lib)
+        files["stdcell.ldb.list.all.regex"] = _list_text(all_regex_ldb)
+        files["stdcell.lib.list.all.regex"] = _list_text(all_regex_lib)
     return files
 
 
@@ -172,6 +236,33 @@ def die_summary(die: str, plan: dict) -> str:
     )
 
 
+def config_regex_pairs(plan: dict) -> list[tuple[str, str]]:
+    """``(input path, pattern)`` for every REGEX the die attached to a path."""
+    return list(plan.get("regex_pairs", []))
+
+
+def render_output_key() -> list[str]:
+    """Commented key explaining each generated file (spec 3.3)."""
+    lines = [
+        "# output file key",
+        "#",
+        "#   naming: stdcell.<lib|ldb>.list[.ctech][.all][.regex]",
+        "#     .ctech  only bundles instantiated by ctech;"
+        " absent = every bundle in the library roots",
+        "#     .all    every nldm corner;"
+        " absent = one corner, PVT-selected (tttt / 0.650V / 100C)",
+        "#     .regex  only corners matching the die REGEX;"
+        " written only when the die sets one",
+        "#",
+    ]
+    for name, what, usage in OUTPUT_KEY:
+        lines.append(f"#   {name}")
+        lines.append(f"#       {what}")
+        lines.append(f"#       usage: {usage}")
+    lines.append("")
+    return lines
+
+
 def render_report(plans) -> str:
     """Human-readable per-die report (spec 3.3)."""
     now = datetime.datetime.now().replace(microsecond=0).isoformat()
@@ -184,10 +275,11 @@ def render_report(plans) -> str:
     for die, plan in plans:
         lines.append(die_summary(die, plan))
     lines.append("")
+    lines.extend(render_output_key())
 
     for die, plan in plans:
         files = render_die_files(plan)
-        lines.append(f"die: {die}")
+        lines.append(f"{plan.get('kind', 'die')}: {die}")
         lines.append(f"  ctech cells found: {len(plan['ctech_cells'])}")
         lines.append(
             f"  referenced stdcells (deduplicated): {len(plan['refs'])}"
@@ -200,29 +292,19 @@ def render_report(plans) -> str:
         )
         for ctech_cell, stdcell, sv_path in plan["unresolved"]:
             lines.append(f"    {stdcell} <- {ctech_cell} ({sv_path})")
+        lines.append(f"  bundles in library roots: {len(plan['bundles'])}")
         lines.append(
-            "  ctech-referenced .lib files: "
-            f"{_line_count(files['stdcell.lib.list.ctech'])}"
+            f"  ctech-referenced bundles: {len(plan['referenced_keys'])}"
         )
-        lines.append(
-            "  ctech-referenced .ldb/.db files: "
-            f"{_line_count(files['stdcell.ldb.list.ctech'])}"
-        )
-        if plan["regexes"]:
-            lines.append(
-                "  regex-filtered .lib files: "
-                f"{_line_count(files['stdcell.lib.list.ctech.regex'])}"
-            )
-            lines.append(
-                "  regex-filtered .ldb/.db files: "
-                f"{_line_count(files['stdcell.ldb.list.ctech.regex'])}"
-            )
-        lines.append(
-            f"  full-list .lib files: {_line_count(files['stdcell.lib.list'])}"
-        )
-        lines.append(
-            f"  full-list .ldb/.db files: {_line_count(files['stdcell.ldb.list'])}"
-        )
+        for name in sorted(n for n in files if n.startswith("stdcell.")):
+            lines.append(f"  {name}: {_line_count(files[name])}")
+        pairs = config_regex_pairs(plan)
+        if pairs:
+            lines.append("  configuration/regex pairs:")
+            width = max(len(os.path.basename(source)) for source, _ in pairs)
+            for source, pattern in pairs:
+                source = os.path.basename(source).ljust(width)
+                lines.append(f'    {source}  r"{pattern}"')
         lines.append("")
 
     return "\n".join(lines)

@@ -71,7 +71,7 @@ But it is also possible that direct paths are provided,  for example:
     /p/hdk/etc/Projects/refcth2/2026.06.plus/76p5_g1i_opt8.cth  REGEX=r"tttt\S+850v\S+100c"
     ```
 
-    Because it is a raw string, backslash escapes such as `\S` are taken literally and need no doubling. The older slash-delimited form `REGEX=/.../` is **no longer accepted** and is a fatal input-format error, as is any `REGEX=` value that is not a raw string literal. Per die, all `REGEX=` patterns are collected as a **union** and used to build the optional `*.list.ctech.regex` outputs (see 3.0). Omit it when no filtering is needed.
+    Because it is a raw string, backslash escapes such as `\S` are taken literally and need no doubling. The older slash-delimited form `REGEX=/.../` is **no longer accepted** and is a fatal input-format error, as is any `REGEX=` value that is not a raw string literal. Per die, all `REGEX=` patterns are collected as a **union** and used to build the optional `*.regex` outputs (see 3.0). Omit it when no filtering is needed.
   - All other non-empty content lines are **ctech structural release areas** (directory vanity paths), matched **exactly** as written.
 - **Comment-only lines** beginning with `#` (pound sign, not a markdown heading) are permitted and ignored.
 - Blank lines are ignored.
@@ -155,32 +155,64 @@ Validation raises on the first missing path. Two non-writing modes are provided:
 
 If `$WORKAREA` is set, create a directory `prep_tech` under `$WORKAREA`; otherwise create it in the current working directory. Output filenames are **bare** (no `<tech>` prefix — a die may list multiple configuration files resolving to different libraries, so a single per-die tech prefix is ambiguous and was removed). The output tree is:
 
-```
+```txt
 $WORKAREA/prep_tech/
-├── <die>/
-│   ├── static_stdcells.f            # stdcell *bmod.v files for ctech-referenced bundles only (see 3.1)
-│   ├── stdcell.ldb.list.ctech       # ctech-referenced: selected ldb/db file per referenced bundle
-│   ├── stdcell.lib.list.ctech       # ctech-referenced: selected lib file per referenced bundle
-│   ├── stdcell.ldb.list.ctech.regex # optional (only if REGEX given): regex-filtered ldb/db, per referenced bundle
-│   ├── stdcell.lib.list.ctech.regex # optional (only if REGEX given): regex-filtered lib, per referenced bundle
-│   ├── stdcell.ldb.list             # full: all stdcell ldb/db collateral for used bundles.
-│   ├── stdcell.lib.list             # full: all stdcell lib collateral for used bundles.
-│   └── stdcell.ndm.list             # full: all ndm files for used bundles. Consumed by synthesis.
-├── prep_tech.report                 # per-die summary statistics (see 3.3)
-└── prep_tech.csv                    # detailed ctech→stdcell mapping (see 3.4)
+├── <die or ip>/
+│   ├── static_stdcells.f                 # stdcell *bmod.v files for ctech-referenced bundles only (see 3.1);  for cdc, tcm, vcs struct
+│   ├── stdcell.ldb.list.ctech            # ctech bundles, one selected corner each
+│   ├── stdcell.lib.list.ctech            # ctech bundles, one selected corner each
+│   ├── stdcell.ldb.list.ctech.all        # ctech bundles, every nldm corner; useful for determining which PVTs exist for filtering
+│   ├── stdcell.lib.list.ctech.all        # ctech bundles, every nldm corner; useful for determining which PVTs exist for filtering
+│   ├── stdcell.ldb.list.ctech.all.regex  # optional (only if REGEX given): ctech bundles, REGEX corners; simple synthesis, eg no mbit, power elements, etc
+│   ├── stdcell.lib.list.ctech.all.regex  # optional (only if REGEX given): ctech bundles, REGEX corners; simple synthesis, eg no mbit, power elements, etc
+│   ├── stdcell.ldb.list.all              # every bundle, every nldm corner; useful for determining which PVTs exist for filtering
+│   ├── stdcell.lib.list.all              # every bundle, every nldm corner; useful for determining which PVTs exist for filtering
+│   ├── stdcell.ldb.list.all.regex        # optional (only if REGEX given): every bundle, REGEX corners; for full synthesis
+│   ├── stdcell.lib.list.all.regex        # optional (only if REGEX given): every bundle, REGEX corners; for full synthesis
+│   └── stdcell.ndm.list                  # all ndm files for ctech bundles. Consumed by synthesis.
+├── prep_tech.report                      # per-die summary statistics (see 3.3)
+└── prep_tech.csv                         # detailed ctech→stdcell mapping (see 3.4)
 ```
 
 Repeat the `<die>/` directory for each die. `<die>` is the die heading name lowercased (e.g. `CORIMH DIE` → `corimh`).
 
 For `static_stdcells.f`, the first line is `+define+functional`, followed by the list of `*bmod.v` files.
 
-### 3.0 List file terminology (ctech-referenced vs full)
+### 3.0 List file naming scheme
 
-Two families of list files are produced per die. (The earlier term "minimal" was a poor choice and is deprecated; use "ctech-referenced".)
+List filenames are built from a **grammar**, not from ad-hoc names:
 
-- **ctech-referenced lists** (`*.list.ctech`): the selected collateral for **only the bundles that contain a stdcell actually referenced by ctech**. One selected file per referenced bundle. These are the files needed to elaborate the ctech verilog.
-- **regex lists** (`*.list.ctech.regex`): optional. For each **ctech-referenced bundle**, keep that bundle's **nldm** `lib/` collateral whose **basename matches any** of the die's `REGEX=` patterns (union / logical OR, `re.search`), routed to `.lib` vs `.ldb/.db`. Emitted only when the die specifies at least one `REGEX`. Because this is an **independent PVT-corner selection** (not a filter of the already PVT-selected `*.list.ctech`), it may contain **more than one file per bundle** and be larger than `*.list.ctech` — which may signal the designer should tighten the REGEX.
-- **full lists** (`*.list`, no `.ctech` suffix): **all** collateral for **all bundles used in ctech**. Given the current rules, "all used bundles" and "ctech-referenced bundles" are the same set; the difference is that the full lists carry the complete collateral for those bundles while the `.ctech` lists carry only the single selected file per bundle.
+```
+stdcell.<lib|ldb>.list[.ctech][.all][.regex]
+```
+
+Each suffix is an independent, orthogonal narrowing:
+
+| suffix | present | absent |
+| --- | --- | --- |
+| `.ctech` | only **ctech-referenced bundles** — bundles holding a stdcell actually instantiated by the die's ctech `.sv` files | **every bundle** discovered in the die's resolved library roots |
+| `.all` | **every** nldm corner of each included bundle | **one** corner per bundle, PVT-selected per section 4 |
+| `.regex` | only corners whose basename matches the die's `REGEX=` union (`re.search`) | no corner filtering |
+
+Read a name right-to-left as "what was filtered" and left-to-right as "what the filter was applied to" — `stdcell.lib.list.ctech.all.regex` is *the regex applied to all corners of the ctech bundles*. The `.all` in a `.regex` name names the **pre-filter source**, which is why every `.regex` file carries it.
+
+The emitted set (per die):
+
+| file | bundles | corners | typical consumer |
+| --- | --- | --- | --- |
+| `stdcell.<fmt>.list.ctech` | ctech-referenced | one, PVT-selected | elaborating ctech verilog |
+| `stdcell.<fmt>.list.ctech.all` | ctech-referenced | all nldm | ctech-scoped multi-corner work |
+| `stdcell.<fmt>.list.ctech.all.regex` | ctech-referenced | nldm matching `REGEX` | ctech at chosen corners |
+| `stdcell.<fmt>.list.all` | every bundle | all nldm | complete library reference |
+| `stdcell.<fmt>.list.all.regex` | every bundle | nldm matching `REGEX` | **synthesis** |
+
+The `.regex` files are emitted **only** when the die specifies at least one `REGEX=`. They are an **independent corner selection**, not a filter of the PVT-selected `*.list.ctech`, so they may hold **more than one file per bundle**; a `.ctech.all.regex` larger than `.ctech` signals the designer should tighten the REGEX.
+
+`stdcell.<fmt>.list.all.regex` is the file that motivates the whole scheme: synthesis needs the **whole** standard-cell library visible to the mapper, but loading every corner of every bundle is prohibitively slow, so the reduction must be in corners rather than bundles.
+
+All list files are nldm-only. `stdcell.ndm.list` has no variants — NDM basenames carry no PVT corner to match — and is scoped to ctech-referenced bundles.
+
+> **Deprecated names.** `*.list` (now `*.list.ctech.all`) and `*.list.ctech.regex` (now `*.list.ctech.all.regex`). The bare `*.list` name was ambiguous: it read as "everything" but was scoped to ctech-referenced bundles. The earlier terms "minimal" and "full" are likewise deprecated — describe a list by its suffixes.
 
 ### 3.1 `static_stdcells.f`
 
@@ -199,14 +231,31 @@ Two families of list files are produced per die. (The earlier term "minimal" was
 - **Plain text**, written to the output root.
 - Add the script name and date executed in the report header.
 - Add a summary line for each die at the top of the report.  The same summary printed to STDOUT when the automation is ran.
-- For each die, list:
+- Between the top summary and the per-section breakdowns, emit an **output file key**: a commented block that states the filename grammar (see 3.0) and then, for every generated file, one line naming it, one line describing its content, and one `usage:` line naming the consuming tools. The key is **static** — it documents the full output set regardless of which files this run produced — so a reader who opens only the report can tell what each file holds and which to feed their flow.
+- For each die or IP, open the section with `die: <name>` or `ip: <name>` according to the `## <NAME> DIE` / `## <NAME> IP` heading it came from. Then list:
   - Number of ctech cells found.
   - Number of stdcells referenced by the ctechs, **deduplicated** (a stdcell referenced by multiple ctechs is counted once). Stdcell names are unique per bundle.
   - Number of duplicate stdcell cell definitions found for the provided configuration files
   - Number of **unresolved stdcell instantiations** — ctech instances whose name begins with a die stdcell-library prefix (e.g. `g1i`, `g1m`, `i0m`, taken from each configuration file `lib_name`) but has **no matching `*bmod.v` definition** in any bundle. Each is listed on its own indented line as `<stdcell> <- <ctech_cell> (<path to ctech .sv>)`. Tokens that do **not** match a known library prefix are treated as non-stdcell (ctech submodules / SV constructs) and are not reported. This is **report-only** (it does not fail the run).
-  - `ctech-referenced .lib files` / `.ldb/.db files` — line counts of `stdcell.lib.list.ctech` / `stdcell.ldb.list.ctech` (one selected file per referenced bundle).
-  - `regex-filtered .lib files` / `.ldb/.db files` — line counts of `stdcell.lib.list.ctech.regex` / `stdcell.ldb.list.ctech.regex` (shown only when the die has a `REGEX`).
-  - `full-list .lib files` / `.ldb/.db files` — line counts of `stdcell.lib.list` / `stdcell.ldb.list`.
+  - `bundles in library roots` and `ctech-referenced bundles` — the two bundle populations the list files are drawn from.
+  - One line per emitted `stdcell.*` list file, **keyed by the filename itself**, giving its line count. Naming the files rather than describing them keeps the report unambiguous as the list set grows, and the `.regex` entries simply do not appear when the die has no `REGEX`. For example:
+
+    ```
+      bundles in library roots: 226
+      ctech-referenced bundles: 13
+      stdcell.ldb.list.all: 2307
+      stdcell.ldb.list.all.regex: 226
+      stdcell.ldb.list.ctech: 13
+      stdcell.ldb.list.ctech.all: 2307
+      stdcell.ldb.list.ctech.all.regex: 13
+      ...
+    ```
+  - **Last in the section, and only when the die has a `REGEX`:** the `configuration/regex pairs` — one line per pair, naming the basename of the input path the `REGEX` was written on and the raw literal itself. A die may carry several patterns on several lines, so this is what shows **which pattern came from which configuration**, without the reader having to open `prep_tech.input.md`:
+
+    ```
+      configuration/regex pairs:
+        78p6_i0m_opt32.cth  r"tttt_0p850v(_0p850v)?_100c\S+cmax"
+    ```
 
 ### 3.4 `prep_tech.csv`
 
@@ -281,16 +330,21 @@ lib764_g1i_210h_50pp_base_lvt_tttt_0p650v_100c_tttt_cmax_nldm.lib.gz
 - The library-prefix uses forms like `lib764_g1i_210h_50pp`, `lib786_i0m_180h_50pp`, and equivalent.
 - Derived by splitting the resolved library directory name at the **4th underscore group** (see section 4). Retained for reference only; not used in output filenames.
 
-### 4.2 Bundle selection (ctech-referenced / used bundles)
+### 4.2 Bundle selection
 
-- Select **one file per bundle** — no more.
-- Only include bundles actually referenced by the ctech. If the ctech references only `svt` and `lvt` cells, do **not** include `hvt` bundles.
-- It is possible (though unusual) for a ctech verilog in an `lvt` directory to reference an `lvt` cell.
+Two bundle populations exist, and every list file is scoped to exactly one of them (see 3.0):
+
+- **ctech-referenced bundles** — bundles holding a stdcell actually instantiated by the die's ctech `.sv` files. Files with `.ctech` in the name use this set. If the ctech references only `svt` and `lvt` cells, `hvt` bundles are **not** included. (It is possible, though unusual, for a ctech verilog in an `lvt` directory to reference an `lvt` cell.)
+- **every bundle** — all bundles discovered under the die's resolved library roots. Files without `.ctech` use this set.
+
+Within a bundle, a name **without** `.all` carries exactly **one** file — the PVT-selected corner (see section 4); a name **with** `.all` carries every nldm corner.
+
+> The term **"used bundle"** appeared in earlier drafts as a synonym for "ctech-referenced bundle". It is **deprecated** — it was too easily read as "every bundle the library ships". Say **ctech-referenced** when that is what is meant.
 
 ### 4.3 lib / ldb / db routing
 
-- `.lib*` → `.stdcell.lib.list`
-- `.db*` or `.ldb*` → `.stdcell.ldb.list`
+- `.lib*` → the `stdcell.lib.list*` family
+- `.db*` or `.ldb*` → the `stdcell.ldb.list*` family
 - If there are duplicates between `.db` and `.ldb`, choose **`.ldb`**.
 - The nldm filter (see section 4) applies to `.lib`, `.ldb`, and `.db` selection.
 
@@ -326,12 +380,12 @@ prep-tech/
 ```
 
 Key data contracts:
-- `config.parse_input(path) -> {"dies": {<die>: {"config_files": [<abs paths>], "ctech_dirs": [<abs dirs>], "regexes": [<raw REGEX patterns>], "missing": [<paths that are neither>]}}}`. Lines are classified by filesystem type (directory -> ctech area; file -> configuration file). A malformed `REGEX=` suffix raises `config.InputFormatError`. No backend prefix.
+- `config.parse_input(path) -> {"dies": {<die>: {"kind": "die"|"ip", "config_files": [<abs paths>], "ctech_dirs": [<abs dirs>], "regexes": [<raw REGEX patterns>], "regex_pairs": [(<path the REGEX was written on>, <pattern>), ...], "missing": [<paths that are neither>]}}}`. Lines are classified by filesystem type (directory -> ctech area; file -> configuration file). `kind` comes from the `DIE`/`IP` heading keyword and only affects the report label. A malformed `REGEX=` suffix raises `config.InputFormatError`. No backend prefix.
 - `discover.lib_keys(params)` — library keys for a configuration: split `LIB_NAME` on `_`, or (no `LIB_NAME`) auto-detect fields whose value contains `/lib<digits>_<key>_`.
 - `discover.resolve_lib_roots(params) -> [<lib root>, ...]` — resolve each key via its explicit field (direct path / designpackage tokens) or contour discovery; a config may yield multiple roots. `resolve_lib_root(params)` returns the first.
 - `discover.enumerate_bundles(lib_root) -> {<bundle>: {root, bmod, cells, lib, ldb, ndm}}` (only dirs with a `verilog/*bmod.v`).
 - `discover.compile_regexes(patterns)` / `discover.regex_filter(files, compiled)` — union `re.search` on basenames.
-- `generate.build_die_plan(die, die_info) -> {bundles, referenced_keys, refs, ctech_cells, unresolved, duplicates, regexes}`; `generate.generate_all(parsed, output_root, allow_duplicates) -> (written, plans, has_duplicates)`.
+- `generate.build_die_plan(die, die_info) -> {die, kind, bundles, referenced_keys, refs, ctech_cells, unresolved, duplicates, regexes, regex_pairs}`; `generate.config_regex_pairs(plan) -> [(<path>, <pattern>), ...]`; `generate.generate_all(parsed, output_root, allow_duplicates) -> (written, plans, has_duplicates)`.
 
 Output root resolution: `$WORKAREA/prep_tech/` if `WORKAREA` is set, else `./prep_tech/`.
 
@@ -399,14 +453,20 @@ Coverage: configuration parsing (filesystem-type classification, raw-string `REG
 **Q9.** Library-root resolution when the `.cth` has no explicit `<lib_name>` field (contour style).  
 > **Resolved:** Discover under the resolved `path` the directory matching `lib*_<lib_name>_*`, filtered by the **pitch** token from `lib_height_class` (e.g. `50pp`) and preferring **`_fv`** (functional views); lexically-first on ties, error if none (see 2.3).
 
-**Q10.** REGEX filtering semantics (`*.list.ctech.regex`).  
-> **Resolved:** For each ctech-referenced bundle, keep the bundle's **nldm** `lib/` collateral whose basename matches **any** die `REGEX` (union, `re.search`), routed to lib vs ldb/db. Independent PVT selection (not a filter of `*.list.ctech`); may exceed one file per bundle. Emitted only when a `REGEX` is present. Invalid patterns fail validation early (see 2.1 / 2.4).
+**Q10.** REGEX filtering semantics (`*.regex`).  
+> **Resolved:** Keep the **nldm** `lib/` collateral whose basename matches **any** die `REGEX` (union, `re.search`), routed to lib vs ldb/db. Independent PVT selection (not a filter of `*.list.ctech`); may exceed one file per bundle. Emitted only when a `REGEX` is present. Invalid patterns fail validation early (see 2.1 / 2.4).
 
 **Q12.** REGEX literal syntax.  
 > **Resolved:** A **Python raw string literal** (`REGEX=r"..."` or `REGEX=r'...'`), so the input file spells the pattern exactly as it would be written in Python source for `re.search`. This removes the escaping ambiguity of the old `/.../` delimiters (a pattern containing `/` needed no escape, but the form looked like Perl while the semantics were Python). The `/.../` form is now rejected outright rather than silently reinterpreted.
 
+**Q13.** Scope of the library-wide lists (`*.list.all`, `*.list.all.regex`).  
+> **Resolved:** **Every bundle** in the die's resolved library roots, not just the ctech-referenced ones. Synthesis needs the whole library visible to the mapper, so the useful reduction is in **corners**, not bundles: for a 226-bundle library, `*.list.all.regex` replaces "every corner of every bundle" with "the wanted corners of every bundle". The nldm-only restriction is kept for consistency, and no `stdcell.ndm.list.regex` is emitted because NDM basenames carry no PVT corner to match.
+
+**Q14.** List filename scheme.  
+> **Resolved:** A **suffix grammar** (`stdcell.<fmt>.list[.ctech][.all][.regex]`, see 3.0) replaced the ad-hoc names. The bare `*.list` was actively misleading — it read as "every bundle" but was scoped to ctech-referenced ones — and `*.list.ctech.regex` hid its pre-filter source, so it was impossible to tell whether the regex had been applied to one selected corner or to all of them. Every `.regex` file now carries the `.all` of the population it was filtered from. The cost is longer names; the benefit is that a filename fully determines its content, and the report simply lists the filenames rather than describing them in prose.
+
 **Q11.** Re-run hygiene / stale outputs.  
-> **Resolved:** Generation writes in place (`os.makedirs(exist_ok=True)`; no `rmtree`, so it is NFS-safe). It does **not** prune stale files when an input contracts (e.g. a die drops a bundle, or a `REGEX` is removed so `*.list.ctech.regex` should no longer exist). Remove the die/output directory manually if the input set shrinks.
+> **Resolved:** Generation writes in place (`os.makedirs(exist_ok=True)`; no `rmtree`, so it is NFS-safe). It does **not** prune stale files when an input contracts (e.g. a die drops a bundle, or a `REGEX` is removed so the `*.regex` files should no longer exist). Remove the die/output directory manually if the input set shrinks, or after a rename of the output filenames.
 
 ---
 
@@ -418,7 +478,7 @@ Use this section as the skeleton for a new generative/idempotent automation. Kee
 2. **Inputs (sources of truth)** — table of inputs; define a **machine-readable** input format (headings, required vs optional lines, comment/blank handling). Classify ambiguous lines robustly (here: by **filesystem type** — directory vs file). Allow optional per-line modifiers (here: `REGEX=r"..."` on a configuration line — borrow the host language's own literal syntax so the value needs no re-escaping) and state how repeats combine (union). Reject malformed modifiers loudly instead of guessing. State **precedence** when the same logical item is defined by multiple sources (here: the first-listed configuration file wins).
 3. **Path & resolution handling** — state vanity-path vs symlink-resolution policy; describe any **indirection/token resolution** (here: DesignPackage key-deref + recursive `designpackage(...)` substitution) with a worked example, and cover **multiple input styles / fallbacks** for the same logical value (here: explicit library field, direct paths, compound keys that resolve to several targets, and contour discovery / auto-detection when the explicit form is absent).
 4. **Validation & non-writing modes** — enumerate pre-flight checks; provide `--check` (validate only) and `--dry-run` (plan only, no writes).
-5. **Outputs (generated tree + file formats)** — show the exact tree; specify each file's content, ordering (sorted/deterministic), and comment conventions. Mark **optional** outputs and their trigger conditions (here: `*.list.ctech.regex` only when a `REGEX` is given). Give the human report a **header** (tool name + run timestamp) and a **top summary** printed identically to STDOUT; surface anomalies as **report-only** entries (don't fail the run).
+5. **Outputs (generated tree + file formats)** — show the exact tree; specify each file's content, ordering (sorted/deterministic), and comment conventions. Prefer a **filename grammar** over ad-hoc names when outputs vary along independent axes (here: `[.ctech][.all][.regex]` — scope, breadth, filter), so a name fully determines its content and a filtered output always names its **pre-filter source**. Mark **optional** outputs and their trigger conditions (here: `*.regex` only when a `REGEX` is given). Give the human report a **header** (tool name + run timestamp), a **top summary** printed identically to STDOUT, and an **output file key** describing every generated file so the report is self-documenting. Label each section by what it actually is (here: `die:` vs `ip:`). Where a user-supplied filter drives the output, echo back **where each filter came from** (here: configuration/regex pairs) so the report explains its own inputs. Surface anomalies as **report-only** entries (don't fail the run).
 6. **Derivation / selection rules** — how concrete artifacts are chosen (here: bundle enumeration, PVT-closest + format filter, one-per-group selection, routing by extension).
 7. **Architecture & module responsibilities** — one module per concern (`config` parse, `discover` resolve/enumerate/select, `validate`, `generate` plan+render+write); pass plain dicts; define the key data contracts.
 8. **CLI / usage** — exact commands, including how to run without installation.

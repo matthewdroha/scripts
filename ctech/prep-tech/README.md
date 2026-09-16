@@ -46,7 +46,7 @@ From another directory: `uv --project /path/to/prep-tech run prep_tech ...`.
 | `prep_tech.input.md` | Markdown. `## <NAME> DIE` / `## <NAME> IP` headings; one absolute path per line underneath. |
 | ctech structural release area | A line that is an existing **directory**. Its `ctech_lib*.sv` files are parsed for instantiated stdcells. |
 | Cheetah configuration file | A line that is an existing **file**. Its `[DESIGNPACKAGE]` section resolves to one or more stdcell library roots. |
-| `REGEX=r"<pattern>"` | Optional suffix on a configuration line, written as a Python raw string (`r"..."` or `r'...'`). All of a die's patterns are unioned to build the optional `*.list.ctech.regex` outputs. |
+| `REGEX=r"<pattern>"` | Optional suffix on a configuration line, written as a Python raw string (`r"..."` or `r'...'`). All of a die's patterns are unioned to build the optional `*.regex` outputs. |
 
 Lines beginning with `#` (that are not headings) and blank lines are ignored. All
 paths are treated as vanity paths and are never symlink-resolved. A `REGEX=` suffix
@@ -64,13 +64,17 @@ discovery under `path` using the pitch from `lib_height_class`.
 <output-root>/
 ├── <die>/
 │   ├── static_stdcells.f             # +define+functional, then the referenced bundles' *bmod.v
-│   ├── stdcell.lib.list.ctech        # one selected nldm .lib per ctech-referenced bundle
-│   ├── stdcell.ldb.list.ctech        # one selected nldm .ldb/.db per ctech-referenced bundle
-│   ├── stdcell.lib.list.ctech.regex  # only when the die has a REGEX
-│   ├── stdcell.ldb.list.ctech.regex  # only when the die has a REGEX
-│   ├── stdcell.lib.list              # all nldm .lib collateral for the used bundles
-│   ├── stdcell.ldb.list              # all nldm .ldb/.db collateral for the used bundles
-│   └── stdcell.ndm.list              # all ndm collateral for the used bundles
+│   ├── stdcell.lib.list.ctech            # ctech bundles, one selected nldm corner each
+│   ├── stdcell.ldb.list.ctech            # ctech bundles, one selected nldm corner each
+│   ├── stdcell.lib.list.ctech.all        # ctech bundles, every nldm corner
+│   ├── stdcell.ldb.list.ctech.all        # ctech bundles, every nldm corner
+│   ├── stdcell.lib.list.ctech.all.regex  # only when the die has a REGEX
+│   ├── stdcell.ldb.list.ctech.all.regex  # only when the die has a REGEX
+│   ├── stdcell.lib.list.all              # every bundle, every nldm corner
+│   ├── stdcell.ldb.list.all              # every bundle, every nldm corner
+│   ├── stdcell.lib.list.all.regex        # only when the die has a REGEX
+│   ├── stdcell.ldb.list.all.regex        # only when the die has a REGEX
+│   └── stdcell.ndm.list                  # all ndm collateral for the ctech bundles
 ├── prep_tech.report                  # header, per-die summary, per-die statistics
 ├── prep_tech.csv                     # die,ctech_cell,stdcell,bundle,config,bmod,ctech .sv
 └── prep_tech.duplicates.csv          # header always; rows when a stdcell is defined twice
@@ -84,11 +88,19 @@ a die directory by hand if its input set shrinks.
 | File | Description | Typical usage within Intel |
 | ---- | ----------- | -------------------------- |
 | `static_stdcells.f` | Filelist containing stdcell verilog (may contain UDP definitions) | Stdcell vc_cdc, vcs (RTL) structural run |
-| `stdcell.lib.list` | List containing paths to stdcell Liberty files | Conformal and other CDNS tools, most .ldb tools can consume .lib also |
-| `stdcell.lib.list.ctech` | Same as above but only the libs required to elaborate ctech | Only where you need to consume RTL but not synthesize |
-| `stdcell.ldb.list` | List containing paths to SNPS compiled liberty files | SNPS activities: Power estimation, rtla (no phy), dc, sta/caliber, vclp, fishtail/TCM |
-| `stdcell.ldb.list.ctech` | Same as above but only the ldb’s required to elaborate ctech | Only where you need to consume RTL but not synthesize |
+| `stdcell.lib.list.ctech` | One selected corner per ctech bundle | Only where you need to consume RTL but not synthesize |
+| `stdcell.lib.list.ctech.all` | Every corner of the ctech bundles | Conformal and other CDNS tools, most .ldb tools can consume .lib also |
+| `stdcell.lib.list.ctech.all.regex` | Ctech bundles at the `REGEX` corners | Ctech-scoped work at a specific corner set |
+| `stdcell.lib.list.all` | Every corner of every bundle | Complete library reference |
+| `stdcell.lib.list.all.regex` | Every bundle at the `REGEX` corners | Synthesis: the mapper needs the whole library but not every PVT corner |
+| `stdcell.ldb.list*` | As above, for SNPS compiled liberty | SNPS activities: power estimation, rtla (no phy), dc, sta/caliber, vclp, fishtail/TCM |
 | `stdcell.ndm.list` | List containing paths to SNPS .ndm (New Data Model) | Fusion, RTLA (phy aware) |
+
+List names follow a suffix grammar, `stdcell.<lib|ldb>.list[.ctech][.all][.regex]`:
+`.ctech` restricts to bundles ctech instantiates (absent = every bundle in the
+library roots), `.all` keeps every nldm corner (absent = one PVT-selected corner),
+and `.regex` filters corners by the die `REGEX`. A `.regex` name always carries the
+`.all` of the population it was filtered from.
 
 ## Development
 

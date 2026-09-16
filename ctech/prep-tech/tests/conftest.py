@@ -11,11 +11,18 @@ def write_text(path, text):
 
 
 def die_dict(config_files, ctech_dirs, regexes=None):
-    """A parsed-input die entry, as :func:`prep_tech.config.parse_input` builds it."""
+    """A parsed-input die entry, as :func:`prep_tech.config.parse_input` builds it.
+
+    Each regex is attached to the last configuration file, as an input file
+    carrying ``<config> REGEX=r"..."`` on one line would produce.
+    """
+    configs = [str(p) for p in config_files]
+    regexes = list(regexes or [])
     return {
-        "config_files": [str(p) for p in config_files],
+        "config_files": configs,
         "ctech_dirs": [str(p) for p in ctech_dirs],
-        "regexes": list(regexes or []),
+        "regexes": regexes,
+        "regex_pairs": [(configs[-1], rgx) for rgx in regexes] if configs else [],
         "missing": [],
     }
 
@@ -86,7 +93,11 @@ def fake_project(tmp_path):
 
 @pytest.fixture
 def regex_project(tmp_path):
-    """650mV and 850mV nldm corners plus a die REGEX targeting the 850mV cmax."""
+    """650mV and 850mV nldm corners plus a die REGEX targeting the 850mV cmax.
+
+    ``ulvt`` is deliberately never instantiated by ctech, so it appears only in
+    the library-wide ``*.list.all.regex`` outputs.
+    """
     lib_root = tmp_path / "lib999_myp_pdk"
     make_lib(
         lib_root,
@@ -98,6 +109,16 @@ def regex_project(tmp_path):
             "myp_base_lvt_tttt_0p850v_100c_tttt_cmax_ccslnt.lib.gz",
             "myp_base_lvt_tttt_0p650v_100c_tttt_cmax_nldm.ldb",
             "myp_base_lvt_tttt_0p850v_100c_tttt_cmax_nldm.ldb",
+        ],
+    )
+    make_lib(
+        lib_root,
+        "ulvt",
+        "mypnor000ab1n02x5",
+        corners=[
+            "myp_ulvt_tttt_0p650v_100c_tttt_cmax_nldm.lib.gz",
+            "myp_ulvt_tttt_0p850v_100c_tttt_cmax_nldm.lib.gz",
+            "myp_ulvt_tttt_0p850v_100c_tttt_cmax_nldm.ldb",
         ],
     )
     cfg = make_config(tmp_path / "a.cth", "myp", lib_root)

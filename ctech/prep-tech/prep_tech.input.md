@@ -25,4 +25,4 @@
 ## UIC IP
 
 /p/hdk/cad/dp_contour/78p6/v1.1_1.p2/lib786_i0m_180h_50pp_pdk11_r9v0p0_fv/ctech/source/p1278/180h_i0m_50pp/lvt
-/p/hdk/etc/Projects/refcth2/2026.09/78p6_i0m_opt32.cth
+/p/hdk/etc/Projects/refcth2/2026.09/78p6_i0m_opt32.cth REGEX=r"tttt_0p650v(_0p650v)?_100c"

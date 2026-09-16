@@ -1,6 +1,6 @@
 """prep_tech.generate: plan building, rendering, and writing (spec section 3)."""
 
-from prep_tech import generate
+from prep_tech import config, generate
 
 from conftest import die_dict, make_ctech, make_lib, write_text
 
@@ -37,7 +37,9 @@ def test_unreferenced_bundle_is_not_selected(tmp_path):
 
     plan = generate.build_die_plan("d", die_dict([cfg], [ctech]))
     assert plan["referenced_keys"] == {"base_lvt"}
-    assert "base_hvt" not in generate.render_die_files(plan)["stdcell.lib.list"]
+    files = generate.render_die_files(plan)
+    assert "base_hvt" not in files["stdcell.lib.list.ctech.all"]
+    assert "base_hvt" in files["stdcell.lib.list.all"]
 
 
 # ---------------------------------------------------------------------------
@@ -55,8 +57,10 @@ def test_render_die_files(fake_project):
 
     assert "_nldm.lib.gz" in files["stdcell.lib.list.ctech"]
     assert "ccslnt" not in files["stdcell.lib.list.ctech"]
-    assert "_nldm.lib.gz" in files["stdcell.lib.list"]
-    assert "ccslnt" not in files["stdcell.lib.list"]
+    assert "_nldm.lib.gz" in files["stdcell.lib.list.ctech.all"]
+    assert "ccslnt" not in files["stdcell.lib.list.ctech.all"]
+    assert "_nldm.lib.gz" in files["stdcell.lib.list.all"]
+    assert "ccslnt" not in files["stdcell.lib.list.all"]
     assert "base_lvt.ndm" in files["stdcell.ndm.list"]
     assert files["stdcell.ldb.list.ctech"].strip().endswith("_nldm.ldb")
 
@@ -140,8 +144,8 @@ def test_generate_all_writes_tree(fake_project, tmp_path):
     assert (out_root / "prep_tech.csv").is_file()
     assert (out_root / "prep_tech.duplicates.csv").is_file()
     assert has_dupes is False
-    # 6 die files + report + duplicates.csv + csv.
-    assert len(written) == 9
+    # 8 die files + report + duplicates.csv + csv.
+    assert len(written) == 11
     assert len(plans) == 1
 
 
@@ -149,9 +153,9 @@ def test_generate_all_is_idempotent(fake_project, tmp_path):
     parsed, _, _ = fake_project
     out_root = tmp_path / "out"
     generate.generate_all(parsed, str(out_root))
-    first = (out_root / "corimh" / "stdcell.lib.list").read_text()
+    first = (out_root / "corimh" / "stdcell.lib.list.all").read_text()
     generate.generate_all(parsed, str(out_root))
-    assert (out_root / "corimh" / "stdcell.lib.list").read_text() == first
+    assert (out_root / "corimh" / "stdcell.lib.list.all").read_text() == first
 
 
 def test_generate_all_empty_dies(tmp_path):
@@ -174,6 +178,67 @@ def test_planned_outputs_matches_generate_all(fake_project, tmp_path):
 
 
 # ---------------------------------------------------------------------------
+# Report structure (spec 3.3)
+# ---------------------------------------------------------------------------
+
+def test_report_labels_ip_sections_as_ip(fake_project):
+    parsed, _, _ = fake_project
+    info = parsed["dies"]["corimh"]
+    die_plan = generate.build_die_plan("corimh", dict(info, kind="die"))
+    ip_plan = generate.build_die_plan("sbe_ip", dict(info, kind="ip"))
+    report = generate.render_report([("corimh", die_plan), ("sbe_ip", ip_plan)])
+    assert "die: corimh" in report
+    assert "ip: sbe_ip" in report
+    assert "die: sbe_ip" not in report
+
+
+def test_report_defaults_to_die_when_kind_is_absent(fake_project):
+    parsed, _, _ = fake_project
+    plan = generate.build_die_plan("corimh", parsed["dies"]["corimh"])
+    assert "die: corimh" in generate.render_report([("corimh", plan)])
+
+
+def test_report_output_key_precedes_the_breakdowns(fake_project):
+    parsed, _, _ = fake_project
+    plan = generate.build_die_plan("corimh", parsed["dies"]["corimh"])
+    report = generate.render_report([("corimh", plan)])
+
+    assert report.index("# summary") < report.index("# output file key")
+    assert report.index("# output file key") < report.index("die: corimh")
+    for name, _, _ in generate.OUTPUT_KEY:
+        assert f"#   {name}" in report
+    assert "usage: Fusion, RTLA (phy aware)." in report
+
+
+def test_report_lists_configuration_regex_pairs(regex_project):
+    info = regex_project["dies"]["corimh"]
+    plan = generate.build_die_plan("corimh", info)
+    pattern = plan["regexes"][0]
+    assert generate.config_regex_pairs(plan) == [(info["config_files"][0], pattern)]
+
+    report = generate.render_report([("corimh", plan)])
+    assert "  configuration/regex pairs:" in report
+    assert f'    a.cth  r"{pattern}"' in report
+
+
+def test_configuration_regex_pairs_name_each_source_line(tmp_path, write):
+    cfg = write(tmp_path / "78p6_i0m_opt32.cth", "")
+    ctech = tmp_path / "ctech"
+    ctech.mkdir()
+    md = write(
+        tmp_path / "in.md",
+        f'## CORCBBP DIE\n{ctech}  REGEX=r"aaa"\n{cfg} REGEX=r"bbb"\n',
+    )
+    info = config.parse_input(md)["dies"]["corcbbp"]
+    assert info["regex_pairs"] == [(str(ctech), "aaa"), (cfg, "bbb")]
+
+    plan = generate.build_die_plan("corcbbp", info)
+    report = generate.render_report([("corcbbp", plan)])
+    assert '    ctech               r"aaa"' in report
+    assert '    78p6_i0m_opt32.cth  r"bbb"' in report
+
+
+# ---------------------------------------------------------------------------
 # REGEX-filtered lists
 # ---------------------------------------------------------------------------
 
@@ -182,11 +247,11 @@ def test_regex_list_files_rendered(regex_project):
     files = generate.render_die_files(plan)
 
     assert "0p650v" in files["stdcell.lib.list.ctech"]
-    rgx = files["stdcell.lib.list.ctech.regex"]
+    rgx = files["stdcell.lib.list.ctech.all.regex"]
     assert "0p850v" in rgx
     assert "0p650v" not in rgx
     assert "ccslnt" not in rgx
-    assert files["stdcell.ldb.list.ctech.regex"].strip().endswith(
+    assert files["stdcell.ldb.list.ctech.all.regex"].strip().endswith(
         "0p850v_100c_tttt_cmax_nldm.ldb"
     )
 
@@ -194,19 +259,60 @@ def test_regex_list_files_rendered(regex_project):
 def test_regex_report_counts(regex_project):
     plan = generate.build_die_plan("corimh", regex_project["dies"]["corimh"])
     report = generate.render_report([("corimh", plan)])
-    assert "ctech-referenced .lib files: 1" in report
-    assert "regex-filtered .lib files: 1" in report
-    assert "regex-filtered .ldb/.db files: 1" in report
-    assert "full-list .lib files: 2" in report
+    assert "bundles in library roots: 2" in report
+    assert "ctech-referenced bundles: 1" in report
+    assert "stdcell.lib.list.ctech: 1" in report
+    assert "stdcell.lib.list.ctech.all: 2" in report
+    assert "stdcell.lib.list.ctech.all.regex: 1" in report
+    assert "stdcell.lib.list.all: 4" in report
+    assert "stdcell.lib.list.all.regex: 2" in report
+
+
+def test_all_lists_span_unreferenced_bundles(regex_project):
+    plan = generate.build_die_plan("corimh", regex_project["dies"]["corimh"])
+    files = generate.render_die_files(plan)
+
+    assert "ulvt" not in files["stdcell.lib.list.ctech.all.regex"]
+
+    wide = files["stdcell.lib.list.all.regex"]
+    assert "base_lvt" in wide and "ulvt" in wide
+    assert "0p650v" not in wide
+    assert "ccslnt" not in wide
+    assert "ulvt" in files["stdcell.ldb.list.all.regex"]
+
+    unfiltered = files["stdcell.lib.list.all"]
+    assert "ulvt" in unfiltered
+    assert "0p650v" in unfiltered
+    assert "ccslnt" not in unfiltered
+
+
+def test_ctech_scoped_outputs_exclude_unreferenced_bundles(regex_project):
+    plan = generate.build_die_plan("corimh", regex_project["dies"]["corimh"])
+    files = generate.render_die_files(plan)
+    for name in (
+        "static_stdcells.f",
+        "stdcell.ndm.list",
+        "stdcell.lib.list.ctech",
+        "stdcell.ldb.list.ctech",
+        "stdcell.lib.list.ctech.all",
+        "stdcell.ldb.list.ctech.all",
+    ):
+        assert "ulvt" not in files[name], name
 
 
 def test_no_regex_no_regex_files(fake_project):
     parsed, _, _ = fake_project
     plan = generate.build_die_plan("corimh", parsed["dies"]["corimh"])
     files = generate.render_die_files(plan)
-    assert "stdcell.lib.list.ctech.regex" not in files
-    assert "stdcell.ldb.list.ctech.regex" not in files
-    assert "regex-filtered" not in generate.render_report([("corimh", plan)])
+    assert not [name for name in files if name.endswith(".regex")]
+    assert "stdcell.lib.list.all" in files
+
+    report = generate.render_report([("corimh", plan)])
+    assert "configuration/regex pairs" not in report
+    assert not [
+        line for line in report.splitlines() if line.startswith("  stdcell.")
+        and ".regex" in line
+    ]
 
 
 # ---------------------------------------------------------------------------

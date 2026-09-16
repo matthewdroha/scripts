@@ -45,6 +45,14 @@ def test_parse_input_ip_section_suffix(tmp_path, write):
     assert list(parse_input(md)["dies"]) == ["sbe_ip"]
 
 
+def test_parse_input_records_section_kind(tmp_path, write):
+    cfg = write(tmp_path / "a.cth", "")
+    md = write(tmp_path / "in.md", f"## CORIMH DIE\n{cfg}\n## SBE IP\n{cfg}\n")
+    dies = parse_input(md)["dies"]
+    assert dies["corimh"]["kind"] == "die"
+    assert dies["sbe_ip"]["kind"] == "ip"
+
+
 def test_parse_input_regex_raw_string(tmp_path, write):
     cfg = write(tmp_path / "76p5_g1i_opt8.cth", "")
     md = write(
