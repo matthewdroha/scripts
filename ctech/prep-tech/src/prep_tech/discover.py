@@ -311,9 +311,12 @@ def enumerate_bundles(lib_root: str) -> dict:
 
         libs, ldbs = _collect_lib_dir(os.path.join(root, "lib"))
         ndm_dir = os.path.join(root, "ndm")
+        # ndm/ also holds label and rule .tcl sidecars; only the .ndm is a list entry.
         ndm = (
             sorted(
-                os.path.join(ndm_dir, entry) for entry in os.listdir(ndm_dir)
+                os.path.join(ndm_dir, entry)
+                for entry in os.listdir(ndm_dir)
+                if entry.endswith(".ndm")
             )
             if os.path.isdir(ndm_dir)
             else []

@@ -169,7 +169,8 @@ $WORKAREA/prep_tech/
 │   ├── stdcell.lib.list.all              # every bundle, every nldm corner; useful for determining which PVTs exist for filtering
 │   ├── stdcell.ldb.list.all.regex        # optional (only if REGEX given): every bundle, REGEX corners; for full synthesis
 │   ├── stdcell.lib.list.all.regex        # optional (only if REGEX given): every bundle, REGEX corners; for full synthesis
-│   └── stdcell.ndm.list                  # all ndm files for ctech bundles. Consumed by synthesis.
+│   ├── stdcell.ndm.list.ctech                # ndm files for ctech bundles. Consumed by synthesis.
+│   └── stdcell.ndm.list.all                  # ndm files for every bundle in the library roots
 ├── prep_tech.report                      # per-die summary statistics (see 3.3)
 └── prep_tech.csv                         # detailed ctech→stdcell mapping (see 3.4)
 ```
@@ -183,7 +184,7 @@ For `static_stdcells.f`, the first line is `+define+functional`, followed by the
 List filenames are built from a **grammar**, not from ad-hoc names:
 
 ```
-stdcell.<lib|ldb>.list[.ctech][.all][.regex]
+stdcell.<lib|ldb|ndm>.list[.ctech][.all][.regex]
 ```
 
 Each suffix is an independent, orthogonal narrowing:
@@ -205,14 +206,16 @@ The emitted set (per die):
 | `stdcell.<fmt>.list.ctech.all.regex` | ctech-referenced | nldm matching `REGEX` | ctech at chosen corners |
 | `stdcell.<fmt>.list.all` | every bundle | all nldm | complete library reference |
 | `stdcell.<fmt>.list.all.regex` | every bundle | nldm matching `REGEX` | **synthesis** |
+| `stdcell.ndm.list.ctech` | ctech-referenced | n/a | fusion, phy-aware rtla |
+| `stdcell.ndm.list.all` | every bundle | n/a | fusion/rtla mapping outside ctech |
 
 The `.regex` files are emitted **only** when the die specifies at least one `REGEX=`. They are an **independent corner selection**, not a filter of the PVT-selected `*.list.ctech`, so they may hold **more than one file per bundle**; a `.ctech.all.regex` larger than `.ctech` signals the designer should tighten the REGEX.
 
 `stdcell.<fmt>.list.all.regex` is the file that motivates the whole scheme: synthesis needs the **whole** standard-cell library visible to the mapper, but loading every corner of every bundle is prohibitively slow, so the reduction must be in corners rather than bundles.
 
-All list files are nldm-only. `stdcell.ndm.list` has no variants — NDM basenames carry no PVT corner to match — and is scoped to ctech-referenced bundles.
+The `lib`/`ldb` list files are nldm-only. The `ndm` lists take the **scope** axis only — NDM basenames carry no PVT corner, so `.all` on an ndm name means "every bundle", and there is no `.regex` variant. Every entry ends in `.ndm`: the `ndm/` directory also ships `*_labels.tcl` and `*_rules.tcl` sidecars, which are not list entries.
 
-> **Deprecated names.** `*.list` (now `*.list.ctech.all`) and `*.list.ctech.regex` (now `*.list.ctech.all.regex`). The bare `*.list` name was ambiguous: it read as "everything" but was scoped to ctech-referenced bundles. The earlier terms "minimal" and "full" are likewise deprecated — describe a list by its suffixes.
+> **Deprecated names.** `*.list` (now `*.list.ctech.all`), `*.list.ctech.regex` (now `*.list.ctech.all.regex`), and `stdcell.ndm.list` (now `stdcell.ndm.list.ctech`). The bare `*.list` name was ambiguous: it read as "everything" but was scoped to ctech-referenced bundles. The earlier terms "minimal" and "full" are likewise deprecated — describe a list by its suffixes.
 
 ### 3.1 `static_stdcells.f`
 
@@ -313,6 +316,8 @@ verilog/
 lib/
 
 ldb or db will be under lib/
+
+`ndm/` also holds `*_labels.tcl` and `*_rules.tcl` sidecars alongside the `*.ndm`. Only entries ending in `.ndm` belong in an ndm list.
 
 Collateral may be compressed.
 
@@ -460,7 +465,7 @@ Coverage: configuration parsing (filesystem-type classification, raw-string `REG
 > **Resolved:** A **Python raw string literal** (`REGEX=r"..."` or `REGEX=r'...'`), so the input file spells the pattern exactly as it would be written in Python source for `re.search`. This removes the escaping ambiguity of the old `/.../` delimiters (a pattern containing `/` needed no escape, but the form looked like Perl while the semantics were Python). The `/.../` form is now rejected outright rather than silently reinterpreted.
 
 **Q13.** Scope of the library-wide lists (`*.list.all`, `*.list.all.regex`).  
-> **Resolved:** **Every bundle** in the die's resolved library roots, not just the ctech-referenced ones. Synthesis needs the whole library visible to the mapper, so the useful reduction is in **corners**, not bundles: for a 226-bundle library, `*.list.all.regex` replaces "every corner of every bundle" with "the wanted corners of every bundle". The nldm-only restriction is kept for consistency, and no `stdcell.ndm.list.regex` is emitted because NDM basenames carry no PVT corner to match.
+> **Resolved:** **Every bundle** in the die's resolved library roots, not just the ctech-referenced ones. Synthesis needs the whole library visible to the mapper, so the useful reduction is in **corners**, not bundles: for a 226-bundle library, `*.list.all.regex` replaces "every corner of every bundle" with "the wanted corners of every bundle". The nldm-only restriction is kept for consistency, and no `stdcell.ndm.list*.regex` is emitted because NDM basenames carry no PVT corner to match.
 
 **Q14.** List filename scheme.  
 > **Resolved:** A **suffix grammar** (`stdcell.<fmt>.list[.ctech][.all][.regex]`, see 3.0) replaced the ad-hoc names. The bare `*.list` was actively misleading — it read as "every bundle" but was scoped to ctech-referenced ones — and `*.list.ctech.regex` hid its pre-filter source, so it was impossible to tell whether the regex had been applied to one selected corner or to all of them. Every `.regex` file now carries the `.all` of the population it was filtered from. The cost is longer names; the benefit is that a filename fully determines its content, and the report simply lists the filenames rather than describing them in prose.

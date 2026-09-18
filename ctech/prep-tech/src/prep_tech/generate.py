@@ -66,9 +66,14 @@ OUTPUT_KEY = [
         "Power estimation, rtla, dc, sta/caliber, vclp, fishtail/TCM.",
     ),
     (
-        "stdcell.ndm.list",
+        "stdcell.ndm.list.ctech",
         "All ndm collateral for the ctech bundles.",
         "Fusion, RTLA (phy aware).",
+    ),
+    (
+        "stdcell.ndm.list.all",
+        "All ndm collateral for every bundle in the library roots.",
+        "Fusion/RTLA runs that may map outside the ctech bundles.",
     ),
 ]
 
@@ -164,7 +169,7 @@ def render_die_files(plan: dict) -> dict:
     referenced = sorted(plan["referenced_keys"])
     compiled = discover.compile_regexes(plan["regexes"])
 
-    bmods, ndm = [], []
+    bmods, ctech_ndm, all_ndm = [], [], []
     ctech_lib, ctech_ldb = [], []
     ctech_all_lib, ctech_all_ldb = [], []
     ctech_regex_lib, ctech_regex_ldb = [], []
@@ -174,7 +179,7 @@ def render_die_files(plan: dict) -> dict:
     for name in referenced:
         bundle = bundles[name]
         bmods.extend(bundle.get("bmods") or [bundle["bmod"]])
-        ndm.extend(bundle["ndm"])
+        ctech_ndm.extend(bundle["ndm"])
 
         lib_nldm = discover.nldm_only(bundle["lib"])
         ldb_nldm = discover.nldm_only(bundle["ldb"])
@@ -196,6 +201,7 @@ def render_die_files(plan: dict) -> dict:
     # synthesis maps against the whole library, only at the wanted corners.
     for name in sorted(bundles):
         bundle = bundles[name]
+        all_ndm.extend(bundle["ndm"])
         lib_nldm = discover.nldm_only(bundle["lib"])
         ldb_nldm = discover.nldm_only(bundle["ldb"])
         all_lib.extend(lib_nldm)
@@ -212,7 +218,8 @@ def render_die_files(plan: dict) -> dict:
         "stdcell.lib.list.ctech.all": _list_text(ctech_all_lib),
         "stdcell.ldb.list.all": _list_text(all_ldb),
         "stdcell.lib.list.all": _list_text(all_lib),
-        "stdcell.ndm.list": _list_text(ndm),
+        "stdcell.ndm.list.ctech": _list_text(ctech_ndm),
+        "stdcell.ndm.list.all": _list_text(all_ndm),
     }
     if compiled:
         files["stdcell.ldb.list.ctech.all.regex"] = _list_text(ctech_regex_ldb)
@@ -246,13 +253,16 @@ def render_output_key() -> list[str]:
     lines = [
         "# output file key",
         "#",
-        "#   naming: stdcell.<lib|ldb>.list[.ctech][.all][.regex]",
+        "#   naming: stdcell.<lib|ldb|ndm>.list[.ctech][.all][.regex]",
         "#     .ctech  only bundles instantiated by ctech;"
         " absent = every bundle in the library roots",
         "#     .all    every nldm corner;"
         " absent = one corner, PVT-selected (tttt / 0.650V / 100C)",
         "#     .regex  only corners matching the die REGEX;"
         " written only when the die sets one",
+        "#",
+        "#   ndm carries no corner, so its lists are scoped only:"
+        " .ctech or .all",
         "#",
     ]
     for name, what, usage in OUTPUT_KEY:

@@ -72,7 +72,7 @@ def test_full_run_writes_tree(tmp_path, capsys):
     assert cli.main([md, "--output-root", str(out)]) == cli.EXIT_OK
     assert (out / "corimh" / "static_stdcells.f").is_file()
     assert (out / "prep_tech.report").is_file()
-    assert "wrote 11 files" in capsys.readouterr().out
+    assert "wrote 12 files" in capsys.readouterr().out
 
 
 def test_regex_run_emits_regex_lists(tmp_path):

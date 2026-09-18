@@ -74,7 +74,8 @@ discovery under `path` using the pitch from `lib_height_class`.
 │   ├── stdcell.ldb.list.all              # every bundle, every nldm corner
 │   ├── stdcell.lib.list.all.regex        # only when the die has a REGEX
 │   ├── stdcell.ldb.list.all.regex        # only when the die has a REGEX
-│   └── stdcell.ndm.list                  # all ndm collateral for the ctech bundles
+│   ├── stdcell.ndm.list.ctech                # all ndm collateral for the ctech bundles
+│   └── stdcell.ndm.list.all                  # all ndm collateral for every bundle
 ├── prep_tech.report                  # header, per-die summary, per-die statistics
 ├── prep_tech.csv                     # die,ctech_cell,stdcell,bundle,config,bmod,ctech .sv
 └── prep_tech.duplicates.csv          # header always; rows when a stdcell is defined twice
@@ -94,13 +95,15 @@ a die directory by hand if its input set shrinks.
 | `stdcell.lib.list.all` | Every corner of every bundle | Complete library reference |
 | `stdcell.lib.list.all.regex` | Every bundle at the `REGEX` corners | Synthesis: the mapper needs the whole library but not every PVT corner |
 | `stdcell.ldb.list*` | As above, for SNPS compiled liberty | SNPS activities: power estimation, rtla (no phy), dc, sta/caliber, vclp, fishtail/TCM |
-| `stdcell.ndm.list` | List containing paths to SNPS .ndm (New Data Model) | Fusion, RTLA (phy aware) |
+| `stdcell.ndm.list.ctech` | Paths to the SNPS .ndm (New Data Model) of the ctech bundles | Fusion, RTLA (phy aware) |
+| `stdcell.ndm.list.all` | Paths to the .ndm of every bundle in the library roots | Fusion/RTLA runs that may map outside the ctech bundles |
 
-List names follow a suffix grammar, `stdcell.<lib|ldb>.list[.ctech][.all][.regex]`:
+List names follow a suffix grammar, `stdcell.<lib|ldb|ndm>.list[.ctech][.all][.regex]`:
 `.ctech` restricts to bundles ctech instantiates (absent = every bundle in the
 library roots), `.all` keeps every nldm corner (absent = one PVT-selected corner),
 and `.regex` filters corners by the die `REGEX`. A `.regex` name always carries the
-`.all` of the population it was filtered from.
+`.all` of the population it was filtered from. NDM collateral has no corner, so the
+ndm lists are scoped only: `.ctech` or `.all`.
 
 ## Development
 

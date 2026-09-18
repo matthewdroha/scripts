@@ -41,6 +41,9 @@ def make_lib(root, bundle_name, cell, corners=()):
         for name in corners:
             write_text(bundle / "lib" / name, "")
         write_text(bundle / "ndm" / f"lib999_{bundle_name}.ndm", "")
+        # Real ndm/ directories ship label and rule sidecars next to the .ndm.
+        write_text(bundle / "ndm" / f"lib999_{bundle_name}_labels.tcl", "")
+        write_text(bundle / "ndm" / f"lib999_{bundle_name}_rules.tcl", "")
     return bundle
 
 

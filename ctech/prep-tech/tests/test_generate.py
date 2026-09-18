@@ -61,7 +61,11 @@ def test_render_die_files(fake_project):
     assert "ccslnt" not in files["stdcell.lib.list.ctech.all"]
     assert "_nldm.lib.gz" in files["stdcell.lib.list.all"]
     assert "ccslnt" not in files["stdcell.lib.list.all"]
-    assert "base_lvt.ndm" in files["stdcell.ndm.list"]
+    assert "base_lvt.ndm" in files["stdcell.ndm.list.ctech"]
+    assert "base_lvt.ndm" in files["stdcell.ndm.list.all"]
+    for name in ("stdcell.ndm.list.ctech", "stdcell.ndm.list.all"):
+        entries = files[name].split()
+        assert entries and all(entry.endswith(".ndm") for entry in entries), name
     assert files["stdcell.ldb.list.ctech"].strip().endswith("_nldm.ldb")
 
 
@@ -139,13 +143,14 @@ def test_generate_all_writes_tree(fake_project, tmp_path):
     written, plans, has_dupes = generate.generate_all(parsed, str(out_root))
 
     assert (out_root / "corimh" / "static_stdcells.f").is_file()
-    assert (out_root / "corimh" / "stdcell.ndm.list").is_file()
+    assert (out_root / "corimh" / "stdcell.ndm.list.ctech").is_file()
+    assert (out_root / "corimh" / "stdcell.ndm.list.all").is_file()
     assert (out_root / "prep_tech.report").is_file()
     assert (out_root / "prep_tech.csv").is_file()
     assert (out_root / "prep_tech.duplicates.csv").is_file()
     assert has_dupes is False
-    # 8 die files + report + duplicates.csv + csv.
-    assert len(written) == 11
+    # 9 die files + report + duplicates.csv + csv.
+    assert len(written) == 12
     assert len(plans) == 1
 
 
@@ -291,13 +296,14 @@ def test_ctech_scoped_outputs_exclude_unreferenced_bundles(regex_project):
     files = generate.render_die_files(plan)
     for name in (
         "static_stdcells.f",
-        "stdcell.ndm.list",
+        "stdcell.ndm.list.ctech",
         "stdcell.lib.list.ctech",
         "stdcell.ldb.list.ctech",
         "stdcell.lib.list.ctech.all",
         "stdcell.ldb.list.ctech.all",
     ):
         assert "ulvt" not in files[name], name
+    assert "ulvt" in files["stdcell.ndm.list.all"]
 
 
 def test_no_regex_no_regex_files(fake_project):
