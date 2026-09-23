@@ -70,7 +70,8 @@ Build scripts using the same structure as `pprtl2/fixclocks.pl`. For testing use
 
 ## Markdown
 
-- Surround heading with at least one blank line above and below.
+- Surround heading with one blank line above and below.
+- Allow no more than 2 consecutive blank lines outside of code fences.
 - All fenced code blocks should specify the language for syntax highlighting.
 - Trailing spaces should be avoided or be 2 spaces for line breaks.
 
