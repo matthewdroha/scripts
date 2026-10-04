@@ -68,6 +68,11 @@ For the full scaffolding workflow run the `/new-uv-tool` prompt.
 Build scripts using the same structure as `pprtl2/fixclocks.pl`. For testing use
 `Test::More`.
 
+
+## Bash
+
+Bash scripts should be simple and standalone.
+
 ## Markdown
 
 - Surround heading with one blank line above and below.
