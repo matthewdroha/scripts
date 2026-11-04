@@ -61,6 +61,89 @@ def make_config(path, lib_name, lib_root):
     return write_text(path, f"[DESIGNPACKAGE]\nlib_name = {lib_name}\n{lib_name} = {lib_root}\n")
 
 
+TSMC_CORNERS = [
+    "ffgnp_0p825v_125c_cbest_CCbest_T_hm_lvf",
+    "ssgnp_0p675v_125c_cworst_CCworst_T_hm_lvf",
+    "tt_0p65v_85c_typical_hm_lvf",
+    "tt_0p75v_85c_typical_hm_lvf",
+]
+
+
+def make_foundry_release(root, libs):
+    """A TSMC-style release: one ``<lib>_lib`` dir per entry plus a designpackage.tcl.
+
+    *libs* maps library name -> stdcell module name. Timing is CCS/LVF only, as
+    in N2P/N3P. Returns the designpackage.tcl path (relative to *root*).
+    """
+    rel_tcl = "flowinterface/stack/h156p48/designpackage.tcl"
+    lines = [
+        'set ivar(techlib_dir) "/elsewhere/not/vanity"',
+        f'set ivar(link_libs)  "{" ".join(libs)} n02p_dtcd_lib"',
+    ]
+    for lib, cell in libs.items():
+        base = root / lib
+        (base / "verilog" / "v110a").mkdir(parents=True)
+        write_text(base / "verilog" / "v110a" / f"{lib}.v", f"module {cell} (A, Z); endmodule\n")
+        prefix = f"$ivar(techlib_dir)/{lib}"
+        lines.append(
+            f'set ivar(lib,{lib},verilog_default_filelist) "{prefix}/verilog/v110a/{lib}.v"'
+        )
+        lines.append(f'set ivar(lib,{lib},ndm_reflist) "{prefix}/ndm_3.0/v110b/{lib}.ndm"')
+        lines.append(f'set ivar(lib,{lib},lib_nldm_filelist,T_85) ""')
+        for corner in TSMC_CORNERS:
+            key = corner.split("_", 1)[0][0].upper()
+            for ext, kind in ((".lib.gz", "lib"), (".db", "db")):
+                path = f"{prefix}/LVF/CCS/v110b/{lib.removesuffix('_lib')}{corner}{ext}"
+                lines.append(f'set ivar(lib,{lib},{kind}_ccs_filelist,{key}) "{path}"')
+                lines.append(f'set ivar(lib,{lib},fusion_{kind}_ccs_filelist,{key}) "{path}"')
+    (root / "flowinterface" / "stack" / "h156p48").mkdir(parents=True)
+    write_text(root / rel_tcl, "\n".join(lines) + "\n")
+    return rel_tcl
+
+
+def make_foundry_config(directory, release_root, rel_tcl):
+    """Top-level config that reaches ``path``/``dpvarspath`` via INCLUDES and ``$DP_PATH``."""
+    inc = write_text(
+        directory / "dp_generic.cth",
+        "[DESIGNPACKAGE]\n"
+        "lib_height_class = h156p48\n"
+        "name = n2p\n"
+        "path = $DP_PATH\n"
+        f"dpvarspath = {rel_tcl}\n"
+        "[ENVS]\n"
+        "DP_PATH = $RELEASE_BASE/$DP_VERSION\n"
+        f"RELEASE_BASE = {release_root.parent}\n"
+        f"DP_VERSION = {release_root.name}\n",
+    )
+    return write_text(
+        directory / "n2p_htall_conf7.cth", f"[INCLUDES]\n{inc}\n[DESIGNPACKAGE]\nname = n2p\n"
+    )
+
+
+@pytest.fixture
+def foundry_project(tmp_path):
+    """TSMC-style die: config chain -> designpackage.tcl -> two CCS-only bundles.
+
+    Returns ``(parsed, config_path, release_root)``.
+    """
+    release = tmp_path / "tech-release" / "v1.1.5"
+    rel_tcl = make_foundry_release(
+        release,
+        {
+            "tcbn02p_bwph156pnpnl3p48cpd_base_lvt_c240429_lib": "AN2D2BWP156HPNPN3P48CPDLVT",
+            "tcbn02p_bwph156pnpnl3p48cpd_base_ulvt_c240429_lib": "AN2D2BWP156HPNPN3P48CPDULVT",
+        },
+    )
+    cfg = make_foundry_config(tmp_path, release, rel_tcl)
+    ctech = make_ctech(
+        tmp_path / "ctech",
+        "ctech_lib_and",
+        ["AN2D2BWP156HPNPN3P48CPDLVT", "MISSINGBWP156HPNPN3P48CPDLVT", "ctech_lib_sub"],
+    )
+    parsed = {"dies": {"hovis": die_dict([cfg], [ctech])}}
+    return parsed, cfg, str(release)
+
+
 @pytest.fixture
 def write():
     return write_text

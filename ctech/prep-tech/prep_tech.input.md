@@ -26,3 +26,8 @@
 
 /p/hdk/cad/dp_contour/78p6/v1.0_2/lib786_i0m_180h_50pp_pdk10_r8v2p0_fv/ctech/source/p1278/180h_i0m_50pp/lvt
 /p/hdk/etc/Projects/refcth2/2026.06/78p6_i0m_opt32.cth REGEX=r"_(lvt|svt)_tttt_0p650v(_0p650v)?_m40c"
+
+## HOVIS
+
+/p/tech1/n2p/tech-release/v1.1.5/ctech_c4v26ww04b_hdk164_cth2509_lib/c4v26ww04b_hdk164_cth2509/source/n2p/h156p48/lvt
+/p/hdk/etc/Projects/refcth2/2026.12/n2p_htall_conf7.cth

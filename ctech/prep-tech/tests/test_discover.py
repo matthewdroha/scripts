@@ -286,6 +286,134 @@ def test_nldm_only_filter():
     assert discover.nldm_only(files) == ["a_nldm.lib.gz", "c_nldm.ldb"]
 
 
+def test_select_timing_tsmc_corner_glued_to_library_date():
+    stem = "d/tcbn02p_bwph156pnpnl3p48cpd_base_lvt_c240429"
+    bundle = {
+        "timing": "ccs",
+        "lib": [
+            f"{stem}ffgnp_0p65v_125c_cbest_CCbest_T_hm_lvf.lib.gz",
+            f"{stem}ssgnp_0p65v_125c_cworst_CCworst_T_hm_lvf.lib.gz",
+            f"{stem}tt_0p75v_85c_typical_hm_lvf.lib.gz",
+            f"{stem}tt_0p65v_85c_typical_hm_lvf.lib.gz",
+            f"{stem}tt_0p65v_25c_typical_hm_lvf.lib.gz",
+        ],
+    }
+    assert discover.select_timing(bundle, "lib").endswith("tt_0p65v_85c_typical_hm_lvf.lib.gz")
+
+
+def test_select_timing_directory_bundles_stay_nldm_only():
+    bundle = {"lib": ["d/x_tttt_0p650v_100c_ccslnt.lib.gz"]}
+    assert discover.timing_files(bundle, "lib") == []
+    assert discover.select_timing(bundle, "lib") is None
+
+
+# ---------------------------------------------------------------------------
+# Foundry (TSMC / Samsung): INCLUDES, ENVS, designpackage.tcl
+# ---------------------------------------------------------------------------
+
+def test_parse_cth_file_follows_includes_and_expands_envs(tmp_path, write):
+    inc = write(
+        tmp_path / "inc.cth",
+        "[DESIGNPACKAGE]\n"
+        "path = $DP_PATH\n"
+        "version = base\n"
+        "[ENVS]\n"
+        "DP_PATH = /p/tech1/$PROCESS_NAME/tech-release/${DP_VERSION}\n"
+        "PROCESS_NAME = s2p\n"
+        "DP_VERSION = v1.1.00_eval\n",
+    )
+    top = write(
+        tmp_path / "top.cth",
+        f"[INCLUDES]\n{inc}\n[DESIGNPACKAGE]\nversion = override\n",
+    )
+    params = discover.parse_cth_file(top)
+    assert params["path"] == "/p/tech1/s2p/tech-release/v1.1.00_eval"
+    assert params["version"] == "override"
+
+
+def test_parse_cth_file_missing_include(tmp_path, write):
+    top = write(tmp_path / "top.cth", f"[INCLUDES]\n{tmp_path / 'nope.cth'}\n")
+    with pytest.raises(FileNotFoundError, match="include not found"):
+        discover.parse_cth_file(top)
+
+
+def test_parse_cth_file_include_cycle_terminates(tmp_path, write):
+    a, b = tmp_path / "a.cth", tmp_path / "b.cth"
+    write(a, f"[INCLUDES]\n{b}\n[DESIGNPACKAGE]\nname = a\n")
+    write(b, f"[INCLUDES]\n{a}\n[DESIGNPACKAGE]\npath = /x\n")
+    assert discover.parse_cth_file(str(a)) == {"path": "/x", "name": "a"}
+
+
+def test_parse_designpackage_tcl(foundry_project):
+    _, cfg, release = foundry_project
+    root, tcl = discover.designpackage_tcl(discover.parse_cth_file(cfg))
+    assert root == release
+
+    parsed = discover.parse_designpackage_tcl(tcl, root)
+    lib = "tcbn02p_bwph156pnpnl3p48cpd_base_lvt_c240429_lib"
+    assert lib in parsed["link_libs"]
+    assert "n02p_dtcd_lib" in parsed["link_libs"]
+    # Per-corner lists are unioned; $ivar(techlib_dir) becomes the vanity path.
+    assert len(parsed["libs"][lib]["db_ccs_filelist"]) == 4
+    assert all(p.startswith(release) for p in parsed["libs"][lib]["db_ccs_filelist"])
+    assert "fusion_db_ccs_filelist" not in parsed["libs"][lib]
+
+
+def test_enumerate_designpackage_bundles(foundry_project):
+    _, cfg, release = foundry_project
+    root, tcl = discover.designpackage_tcl(discover.parse_cth_file(cfg))
+    bundles = discover.enumerate_designpackage_bundles(tcl, root)
+
+    # n02p_dtcd_lib is a link lib without verilog: not a bundle.
+    assert sorted(bundles) == [
+        "tcbn02p_bwph156pnpnl3p48cpd_base_lvt_c240429_lib",
+        "tcbn02p_bwph156pnpnl3p48cpd_base_ulvt_c240429_lib",
+    ]
+    lvt = bundles["tcbn02p_bwph156pnpnl3p48cpd_base_lvt_c240429_lib"]
+    assert lvt["timing"] == "ccs"
+    assert lvt["cells"] == {"AN2D2BWP156HPNPN3P48CPDLVT"}
+    assert lvt["root"] == os.path.join(release, "tcbn02p_bwph156pnpnl3p48cpd_base_lvt_c240429_lib")
+    assert len(lvt["lib"]) == 4 and all(p.endswith(".lib.gz") for p in lvt["lib"])
+    assert len(lvt["ldb"]) == 4 and all(p.endswith(".db") for p in lvt["ldb"])
+    assert [os.path.basename(p) for p in lvt["ndm"]] == [
+        "tcbn02p_bwph156pnpnl3p48cpd_base_lvt_c240429_lib.ndm"
+    ]
+
+
+def test_enumerate_designpackage_bundles_prefers_nldm(tmp_path, write):
+    (tmp_path / "v").mkdir()
+    write(tmp_path / "v" / "x.v", "module X1 (A); endmodule\n")
+    tcl = write(
+        tmp_path / "dp.tcl",
+        'set ivar(link_libs) "x_lib"\n'
+        'set ivar(lib,x_lib,verilog_default_filelist) "$ivar(techlib_dir)/v/x.v"\n'
+        'set ivar(lib,x_lib,lib_nldm_filelist,T) "$ivar(techlib_dir)/x_tt_0p65v_85c.lib"\n'
+        'set ivar(lib,x_lib,lib_ccs_filelist,T) "$ivar(techlib_dir)/x_tt_0p65v_85c_ccs.lib"\n',
+    )
+    bundle = discover.enumerate_designpackage_bundles(tcl, str(tmp_path))["x_lib"]
+    assert bundle["timing"] == "nldm"
+    assert bundle["lib"] == [str(tmp_path / "x_tt_0p65v_85c.lib")]
+
+
+def test_resolve_bundle_sources_foundry(foundry_project):
+    _, cfg, _ = foundry_project
+    sources = discover.resolve_bundle_sources(discover.parse_cth_file(cfg))
+    assert len(sources) == 1
+    assert sources[0][0].endswith("designpackage.tcl")
+    assert len(sources[0][1]) == 2
+
+
+def test_designpackage_tcl_missing_file(tmp_path):
+    with pytest.raises(FileNotFoundError, match="designpackage.tcl not found"):
+        discover.designpackage_tcl({"path": str(tmp_path), "dpvarspath": "x/designpackage.tcl"})
+
+
+def test_is_foundry_cell_name():
+    assert discover.is_foundry_cell_name("AN2D2BWP156HPNPN3P48CPDLVT")
+    assert not discover.is_foundry_cell_name("ctech_lib_sub")
+    assert not discover.is_foundry_cell_name("g1iinv000ab1n24x5")
+
+
 # ---------------------------------------------------------------------------
 # REGEX collateral filtering
 # ---------------------------------------------------------------------------

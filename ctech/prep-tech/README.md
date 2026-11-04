@@ -43,7 +43,7 @@ From another directory: `uv --project /path/to/prep-tech run prep_tech ...`.
 
 | Input | Description |
 | ----- | ----------- |
-| `prep_tech.input.md` | Markdown. `## <NAME> DIE` / `## <NAME> IP` headings; one absolute path per line underneath. |
+| `prep_tech.input.md` | Markdown. `## <NAME> DIE` / `## <NAME> IP` headings (a bare `## <NAME>` is a die); one absolute path per line underneath. |
 | ctech structural release area | A line that is an existing **directory**. Its `ctech_lib*.sv` files are parsed for instantiated stdcells. |
 | Cheetah configuration file | A line that is an existing **file**. Its `[DESIGNPACKAGE]` section resolves to one or more stdcell library roots. |
 | `REGEX=r"<pattern>"` | Optional suffix on a configuration line, written as a Python raw string (`r"..."` or `r'...'`). All of a die's patterns are unioned to build the optional `*.regex` outputs. |
@@ -57,6 +57,13 @@ Configuration resolution supports an explicit `<lib_name>` field, direct paths,
 recursive `designpackage(name=<pkg>,<field>)` token substitution, compound
 `LIB_NAME = g1m_g1i`, auto-detection when `LIB_NAME` is absent, and contour-style
 discovery under `path` using the pitch from `lib_height_class`.
+
+Foundry configurations (TSMC N2P/N3P, Samsung) name no stdcell library. Their
+`[INCLUDES]` are followed and `$VAR` references expanded from `[ENVS]` until
+`path` and `dpvarspath` are known; the release `<path>/<dpvarspath>`
+(`designpackage.tcl`) then supplies the bundles (`ivar(link_libs)`) and each
+bundle's verilog, ndm and timing files. TSMC ships no nldm, so its CCS/LVF
+lists are used instead.
 
 ## Outputs
 
@@ -81,8 +88,9 @@ discovery under `path` using the pitch from `lib_height_class`.
 └── prep_tech.duplicates.csv          # header always; rows when a stdcell is defined twice
 ```
 
-The single file per bundle is the nldm-format corner closest to `tttt` / 0.650 V /
-100 C, ties broken lexically. Collateral is referenced in place; nothing is copied
+The single file per bundle is the corner closest to typical (`tttt`, TSMC `tt`) /
+0.650 V / 100 C, ties broken lexically. Timing is nldm, or CCS/LVF for foundry
+libraries that ship no nldm. Collateral is referenced in place; nothing is copied
 or decompressed. Re-running writes in place and does not prune stale files, so remove
 a die directory by hand if its input set shrinks.
 
@@ -121,7 +129,7 @@ Source modules under [src/prep_tech](src/prep_tech):
 | Module | Responsibility |
 | ------ | -------------- |
 | `config.py` | Parse `prep_tech.input.md` into a dict. |
-| `discover.py` | Configuration parsing, DesignPackage resolution, bundle enumeration, PVT/nldm selection, REGEX filtering. |
+| `discover.py` | Configuration parsing (INCLUDES, ENVS), DesignPackage resolution, bundle enumeration (library roots or designpackage.tcl), PVT/timing selection, REGEX filtering. |
 | `validate.py` | Pre-flight checks. |
 | `generate.py` | Per-die plan building, rendering, writing. |
 | `cli.py` | `build_parser()` and `main(argv) -> int`. |

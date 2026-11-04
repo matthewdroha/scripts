@@ -89,14 +89,18 @@ def build_die_plan(die: str, die_info: dict, log=None) -> dict:
     cell_index: dict[str, tuple[str, str, str]] = {}  # cell -> (bundle, bmod, config)
     definitions: dict[str, list[tuple[str, str]]] = {}  # cell -> [(config, bundle)]
     prefixes: set[str] = set()
+    foundry = False
 
     for config in die_info.get("config_files", []):
         params = discover.parse_cth_file(config)
-        prefixes.update(key.lower() for key in discover.lib_keys(params))
-        for lib_root in discover.resolve_lib_roots(params):
+        keys = discover.lib_keys(params)
+        prefixes.update(key.lower() for key in keys)
+        sources = discover.resolve_bundle_sources(params)
+        foundry = foundry or (not keys and bool(sources))
+        for source, source_bundles in sources:
             if log:
-                log(f"{die}: {config} -> {lib_root}")
-            for name, bundle in discover.enumerate_bundles(lib_root).items():
+                log(f"{die}: {config} -> {source}")
+            for name, bundle in source_bundles.items():
                 bundles.setdefault(name, bundle)
                 for cell in bundle["cells"]:
                     definitions.setdefault(cell, []).append((config, name))
@@ -125,7 +129,9 @@ def build_die_plan(die: str, die_info: dict, log=None) -> dict:
             for instance in instances:
                 found = cell_index.get(instance)
                 if found is None:
-                    if any(instance.lower().startswith(p) for p in prefixes):
+                    if any(instance.lower().startswith(p) for p in prefixes) or (
+                        foundry and discover.is_foundry_cell_name(instance)
+                    ):
                         key = (ctech_cell, instance)
                         if key not in seen_unresolved:
                             seen_unresolved.add(key)
@@ -151,6 +157,8 @@ def build_die_plan(die: str, die_info: dict, log=None) -> dict:
         "duplicates": duplicates,
         "regexes": list(die_info.get("regexes", [])),
         "regex_pairs": list(die_info.get("regex_pairs", [])),
+        "config_files": list(die_info.get("config_files", [])),
+        "ctech_dirs": list(die_info.get("ctech_dirs", [])),
     }
 
 
@@ -181,34 +189,34 @@ def render_die_files(plan: dict) -> dict:
         bmods.extend(bundle.get("bmods") or [bundle["bmod"]])
         ctech_ndm.extend(bundle["ndm"])
 
-        lib_nldm = discover.nldm_only(bundle["lib"])
-        ldb_nldm = discover.nldm_only(bundle["ldb"])
-        ctech_all_lib.extend(lib_nldm)
-        ctech_all_ldb.extend(ldb_nldm)
+        lib_timing = discover.timing_files(bundle, "lib")
+        ldb_timing = discover.timing_files(bundle, "ldb")
+        ctech_all_lib.extend(lib_timing)
+        ctech_all_ldb.extend(ldb_timing)
 
-        selected_lib = discover.select_nldm(bundle["lib"])
+        selected_lib = discover.select_timing(bundle, "lib")
         if selected_lib:
             ctech_lib.append(selected_lib)
-        selected_ldb = discover.select_nldm(bundle["ldb"])
+        selected_ldb = discover.select_timing(bundle, "ldb")
         if selected_ldb:
             ctech_ldb.append(selected_ldb)
 
         if compiled:
-            ctech_regex_lib.extend(discover.regex_filter(lib_nldm, compiled))
-            ctech_regex_ldb.extend(discover.regex_filter(ldb_nldm, compiled))
+            ctech_regex_lib.extend(discover.regex_filter(lib_timing, compiled))
+            ctech_regex_ldb.extend(discover.regex_filter(ldb_timing, compiled))
 
     # The `.all` family spans every bundle, not just the ctech-referenced ones:
     # synthesis maps against the whole library, only at the wanted corners.
     for name in sorted(bundles):
         bundle = bundles[name]
         all_ndm.extend(bundle["ndm"])
-        lib_nldm = discover.nldm_only(bundle["lib"])
-        ldb_nldm = discover.nldm_only(bundle["ldb"])
-        all_lib.extend(lib_nldm)
-        all_ldb.extend(ldb_nldm)
+        lib_timing = discover.timing_files(bundle, "lib")
+        ldb_timing = discover.timing_files(bundle, "ldb")
+        all_lib.extend(lib_timing)
+        all_ldb.extend(ldb_timing)
         if compiled:
-            all_regex_lib.extend(discover.regex_filter(lib_nldm, compiled))
-            all_regex_ldb.extend(discover.regex_filter(ldb_nldm, compiled))
+            all_regex_lib.extend(discover.regex_filter(lib_timing, compiled))
+            all_regex_ldb.extend(discover.regex_filter(ldb_timing, compiled))
 
     files = {
         "static_stdcells.f": "+define+functional\n" + _list_text(bmods),
@@ -256,10 +264,13 @@ def render_output_key() -> list[str]:
         "#   naming: stdcell.<lib|ldb|ndm>.list[.ctech][.all][.regex]",
         "#     .ctech  only bundles instantiated by ctech;"
         " absent = every bundle in the library roots",
-        "#     .all    every nldm corner;"
-        " absent = one corner, PVT-selected (tttt / 0.650V / 100C)",
+        "#     .all    every timing corner;"
+        " absent = one corner, PVT-selected (typical / 0.650V / 100C)",
         "#     .regex  only corners matching the die REGEX;"
         " written only when the die sets one",
+        "#",
+        "#   timing format is nldm; foundry libraries that ship no nldm"
+        " (TSMC) use ccs",
         "#",
         "#   ndm carries no corner, so its lists are scoped only:"
         " .ctech or .all",
@@ -306,6 +317,11 @@ def render_report(plans) -> str:
         lines.append(
             f"  ctech-referenced bundles: {len(plan['referenced_keys'])}"
         )
+        formats = sorted(
+            {b.get("timing", "nldm") for b in plan["bundles"].values()}
+        )
+        if formats:
+            lines.append(f"  timing format: {', '.join(formats)}")
         for name in sorted(n for n in files if n.startswith("stdcell.")):
             lines.append(f"  {name}: {_line_count(files[name])}")
         pairs = config_regex_pairs(plan)
@@ -315,9 +331,23 @@ def render_report(plans) -> str:
             for source, pattern in pairs:
                 source = os.path.basename(source).ljust(width)
                 lines.append(f'    {source}  r"{pattern}"')
+        lines.extend(render_sources(plan))
         lines.append("")
 
     return "\n".join(lines)
+
+
+def render_sources(plan: dict) -> list[str]:
+    """The die's prep_tech.input.md paths, in input order (spec 3.3)."""
+    lines = ["  prep_tech.input.md sources of truth:"]
+    for title, key in (
+        ("configuration files", "config_files"),
+        ("ctech directories", "ctech_dirs"),
+    ):
+        paths = plan.get(key, [])
+        lines.append(f"    {title}: {len(paths)}")
+        lines.extend(f"      {path}" for path in paths)
+    return lines
 
 
 def _csv_text(header, rows) -> str:

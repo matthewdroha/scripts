@@ -1,6 +1,6 @@
 # Spec: `prep_tech` — Cheetah process technology list files prep for ctech and synthesis
 
-Status: **COMPLETE** — generation + hermetic pytest suite green. Configuration files are absolute paths (no backend area); supports multi-library configs (compound `LIB_NAME` and no-`LIB_NAME` auto-detect), raw-string `REGEX=r"..."` filters, contour resolution, first-config precedence, and fatal duplicate detection (2026-08-28).  
+Status: **COMPLETE** — generation + hermetic pytest suite green. Configuration files are absolute paths (no backend area); supports multi-library configs (compound `LIB_NAME` and no-`LIB_NAME` auto-detect), raw-string `REGEX=r"..."` filters, contour resolution, first-config precedence, and fatal duplicate detection (2026-08-28). Foundry (TSMC N2P/N3P, Samsung) configurations resolved through `[INCLUDES]`, `[ENVS]` and the release `designpackage.tcl` (2026-11-04).  
 Owner: mroha  
 Language: **Python 3** (driver)  
 Test framework: **pytest**  
@@ -16,6 +16,8 @@ Test framework: **pytest**
 > **Terminology.** A **bundle** is a per-directory grouping under the stdcell library root (e.g. `base_lvt`, `clk_svt`) — a stdcell *function* combined with a threshold *variant* (`lvt`, `svt`, `hvt`, `ulvt`). Throughout this document, **bundle** = the directory; **variant** = the threshold flavor only.
 >
 > A **configuration file** is a Cheetah backend configuration file with a `[DESIGNPACKAGE]` section that resolves to one or more stdcell libraries. It was historically a `.cth` file, but it may be named anything and is referenced by an **absolute path**; wherever this document says `.cth`, read “configuration file.”
+>
+> **Intel** vs **foundry** libraries. Intel configurations (e.g. 76p5, 78p6) name their stdcell libraries in `[DESIGNPACKAGE]` and bundles are subdirectories of a library root. **Foundry** configurations (TSMC N2P/N3P, Samsung) name no library; each bundle is a top-level `<lib>_lib` directory of the tech release (e.g. `/p/tech1/n2p/tech-release/v1.1.5/tcbn02p_bwph156pnpnl3p48cpd_base_lvt_c240429_lib`), listed by the release `designpackage.tcl` (see 2.3.1). For foundry libraries, **bundle** = that library directory name.
 
 ---
 
@@ -63,6 +65,7 @@ But it is also possible that direct paths are provided,  for example:
 - Sections are markdown headings:
   - `## <NAME> DIE` — one section per die. The die's output directory name is `<NAME>` lowercased (e.g. `CORIMH DIE` → `corimh`).
   - `## <NAME> IP` — one section per IP. The IP's output directory name is `<NAME>` lowercased with `_ip` appended (e.g. `SBE IP` → `sbe_ip`).
+  - `## <NAME>` — no keyword: a die (e.g. `## HOVIS` → `hovis`).
 - Within each die section:
   - One or more lines which contains a full path to a text file. A die may list **one or many** of these Cheetah configuration files; **all listed are required** (e.g. CORIMH needs both `g1i` and `g1m` to elaborate the reference stdcell instances inside the ctech verilog cells). The list of files is mutually exclusive,  i.e. a definition of a standard cell needs to be unique per Cheetah configuration file.  If the same standard cell is defined more than once,  then this is a fatal condition and will results in an error during processing.  However,  if `--allow-duplicates` is specified, multiple definitions are permitted, with the first configuration file taking precedence.  A duplicate summary report will be generated in either case.  The file may or may not have a `.cth` suffix,  you can't count on it.
   - Such a configuration line may carry an optional `REGEX=` suffix on the **same line**. The pattern is written as a **Python raw string literal** — `r"..."` or `r'...'` — and the text between the quotes is passed verbatim to `re.search`:
@@ -82,6 +85,8 @@ But it is also possible that direct paths are provided,  for example:
 - The directory paths under the dies are **ctech structural release areas** and must match `prep_tech.input.md` **exactly**.
 - Configuration files are given as **absolute paths**, one per line.
 - configuration parsing uses a **custom regex-based parser**.
+- `[INCLUDES]` entries (absolute paths) are followed recursively, depth-first in listed order; an including file **overrides** the fields it includes, and within one file the first definition wins. A missing include is fatal; include cycles are ignored.
+- `$VAR` / `${VAR}` references in `[DESIGNPACKAGE]` values and include paths are expanded from the merged `[ENVS]` sections, then from the process environment (Samsung: `path = $DP_PATH`, `DP_PATH = /p/tech1/$PROCESS_NAME/tech-release/$DP_VERSION`).
 
 
 ### 2.3 DesignPackage resolution
@@ -135,6 +140,38 @@ The resolved path is treated as a **vanity path** (NOT symlink-resolved); the sy
 
 - **Explicit library field** (crt / i0m style): a field named exactly `<lib_name>` holds the library path (possibly via tokens), e.g. `i0m = designpackage(name=1278.6,path)/lib786_i0m_180h_50pp_pdk10_r8v2p0_fv`. The worked example above is this style.
 - **Contour style (no explicit field):** `<lib_name>` has no matching field; only `path` and `version` are given. The library directory is then **discovered** under the resolved `path` by selecting the directory whose name (a) starts with `lib` and contains `_<lib_name>_`, (b) contains the **pitch** token from `lib_height_class` (e.g. `50pp`), and (c) ends in `_fv` (functional views). Lexically-first wins if several remain; error if none. Example: `/p/hdk/cad/dp_contour/76p5/v1.0_2/` + `lib_name=g1m` + `lib_height_class=g1m_8dg_50pp` → `lib765_g1m_240h_50pp_pdk10_r4v0p0_fv`.
+
+### 2.3.1 Foundry resolution (TSMC, Samsung)
+
+When the configuration yields **no library key** (no `LIB_NAME`, nothing auto-detected), it is a foundry configuration. The top-level file usually holds only `name`; `path`, `dpvarspath` and `lib_height_class` come from an include in the release itself:
+
+```ini
+# /p/hdk/etc/Projects/refcth2/2026.12/n2p_htall_conf7.cth
+[INCLUDES]
+         /p/tech1/n2p/tech-release/v1.1.5/dp_generic/cth_config/n2p_htall_conf7.cth
+[DESIGNPACKAGE]
+         name = n2p
+
+# included file
+[DESIGNPACKAGE]
+         dpvarspath = flowinterface/1P20M_.../h156p48/M5P63_M7P76/M2P30/dow25/designpackage.tcl
+         lib_height_class = h156p48
+         path = /p/tech1/n2p/tech-release/v1.1.5
+```
+
+The stdcell library directory names cannot be derived from `lib_height_class` (N2P `h156p48` → `bwph156{pnpn,pnnp,nppn,ppnn}l3p48cpd`; N3P `143h` → `bwp143mh{117,169,286,403}l3p48cpd`), so they are read from the flow's own **`<path>/<dpvarspath>`** (`designpackage.tcl`, Tcl `set ivar(...) "..."` lines):
+
+| `designpackage.tcl` entry | Used for |
+| --- | --- |
+| `ivar(link_libs)` | the bundle set (only entries with a `verilog_default_filelist` are bundles; e.g. `n02p_dtcd_lib` is not) |
+| `ivar(lib,<lib>,verilog_default_filelist)` | the bundle verilog (plays the role of `*bmod.v`) |
+| `ivar(lib,<lib>,ndm_reflist)` | the bundle `.ndm` |
+| `ivar(lib,<lib>,lib_nldm_filelist,<corner>)` / `db_nldm_filelist` | timing, when non-empty |
+| `ivar(lib,<lib>,lib_ccs_filelist,<corner>)` / `db_ccs_filelist` | timing, when the library ships no nldm (TSMC: CCS+LVF only) |
+
+Per-corner lists are unioned per key. `$ivar(techlib_dir)` (a non-vanity `/nfs/site/proj/...` path) is replaced by the configuration `path`, so outputs stay vanity. A missing `designpackage.tcl` is fatal. The bundle records its timing format (`nldm` or `ccs`); it is printed per die in the report.
+
+Samsung (`s2p_*.cth`) follows the same `path` + `dpvarspath` contract, with `path = $DP_PATH` expanded from `[ENVS]` (see 2.2). No Samsung release is mounted at the time of writing, so that path is covered only by hermetic tests.
 
 ---
 
@@ -239,8 +276,9 @@ The `lib`/`ldb` list files are nldm-only. The `ndm` lists take the **scope** axi
   - Number of ctech cells found.
   - Number of stdcells referenced by the ctechs, **deduplicated** (a stdcell referenced by multiple ctechs is counted once). Stdcell names are unique per bundle.
   - Number of duplicate stdcell cell definitions found for the provided configuration files
-  - Number of **unresolved stdcell instantiations** — ctech instances whose name begins with a die stdcell-library prefix (e.g. `g1i`, `g1m`, `i0m`, taken from each configuration file `lib_name`) but has **no matching `*bmod.v` definition** in any bundle. Each is listed on its own indented line as `<stdcell> <- <ctech_cell> (<path to ctech .sv>)`. Tokens that do **not** match a known library prefix are treated as non-stdcell (ctech submodules / SV constructs) and are not reported. This is **report-only** (it does not fail the run).
+  - Number of **unresolved stdcell instantiations** — ctech instances whose name begins with a die stdcell-library prefix (e.g. `g1i`, `g1m`, `i0m`, taken from each configuration file `lib_name`) — or, for foundry configurations, is an all-upper-case name such as `AN2D2BWP156HPNPN3P48CPDLVT` — but has **no matching definition** in any bundle. Each is listed on its own indented line as `<stdcell> <- <ctech_cell> (<path to ctech .sv>)`. Tokens that do **not** match are treated as non-stdcell (ctech submodules / SV constructs) and are not reported. This is **report-only** (it does not fail the run).
   - `bundles in library roots` and `ctech-referenced bundles` — the two bundle populations the list files are drawn from.
+  - `timing format` — `nldm`, `ccs`, or both, across the die's bundles.
   - One line per emitted `stdcell.*` list file, **keyed by the filename itself**, giving its line count. Naming the files rather than describing them keeps the report unambiguous as the list set grows, and the `.regex` entries simply do not appear when the die has no `REGEX`. For example:
 
     ```
@@ -253,11 +291,20 @@ The `lib`/`ldb` list files are nldm-only. The `ndm` lists take the **scope** axi
       stdcell.ldb.list.ctech.all.regex: 13
       ...
     ```
-  - **Last in the section, and only when the die has a `REGEX`:** the `configuration/regex pairs` — one line per pair, naming the basename of the input path the `REGEX` was written on and the raw literal itself. A die may carry several patterns on several lines, so this is what shows **which pattern came from which configuration**, without the reader having to open `prep_tech.input.md`:
+  - **Only when the die has a `REGEX`:** the `configuration/regex pairs` — one line per pair, naming the basename of the input path the `REGEX` was written on and the raw literal itself. A die may carry several patterns on several lines, so this is what shows **which pattern came from which configuration**, without the reader having to open `prep_tech.input.md`:
 
     ```
       configuration/regex pairs:
         78p6_i0m_opt32.cth  r"tttt_0p850v(_0p850v)?_100c\S+cmax"
+    ```
+  - **Last in the section, always:** the die's `prep_tech.input.md sources of truth` — its configuration files and ctech directories as full paths, in input order, each group headed by its count:
+
+    ```
+      prep_tech.input.md sources of truth:
+        configuration files: 1
+          /p/hdk/etc/Projects/refcth2/2026.12/n2p_htall_conf7.cth
+        ctech directories: 1
+          /p/tech1/n2p/tech-release/v1.1.5/ctech_c4v26ww04b_hdk164_cth2509_lib/c4v26ww04b_hdk164_cth2509/source/n2p/h156p48/lvt
     ```
 
 ### 3.4 `prep_tech.csv`
@@ -323,7 +370,9 @@ Collateral may be compressed.
 
 The lib and ldb files will have versions for each PVT corner (process, voltage, temperature). You are going to select one for the output. Choose the one that is closest tttt/typical and 650mV and 100c. If there is still a tie, select the first one you find in lexical order.
 
-Select nldm format only. This nldm filter applies to `.lib`, `.ldb`, and `.db` selection alike (`.db` files also carry the `_nldm_` token).
+The process corner is the token immediately before the first voltage. It is typical when it is `tttt` (Intel) or `tt` (TSMC, where it is glued to the library date: `..._c240429tt_0p65v_85c_typical_hm_lvf.db`). For N2P `base_lvt` this selects `tt_0p65v_85c`.
+
+Select nldm format only. This nldm filter applies to `.lib`, `.ldb`, and `.db` selection alike (`.db` files also carry the `_nldm_` token). Foundry bundles are exempt: their timing is already restricted to one format by `designpackage.tcl` (nldm when listed, else CCS/LVF; see 2.3.1). Wherever this document says “nldm corner”, read “timing corner” for those bundles.
 
 For example, you will select the second file here:
 
@@ -387,10 +436,13 @@ prep-tech/
 Key data contracts:
 - `config.parse_input(path) -> {"dies": {<die>: {"kind": "die"|"ip", "config_files": [<abs paths>], "ctech_dirs": [<abs dirs>], "regexes": [<raw REGEX patterns>], "regex_pairs": [(<path the REGEX was written on>, <pattern>), ...], "missing": [<paths that are neither>]}}}`. Lines are classified by filesystem type (directory -> ctech area; file -> configuration file). `kind` comes from the `DIE`/`IP` heading keyword and only affects the report label. A malformed `REGEX=` suffix raises `config.InputFormatError`. No backend prefix.
 - `discover.lib_keys(params)` — library keys for a configuration: split `LIB_NAME` on `_`, or (no `LIB_NAME`) auto-detect fields whose value contains `/lib<digits>_<key>_`.
+- `discover.parse_cth_file(path) -> {<field>: <value>}` — `[DESIGNPACKAGE]` after merging `[INCLUDES]` and expanding `[ENVS]` variables.
 - `discover.resolve_lib_roots(params) -> [<lib root>, ...]` — resolve each key via its explicit field (direct path / designpackage tokens) or contour discovery; a config may yield multiple roots. `resolve_lib_root(params)` returns the first.
 - `discover.enumerate_bundles(lib_root) -> {<bundle>: {root, bmod, cells, lib, ldb, ndm}}` (only dirs with a `verilog/*bmod.v`).
+- `discover.resolve_bundle_sources(params) -> [(<source>, {<bundle>: ...}), ...]` — Intel: one source per library root; foundry: the single `designpackage.tcl` via `discover.designpackage_tcl(params) -> (release_root, tcl) | None` and `discover.enumerate_designpackage_bundles(tcl, release_root)` (bundles additionally carry `timing: "nldm"|"ccs"`).
+- `discover.timing_files(bundle, kind)` / `discover.select_timing(bundle, kind)` — eligible `lib`/`ldb` files (nldm-filtered unless the bundle carries `timing`) and the PVT-selected one.
 - `discover.compile_regexes(patterns)` / `discover.regex_filter(files, compiled)` — union `re.search` on basenames.
-- `generate.build_die_plan(die, die_info) -> {die, kind, bundles, referenced_keys, refs, ctech_cells, unresolved, duplicates, regexes, regex_pairs}`; `generate.config_regex_pairs(plan) -> [(<path>, <pattern>), ...]`; `generate.generate_all(parsed, output_root, allow_duplicates) -> (written, plans, has_duplicates)`.
+- `generate.build_die_plan(die, die_info) -> {die, kind, bundles, referenced_keys, refs, ctech_cells, unresolved, duplicates, regexes, regex_pairs, config_files, ctech_dirs}`; `generate.config_regex_pairs(plan) -> [(<path>, <pattern>), ...]`; `generate.render_sources(plan) -> [<report lines>]`; `generate.generate_all(parsed, output_root, allow_duplicates) -> (written, plans, has_duplicates)`.
 
 Output root resolution: `$WORKAREA/prep_tech/` if `WORKAREA` is set, else `./prep_tech/`.
 
@@ -423,7 +475,7 @@ uv sync
 uv run pytest
 ```
 
-Coverage: configuration parsing (filesystem-type classification, raw-string `REGEX=r"..."` including rejection of the legacy `/.../` form), DesignPackage resolution (token deref, direct paths, compound `LIB_NAME`, no-`LIB_NAME` auto-detect, contour discovery), ctech `.sv` instance parsing, bundle enumeration, PVT/nldm selection, pre-flight validation (missing files/dirs, output writability), duplicate detection (fatal vs `--allow-duplicates`), and end-to-end `generate_all` (tree + report + duplicates CSV + CSV).
+Coverage: configuration parsing (filesystem-type classification, raw-string `REGEX=r"..."` including rejection of the legacy `/.../` form, bare `## <NAME>` headings), DesignPackage resolution (token deref, direct paths, compound `LIB_NAME`, no-`LIB_NAME` auto-detect, contour discovery), foundry resolution (`[INCLUDES]` merge and override, `[ENVS]` expansion, include cycles and missing includes, `designpackage.tcl` link_libs / per-corner union / nldm-over-ccs / vanity `techlib_dir`, TSMC `tt` corner selection), ctech `.sv` instance parsing, bundle enumeration, PVT/nldm selection, pre-flight validation (missing files/dirs, output writability), duplicate detection (fatal vs `--allow-duplicates`), and end-to-end `generate_all` (tree + report + duplicates CSV + CSV, Intel and foundry).
 
 ---
 
@@ -472,6 +524,15 @@ Coverage: configuration parsing (filesystem-type classification, raw-string `REG
 
 **Q11.** Re-run hygiene / stale outputs.  
 > **Resolved:** Generation writes in place (`os.makedirs(exist_ok=True)`; no `rmtree`, so it is NFS-safe). It does **not** prune stale files when an input contracts (e.g. a die drops a bundle, or a `REGEX` is removed so the `*.regex` files should no longer exist). Remove the die/output directory manually if the input set shrinks, or after a rename of the output filenames.
+
+**Q15.** Where do TSMC/Samsung stdcell libraries come from?  
+> **Resolved:** The release `designpackage.tcl` at `<path>/<dpvarspath>`, reached by following the configuration `[INCLUDES]` (see 2.3.1). Scanning the release directory for `tcbn*_lib` names was rejected: the cell-architecture and height tokens in the directory names are not derivable from `lib_height_class`, a release ships several heights side by side (N2P: h130 and h156), and the scan could not tell which timing files the flow consumes. `designpackage.tcl` is what the backend flow itself loads, so the outputs match it by construction. Verified on disk (2026-11): N2P v1.1.5 (`n2p_htall_conf7.cth`, 218 TSMC + 2 Intel pdfx bundles) and N3P v1.0.10_gfx (`n3p_h143_m19.cth`, 181 bundles).
+
+**Q16.** Timing format for libraries without nldm.  
+> **Resolved:** TSMC N2P/N3P ship CCS+LVF only (`*_hm_lvf.lib.gz` / `.db`), with empty `*_nldm_filelist`s. Such bundles use the `*_ccs_filelist` lists; nldm is still preferred whenever listed. EMT variants (`*_em_hm_lvf`) appear where the flow lists them (e.g. N2P `F_125`). The list filenames do not change; the report states the format.
+
+**Q17.** Headings without `DIE`/`IP`.  
+> **Resolved:** `## <NAME>` is a die, so an input such as `## HOVIS` works without the keyword.
 
 ---
 

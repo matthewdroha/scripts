@@ -226,6 +226,28 @@ def test_report_lists_configuration_regex_pairs(regex_project):
     assert f'    a.cth  r"{pattern}"' in report
 
 
+def test_report_ends_each_section_with_input_sources(fake_project):
+    parsed, cfg, _ = fake_project
+    info = parsed["dies"]["corimh"]
+    plans = [
+        ("corimh", generate.build_die_plan("corimh", info)),
+        ("sbe_ip", generate.build_die_plan("sbe_ip", dict(info, kind="ip"))),
+    ]
+    report = generate.render_report(plans)
+    ctech = info["ctech_dirs"][0]
+
+    die_section = report[report.index("die: corimh") : report.index("ip: sbe_ip")]
+    expected = (
+        "  prep_tech.input.md sources of truth:\n"
+        "    configuration files: 1\n"
+        f"      {cfg}\n"
+        "    ctech directories: 1\n"
+        f"      {ctech}\n"
+    )
+    assert die_section.endswith(expected + "\n")
+    assert report.rstrip("\n").endswith(expected.rstrip("\n"))
+
+
 def test_configuration_regex_pairs_name_each_source_line(tmp_path, write):
     cfg = write(tmp_path / "78p6_i0m_opt32.cth", "")
     ctech = tmp_path / "ctech"
@@ -398,3 +420,51 @@ def test_generate_all_allow_duplicates(tmp_path, dup_project):
     assert (out / "prep_tech.csv").is_file()
     assert (out / "d" / "static_stdcells.f").is_file()
     assert (out / "prep_tech.duplicates.csv").read_text().count("\n") >= 2
+
+
+# ---------------------------------------------------------------------------
+# Foundry (TSMC / Samsung) via designpackage.tcl
+# ---------------------------------------------------------------------------
+
+LVT = "tcbn02p_bwph156pnpnl3p48cpd_base_lvt_c240429_lib"
+
+
+def test_foundry_plan_and_outputs(foundry_project):
+    parsed, cfg, release = foundry_project
+    plan = generate.build_die_plan("hovis", parsed["dies"]["hovis"])
+
+    assert plan["referenced_keys"] == {LVT}
+    assert len(plan["bundles"]) == 2
+    (ref,) = plan["refs"]
+    assert ref[1] == "AN2D2BWP156HPNPN3P48CPDLVT"
+    assert ref[3].endswith(f"{LVT}.v") and ref[5] == cfg
+    # Upper-case foundry names are flagged; lower-case ctech submodules are not.
+    assert [u[1] for u in plan["unresolved"]] == ["MISSINGBWP156HPNPN3P48CPDLVT"]
+
+    files = generate.render_die_files(plan)
+    assert files["stdcell.lib.list.ctech"].strip().endswith(
+        "c240429tt_0p65v_85c_typical_hm_lvf.lib.gz"
+    )
+    assert files["stdcell.ldb.list.ctech"].strip().endswith(
+        "c240429tt_0p65v_85c_typical_hm_lvf.db"
+    )
+    assert len(files["stdcell.lib.list.ctech.all"].splitlines()) == 4
+    assert len(files["stdcell.lib.list.all"].splitlines()) == 8
+    assert len(files["stdcell.ndm.list.all"].splitlines()) == 2
+    assert all(
+        line.startswith(release)
+        for line in files["static_stdcells.f"].splitlines()[1:]
+    )
+
+    report = generate.render_report([("hovis", plan)])
+    assert "  timing format: ccs" in report
+
+
+def test_foundry_generate_all_regex(foundry_project, tmp_path):
+    parsed, _, _ = foundry_project
+    parsed["dies"]["hovis"]["regexes"] = [r"tt_0p75v_85c"]
+    out = tmp_path / "out"
+    generate.generate_all(parsed, str(out))
+    regex = (out / "hovis" / "stdcell.ldb.list.all.regex").read_text().splitlines()
+    assert len(regex) == 2
+    assert all("tt_0p75v_85c" in line for line in regex)

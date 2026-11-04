@@ -5,7 +5,8 @@ from __future__ import annotations
 import os
 import re
 
-_HEADING = re.compile(r"^##\s+(?P<name>\S+)\s+(?P<kind>DIE|IP)\s*$", re.IGNORECASE)
+# The DIE/IP keyword is optional; a bare '## <NAME>' is a die.
+_HEADING = re.compile(r"^##\s+(?P<name>\S+)(?:\s+(?P<kind>DIE|IP))?\s*$", re.IGNORECASE)
 # REGEX=r"..." / REGEX=r'...' -- a raw string literal, taken verbatim for re.search.
 _REGEX_SUFFIX = re.compile(
     r"""\s+REGEX\s*=\s*r(?P<quote>["'])(?P<pattern>.*)(?P=quote)\s*$"""
@@ -50,7 +51,7 @@ def parse_input(path: str) -> dict:
             if heading:
                 name = heading.group("name").lower()
                 kind = "die"
-                if heading.group("kind").upper() == "IP":
+                if (heading.group("kind") or "").upper() == "IP":
                     name += "_ip"
                     kind = "ip"
                 current = dies.setdefault(name, _new_die(kind))

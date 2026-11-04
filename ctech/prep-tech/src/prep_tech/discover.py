@@ -26,30 +26,79 @@ NON_STDCELL_FIELDS = frozenset(
 )
 
 _MAX_TOKEN_PASSES = 32
+_ENV_REF = re.compile(r"\$(?:\{(?P<braced>\w+)\}|(?P<bare>\w+))")
 
 
-def parse_cth_file(path: str) -> dict:
-    """Return the ``[DESIGNPACKAGE]`` fields of a Cheetah configuration file.
-
-    Keys keep their original case; look them up with :func:`get_param`.
-    """
-    params: dict[str, str] = {}
-    in_section = False
+def _read_cth_sections(path: str) -> tuple[list[str], dict, dict]:
+    """``(includes, designpackage, envs)`` of one file; first definition wins."""
+    includes: list[str] = []
+    fields: dict[str, dict[str, str]] = {"DESIGNPACKAGE": {}, "ENVS": {}}
+    section = None
     with open(path, encoding="utf-8", errors="replace") as handle:
         for raw in handle:
             line = raw.split("#", 1)[0].rstrip()
             if not line.strip():
                 continue
-            section = _SECTION.match(line)
-            if section:
-                in_section = section.group("name").strip().upper() == "DESIGNPACKAGE"
+            header = _SECTION.match(line)
+            if header:
+                section = header.group("name").strip().upper()
                 continue
-            if not in_section:
-                continue
-            field = _FIELD.match(line)
-            if field:
-                params.setdefault(field.group("key"), field.group("value"))
-    return params
+            if section == "INCLUDES":
+                includes.append(line.strip())
+            elif section in fields:
+                field = _FIELD.match(line)
+                if field:
+                    fields[section].setdefault(field.group("key"), field.group("value"))
+    return includes, fields["DESIGNPACKAGE"], fields["ENVS"]
+
+
+def expand_env(value: str, envs: dict) -> str:
+    """Expand ``$VAR`` / ``${VAR}`` from configuration ``[ENVS]``, then ``os.environ``."""
+
+    def lookup(match):
+        name = match.group("braced") or match.group("bare")
+        if name in envs:
+            return envs[name]
+        return os.environ.get(name, match.group(0))
+
+    for _ in range(_MAX_TOKEN_PASSES):
+        expanded = _ENV_REF.sub(lookup, value)
+        if expanded == value:
+            return value
+        value = expanded
+    raise ValueError(f"environment expansion did not converge: {value}")
+
+
+def _load_cth(path: str, seen: set) -> tuple[dict, dict]:
+    """Merge ``[INCLUDES]`` depth-first; the including file overrides what it includes."""
+    if path in seen:
+        return {}, {}
+    seen.add(path)
+    includes, local_dp, local_envs = _read_cth_sections(path)
+    params: dict[str, str] = {}
+    envs: dict[str, str] = {}
+    for include in includes:
+        include = expand_env(include, envs)
+        if not os.path.isfile(include):
+            raise FileNotFoundError(f"configuration include not found: {include} (from {path})")
+        inc_params, inc_envs = _load_cth(include, seen)
+        params.update(inc_params)
+        envs.update(inc_envs)
+    params.update(local_dp)
+    envs.update(local_envs)
+    return params, envs
+
+
+def parse_cth_file(path: str) -> dict:
+    """Return the ``[DESIGNPACKAGE]`` fields of a Cheetah configuration file.
+
+    ``[INCLUDES]`` are followed recursively and ``$VAR`` references are expanded
+    from ``[ENVS]`` (TSMC/Samsung configs keep ``path`` in an included file or
+    behind ``$DP_PATH``). Keys keep their original case; look them up with
+    :func:`get_param`.
+    """
+    params, envs = _load_cth(path, set())
+    return {key: expand_env(value, envs) for key, value in params.items()}
 
 
 def get_param(params: dict, key: str) -> str | None:
@@ -143,6 +192,36 @@ def resolve_lib_root(params: dict) -> str:
     if not roots:
         raise FileNotFoundError("no stdcell library key found in [DESIGNPACKAGE]")
     return roots[0]
+
+
+def designpackage_tcl(params: dict) -> tuple[str, str] | None:
+    """``(release_root, designpackage.tcl)`` from ``path`` + ``dpvarspath``; ``None`` if unset."""
+    path = get_param(params, "path")
+    dpvarspath = get_param(params, "dpvarspath")
+    if not path or not dpvarspath:
+        return None
+    root = resolve_design_package(path, params)
+    tcl = os.path.join(root, resolve_design_package(dpvarspath, params))
+    if not os.path.isfile(tcl):
+        raise FileNotFoundError(f"designpackage.tcl not found: {tcl}")
+    return root, tcl
+
+
+def resolve_bundle_sources(params: dict) -> list[tuple[str, dict]]:
+    """``[(source, bundles), ...]`` for one configuration.
+
+    Intel configurations name their stdcell libraries (``LIB_NAME`` or
+    ``/lib<n>_<key>_`` fields): each library root is a source. Foundry (TSMC,
+    Samsung) configurations name none; their bundles are the ``link_libs`` of
+    the release ``designpackage.tcl``, which is then the single source.
+    """
+    if lib_keys(params):
+        return [(root, enumerate_bundles(root)) for root in resolve_lib_roots(params)]
+    located = designpackage_tcl(params)
+    if located is None:
+        return []
+    root, tcl = located
+    return [(tcl, enumerate_designpackage_bundles(tcl, root))]
 
 
 # ---------------------------------------------------------------------------
@@ -336,6 +415,128 @@ def enumerate_bundles(lib_root: str) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Foundry bundles from the release designpackage.tcl (TSMC, Samsung)
+# ---------------------------------------------------------------------------
+
+_TCL_SET = re.compile(r'^\s*set\s+ivar\((?P<key>[^)]+)\)\s+"(?P<value>[^"]*)"\s*$')
+_TCL_IVAR_REF = re.compile(r"\$ivar\((?P<key>[^),]+)\)")
+
+#: Per-library ``ivar(lib,<lib>,<key>[,<corner>])`` keys that feed the outputs.
+_DP_LIB_KEYS = frozenset(
+    {
+        "verilog_default_filelist",
+        "ndm_reflist",
+        "lib_nldm_filelist",
+        "db_nldm_filelist",
+        "lib_ccs_filelist",
+        "db_ccs_filelist",
+    }
+)
+
+
+def parse_designpackage_tcl(path: str, release_root: str) -> dict:
+    """Return ``{"link_libs": [...], "libs": {<lib>: {<key>: [paths]}}}``.
+
+    Per-corner lists (``ivar(lib,<lib>,<key>,<corner>)``) are unioned per key.
+    ``$ivar(techlib_dir)`` is replaced by *release_root* so paths stay vanity.
+    """
+    scalars = {"techlib_dir": release_root}
+    link_libs: list[str] = []
+    libs: dict[str, dict[str, list[str]]] = {}
+
+    def substitute(value: str) -> str:
+        return _TCL_IVAR_REF.sub(
+            lambda m: scalars.get(m.group("key"), m.group(0)), value
+        )
+
+    with open(path, encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            match = _TCL_SET.match(line)
+            if not match:
+                continue
+            key, value = match.group("key"), match.group("value")
+            parts = key.split(",")
+            if len(parts) == 1:
+                if key == "link_libs":
+                    link_libs = value.split()
+                elif key != "techlib_dir":
+                    scalars.setdefault(key, value)
+                continue
+            if parts[0] != "lib" or len(parts) < 3 or parts[2] not in _DP_LIB_KEYS:
+                continue
+            files = libs.setdefault(parts[1], {}).setdefault(parts[2], [])
+            for item in substitute(value).split():
+                if item not in files:
+                    files.append(item)
+    return {"link_libs": link_libs, "libs": libs}
+
+
+def enumerate_designpackage_bundles(tcl_path: str, release_root: str) -> dict:
+    """Map ``link_libs`` library name -> bundle dict (see :func:`enumerate_bundles`).
+
+    A link library is a bundle only when it lists ``verilog_default_filelist``.
+    Timing collateral comes from the ``*_nldm_filelist`` lists; when a library
+    ships no nldm (TSMC N2P/N3P: CCS+LVF only) the ``*_ccs_filelist`` lists are
+    used instead. The bundle's ``timing`` key records which.
+    """
+    cache_key = f"{tcl_path}\0{release_root}"
+    cached = _BUNDLE_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
+
+    parsed = parse_designpackage_tcl(tcl_path, release_root)
+    bundles: dict[str, dict] = {}
+    for name in parsed["link_libs"]:
+        entry = parsed["libs"].get(name, {})
+        verilog = entry.get("verilog_default_filelist", [])
+        if not verilog:
+            continue
+
+        cells: set[str] = set()
+        for path in verilog:
+            cells |= parse_bmod_cells(path)
+
+        timing = "nldm"
+        collateral = entry.get("lib_nldm_filelist", []) + entry.get("db_nldm_filelist", [])
+        if not collateral:
+            timing = "ccs"
+            collateral = entry.get("lib_ccs_filelist", []) + entry.get("db_ccs_filelist", [])
+
+        libs: list[str] = []
+        ldbs: dict[str, str] = {}
+        dbs: dict[str, str] = {}
+        for path in collateral:
+            kind = _classify_collateral(os.path.basename(path))
+            stem = re.sub(r"\.(lib|ldb|db)(\.gz)?$", "", os.path.basename(path))
+            if kind == "lib":
+                libs.append(path)
+            elif kind == "ldb":
+                ldbs[stem] = path
+            elif kind == "db":
+                dbs[stem] = path
+        merged = dict(dbs)
+        merged.update(ldbs)
+
+        bundles[name] = {
+            "root": os.path.join(release_root, name),
+            "bmod": verilog[0],
+            "bmods": verilog,
+            "cells": cells,
+            "lib": sorted(libs),
+            "ldb": sorted(merged.values()),
+            "ndm": sorted(p for p in entry.get("ndm_reflist", []) if p.endswith(".ndm")),
+            "timing": timing,
+        }
+    _BUNDLE_CACHE[cache_key] = bundles
+    return bundles
+
+
+def is_foundry_cell_name(name: str) -> bool:
+    """Foundry stdcell names are upper case (``AN2D2BWP156HPNPN3P48CPDLVT``)."""
+    return bool(re.fullmatch(r"[A-Z][A-Z0-9_]*", name))
+
+
+# ---------------------------------------------------------------------------
 # PVT + nldm selection (spec section 4)
 # ---------------------------------------------------------------------------
 
@@ -343,13 +544,25 @@ TARGET_PROCESS = "tttt"
 TARGET_VOLTAGE = 0.650
 TARGET_TEMPERATURE = 100.0
 
-_VOLTAGE = re.compile(r"_(?P<whole>\d+)p(?P<frac>\d+)v")
-_TEMPERATURE = re.compile(r"_(?P<sign>m?)(?P<value>\d+)c")
+_VOLTAGE = re.compile(r"_(?P<whole>\d+)p(?P<frac>\d+)v", re.IGNORECASE)
+_TEMPERATURE = re.compile(r"_(?P<sign>m?)(?P<value>\d+)c", re.IGNORECASE)
+# Intel 'tttt'; TSMC glues 'tt' to the library date ('..._c240429tt_0p65v').
+_TYPICAL_PROCESS = re.compile(r"(?:^|\d)(?:tttt|tt)$", re.IGNORECASE)
 
 
 def nldm_only(files) -> list[str]:
     """Keep only nldm-format collateral."""
     return [path for path in files if "nldm" in os.path.basename(path)]
+
+
+def timing_files(bundle: dict, kind: str) -> list[str]:
+    """The bundle's eligible ``lib``/``ldb`` timing files.
+
+    designpackage.tcl bundles are already restricted to one format; directory
+    bundles are filtered to nldm here.
+    """
+    files = bundle.get(kind, [])
+    return list(files) if bundle.get("timing") else nldm_only(files)
 
 
 def _pvt_distance(path: str) -> tuple:
@@ -363,12 +576,14 @@ def _pvt_distance(path: str) -> tuple:
         # a second 'tttt' later in the name is the RC corner, not the process.
         head = name[: voltage.start()].rsplit("_", 1)
         process = head[-1] if head else ""
+        rest = voltage.end()
     else:
         voltage_delta = float("inf")
         process = ""
-    process_penalty = 0 if process == TARGET_PROCESS else 1
+        rest = 0
+    process_penalty = 0 if _TYPICAL_PROCESS.search(process) else 1
 
-    temperature = _TEMPERATURE.search(name)
+    temperature = _TEMPERATURE.search(name, rest)
     if temperature:
         degrees = float(temperature.group("value"))
         if temperature.group("sign"):
@@ -383,6 +598,14 @@ def _pvt_distance(path: str) -> tuple:
 def select_nldm(files) -> str | None:
     """The single nldm file closest to tttt / 0.650V / 100C; ``None`` if no nldm."""
     candidates = nldm_only(files)
+    if not candidates:
+        return None
+    return min(candidates, key=_pvt_distance)
+
+
+def select_timing(bundle: dict, kind: str) -> str | None:
+    """The single eligible timing file closest to the target PVT; ``None`` if none."""
+    candidates = timing_files(bundle, kind)
     if not candidates:
         return None
     return min(candidates, key=_pvt_distance)

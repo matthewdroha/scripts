@@ -53,6 +53,15 @@ def test_parse_input_records_section_kind(tmp_path, write):
     assert dies["sbe_ip"]["kind"] == "ip"
 
 
+def test_parse_input_bare_heading_is_a_die(tmp_path, write):
+    cfg = write(tmp_path / "a.cth", "")
+    md = write(tmp_path / "in.md", f"# Prep Tech Input\n\n## HOVIS\n{cfg}\n")
+    dies = parse_input(md)["dies"]
+    assert list(dies) == ["hovis"]
+    assert dies["hovis"]["kind"] == "die"
+    assert dies["hovis"]["config_files"] == [cfg]
+
+
 def test_parse_input_regex_raw_string(tmp_path, write):
     cfg = write(tmp_path / "76p5_g1i_opt8.cth", "")
     md = write(
